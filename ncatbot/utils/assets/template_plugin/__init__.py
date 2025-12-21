@@ -1,1 +1,1 @@
-from .main import Plugin
+from .plugin import Plugin

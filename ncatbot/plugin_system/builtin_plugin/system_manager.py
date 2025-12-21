@@ -120,6 +120,7 @@ class SystemManager(NcatBotPlugin):
         if not hasattr(self, "_first_process"):
             self._pending_plugin_dirs.clear()
             self._first_process = True
+            LOG.debug("初始化是跳过处理流程")
             return  # 跳过第一次处理，避免启动时误触发
 
         # 复制并清空待处理集合，避免重复处理

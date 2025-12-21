@@ -202,6 +202,18 @@ class BasePlugin:
     @property
     def meta_data(self) -> Dict[str, Any]:
         """获取插件元数据字典。"""
+        # If a raw manifest was provided by the loader, prefer it but
+        # ensure core fields reflect the current instance attributes.
+        if hasattr(self, "_meta_data") and isinstance(self._meta_data, dict):
+            md = dict(self._meta_data)  # copy
+            # ensure essential fields exist and reflect current attrs
+            md.setdefault("name", getattr(self, "name", "Unknown"))
+            md.setdefault("version", getattr(self, "version", "0.0.0"))
+            md.setdefault("author", getattr(self, "author", "Unknown"))
+            md.setdefault("description", getattr(self, "description", ""))
+            md.setdefault("dependencies", getattr(self, "dependencies", {}))
+            md.setdefault("config", getattr(self, "config", {}))
+            return md
         return {
             "name": self.name,
             "version": self.version,
