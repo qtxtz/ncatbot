@@ -155,9 +155,9 @@ cython_debug/
 
 # 项目自定义
 verify_docs/
-test/
+dev/
 test3xx/
-/plugins/
+plugins/
 logs/
 napcat/
 data/
