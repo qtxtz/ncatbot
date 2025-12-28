@@ -55,7 +55,7 @@ class BasePlugin:
         main_file (Path): 插件主文件路径
     """
 
-    # -------- 插件元数据 --------
+    # -------- 插件元数据 (外部注入的属性) --------
     name: str
     version: str
     author: str = "Unknown"
@@ -99,18 +99,18 @@ class BasePlugin:
         Raises:
             ValueError: 如果未定义name或version属性
         """
-        # 基础校验
-        if not getattr(self, "name", None):
-            raise ValueError(f"{self.__class__.__name__} 必须定义 name 属性")
-        if not getattr(self, "version", None):
-            raise ValueError(f"{self.__class__.__name__} 必须定义 version 属性")
-
-        # 保存外部注入
+        # 保存外部注入（先注入 extras，这样 loader 可以在实例化时传入 name/version）
         self._event_bus = event_bus
         self._loader = plugin_loader
         self._debug = debug
         for k, v in extras.items():
             setattr(self, k, v)
+
+        # 基础校验（在 extras 注入后检查 name/version）
+        if not getattr(self, "name", None):
+            raise ValueError(f"{self.__class__.__name__} 必须定义 name 属性")
+        if not getattr(self, "version", None):
+            raise ValueError(f"{self.__class__.__name__} 必须定义 version 属性")
 
         # 初始化属性
         self.api = status.global_api
@@ -202,6 +202,18 @@ class BasePlugin:
     @property
     def meta_data(self) -> Dict[str, Any]:
         """获取插件元数据字典。"""
+        # If a raw manifest was provided by the loader, prefer it but
+        # ensure core fields reflect the current instance attributes.
+        if hasattr(self, "_meta_data") and isinstance(self._meta_data, dict):
+            md = dict(self._meta_data)  # copy
+            # ensure essential fields exist and reflect current attrs
+            md.setdefault("name", getattr(self, "name", "Unknown"))
+            md.setdefault("version", getattr(self, "version", "0.0.0"))
+            md.setdefault("author", getattr(self, "author", "Unknown"))
+            md.setdefault("description", getattr(self, "description", ""))
+            md.setdefault("dependencies", getattr(self, "dependencies", {}))
+            md.setdefault("config", getattr(self, "config", {}))
+            return md
         return {
             "name": self.name,
             "version": self.version,
