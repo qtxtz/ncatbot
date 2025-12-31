@@ -2,6 +2,8 @@
 from typing import Optional, Any
 from pydantic import BaseModel, field_validator
 
+__all__ = ["BaseDataModel", "BaseSender", "GroupSender", "Anonymous", "FileInfo", "Status"]
+
 class BaseDataModel(BaseModel):
     """基础数据模型，用于处理通用字段转换"""
     @field_validator("*", mode="before")

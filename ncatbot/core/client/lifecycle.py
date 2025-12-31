@@ -158,11 +158,11 @@ class LifecycleManager:
                 self.start(**kwargs)
             except Exception as e:
                 LOG.error(f"启动失败: {e}\n{traceback.format_exc()}")
-            finally:
-                loop.close()
                 self.crash_flag = True
                 if self.release_callback:
                     self.release_callback(None)
+            finally:
+                loop.close()
 
         self.lock = threading.Lock()
         self.lock.acquire()

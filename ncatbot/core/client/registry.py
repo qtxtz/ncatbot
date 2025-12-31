@@ -156,7 +156,9 @@ class EventRegistry:
     def add_group_request_handler(self, handler: Callable, filter: Optional[Callable[[GroupRequestEvent], bool]] = None):
         """添加群请求处理器，自动过滤群请求事件"""
         def filter_func(event: GroupRequestEvent):
-            return hasattr(event, 'request_type') and event.request_type == 'group' and filter(event) if filter else True
+            if not (hasattr(event, 'request_type') and event.request_type == 'group'):
+                return False
+            return filter(event) if filter else True
         
         self.register_handler(EventType.REQUEST, handler, filter_func=filter_func)
     

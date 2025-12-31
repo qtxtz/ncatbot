@@ -6,7 +6,7 @@ Bot 客户端
 
 from typing import List, Type, TypeVar, TYPE_CHECKING
 
-from ncatbot.utils import get_log, status
+from ncatbot.utils import get_log
 from ncatbot.utils.error import NcatBotError
 from ncatbot.core.adapter import Adapter
 from ncatbot.core.api import BotAPI
@@ -50,17 +50,16 @@ class BotClient(EventRegistry, LifecycleManager):
 
     _initialized = False
 
-    def __init__(self, only_private: bool = False, max_workers: int = 16):
+    def __init__(self, max_workers: int = 16):
         """
         初始化 Bot 客户端
         
         Args:
-            only_private: 是否只处理私聊消息
             max_workers: 兼容参数，已废弃
         """
-        if self._initialized:
+        if BotClient._initialized:
             raise NcatBotError("BotClient 实例只能创建一次")
-        self._initialized = True
+        BotClient._initialized = True
 
         # 核心组件
         self.event_bus = EventBus()
@@ -80,24 +79,19 @@ class BotClient(EventRegistry, LifecycleManager):
             self.adapter, self.api, self.event_bus, self
         )
         
-        # 全局状态
-        status.global_api = self.api
-        self._only_private = only_private
-        
         # 注册内置处理器
         self._register_builtin_handlers()
 
     def _register_builtin_handlers(self):
         """注册内置处理器"""
-        if not self._only_private:
-            self.on_startup()(lambda e: LOG.info(f"Bot {e.self_id} 启动成功"))
+        self.on_startup()(lambda e: LOG.info(f"Bot {e.self_id} 启动成功"))
 
     # ==================== 工具方法 ====================
 
     def get_registered_plugins(self) -> List["BasePlugin"]:
         """获取已注册的插件列表"""
-        if self.plugin_loader:
-            return list(self.plugin_loader.plugins.values())
+        if self._lifecycle and self._lifecycle.plugin_loader:
+            return list(self._lifecycle.plugin_loader.plugins.values())
         return []
 
     def get_plugin(self, plugin_type: Type[T]) -> T:
