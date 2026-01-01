@@ -202,8 +202,7 @@ class StringTokenizer:
                 self.position += 1
 
         # 到达字符串末尾但没有找到结束引号
-        self._add_token(TokenType.WORD, self.text[start_pos : self.position])
-        return
+        raise QuoteMismatchError(start_pos, self.position)
 
     def _parse_long_option(self):
         """解析长选项 --option 或 --option=value"""
@@ -325,7 +324,7 @@ class ParsedCommand:
     def get_segment_params(self) -> Dict[str, Any]:
         """获取 MessageSegment 类型的命名参数"""
         return {
-            k: v for k, v in self.named_params.items() if hasattr(v, "msg_seg_type")
+            k: v for k, v in self.named_params.items() if hasattr(v, "type")
         }
 
 
@@ -414,6 +413,7 @@ class AdvancedCommandParser:
             index + 1 < len(tokens)
             and tokens[index + 1].type == TokenType.SEPARATOR
             and index + 2 < len(tokens)
+            and tokens[index + 2].type != TokenType.EOF  # 等号后面不能是 EOF
             and tokens[index + 2].type
             in [TokenType.WORD, TokenType.QUOTED_STRING, TokenType.NON_TEXT_ELEMENT]
         )
