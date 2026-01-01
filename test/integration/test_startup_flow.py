@@ -41,17 +41,6 @@ class MockMessageRouter(BaseService):
         return {"status": "ok", "data": {}}
 
 
-class MockPreUploadService(BaseService):
-    """Mock 预上传服务"""
-    name = "preupload"
-    
-    async def on_load(self):
-        pass
-    
-    async def on_close(self):
-        pass
-
-
 # =============================================================================
 # 启动参数验证测试
 # =============================================================================

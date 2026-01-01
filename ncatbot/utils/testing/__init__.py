@@ -15,7 +15,6 @@ async with E2ETestSuite() as suite:
 """
 
 from .event_factory import EventFactory
-from .mock_api import MockAPIAdapter
 from .mock_services import MockMessageRouter, MockPreUploadService, MockWebSocket
 from .suite import E2ETestSuite, create_test_suite
 from .test_helper import E2ETestHelper
@@ -34,5 +33,4 @@ __all__ = [
     "MockMessageRouter",
     "MockPreUploadService",
     "MockWebSocket",
-    "MockAPIAdapter",
 ]
