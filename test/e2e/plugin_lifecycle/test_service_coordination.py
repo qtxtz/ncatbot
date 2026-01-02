@@ -346,7 +346,7 @@ class TestEdgeCases:
         # 发送更多事件
         test_suite.inject_group_message_sync("Test message 2")
 
-        time.sleep(0.2)
+        time.sleep(0.1)
 
         # 第二条消息不应该被处理
         # （第一条可能被处理，取决于时序）

@@ -276,7 +276,7 @@ class TestEdgeCases:
             wrapper.bulk_update(special_values)
             
             # 等待异步保存完成
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(0.02)
             
             await manager.close_all()
         

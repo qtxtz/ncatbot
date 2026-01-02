@@ -165,7 +165,7 @@ class TestEventBusTimeout:
     async def test_handler_custom_timeout(self, event_bus):
         """自定义超时时间"""
         async def slow_handler(event):
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.2)
             return "done"
         
         event_bus.subscribe("test.event", slow_handler, timeout=0.1)

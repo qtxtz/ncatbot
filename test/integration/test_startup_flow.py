@@ -72,7 +72,6 @@ class TestStartupValidation:
         registry = MagicMock(spec=EventRegistry)
         
         manager = LifecycleManager(services, event_bus, registry)
-        manager.mock_mode = True
         
         with patch("ncatbot.core.client.lifecycle.ncatbot_config") as mock_config:
             mock_config.validate_config = MagicMock()
@@ -80,14 +79,15 @@ class TestStartupValidation:
             
             with patch("ncatbot.core.client.lifecycle.run_coroutine"):
                 with patch("ncatbot.plugin_system.PluginLoader"):
-                    # None 值不应该更新配置
-                    manager.start(bt_uin="123", ws_uri=None)
-                    
-                    # bt_uin 应该被更新
-                    mock_config.update_value.assert_any_call("bt_uin", "123")
-                    # ws_uri 为 None，不应该被更新
-                    calls = [str(c) for c in mock_config.update_value.call_args_list]
-                    assert not any("ws_uri" in c and "None" in c for c in calls)
+                    with patch.object(manager, "_async_start", new_callable=AsyncMock):
+                        # None 值不应该更新配置
+                        manager.start(bt_uin="123", ws_uri=None, mock=True, skip_plugin_load=True)
+                        
+                        # bt_uin 应该被更新
+                        mock_config.update_value.assert_any_call("bt_uin", "123")
+                        # ws_uri 为 None，不应该被更新
+                        calls = [str(c) for c in mock_config.update_value.call_args_list]
+                        assert not any("ws_uri" in c and "None" in c for c in calls)
 
 
 # =============================================================================

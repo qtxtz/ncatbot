@@ -139,7 +139,7 @@ class TestPluginConfigService:
         config_service.set_atomic("plugin", "key", "value")
         
         # 等待异步保存完成
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.01)
         
         # 验证文件内容
         with open(temp_config_file, "r") as f:
@@ -172,12 +172,12 @@ class TestPluginConfigService:
         config_service.set_atomic("plugin", "key2", "value2")
         
         # 等待异步保存完成
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.01)
         
         config_service.delete_config_item("plugin", "key1")
         
         # 等待异步保存完成
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.01)
         
         assert config_service.get("plugin", "key1") is None
         assert config_service.get("plugin", "key2") == "value2"
@@ -273,7 +273,7 @@ class TestPluginConfig:
         old, new = wrapper.update("key", "new_value")
         
         # 等待异步保存完成
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.01)
         
         assert old == "old_value"
         assert new == "new_value"
@@ -307,7 +307,7 @@ class TestPluginConfig:
         wrapper.bulk_update({"key1": "val1", "key2": "val2"})
         
         # 等待异步保存完成
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.01)
         
         assert wrapper["key1"] == "val1"
         assert wrapper["key2"] == "val2"

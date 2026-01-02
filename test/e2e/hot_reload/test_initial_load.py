@@ -16,7 +16,7 @@ from .conftest import (
 )
 
 
-PLUGIN_NAME = "HotReloadTestPlugin"
+PLUGIN_NAME = "reload_test_plugin"
 
 
 class TestInitialLoad:
@@ -30,7 +30,7 @@ class TestInitialLoad:
 
             # 通过正常流程加载插件
             run_coroutine(loader.load_plugins)
-            time.sleep(0.1)
+            time.sleep(0.01)
 
             plugin = loader.get_plugin(PLUGIN_NAME)
             assert plugin is not None, f"插件 {PLUGIN_NAME} 应该已加载"
@@ -41,10 +41,10 @@ class TestInitialLoad:
         with E2ETestSuite(skip_builtin_plugins=True) as suite:
             loader = suite.client.plugin_loader
             run_coroutine(loader.load_plugins)
-            time.sleep(0.1)
+            time.sleep(0.01)
 
-            assert check_command_registered("hot_reload_test"), \
-                "命令 'hot_reload_test' 应该已注册"
+            assert check_command_registered("reload_test_cmd"), \
+                "命令 'reload_test_cmd' 应该已注册"
             assert check_command_registered("hot_reload_config"), \
                 "命令 'hot_reload_config' 应该已注册"
 
@@ -53,7 +53,7 @@ class TestInitialLoad:
         with E2ETestSuite(skip_builtin_plugins=True) as suite:
             loader = suite.client.plugin_loader
             run_coroutine(loader.load_plugins)
-            time.sleep(0.1)
+            time.sleep(0.01)
 
             assert check_alias_registered("hrt"), \
                 "别名 'hrt' 应该已注册"
@@ -65,7 +65,7 @@ class TestInitialLoad:
         with E2ETestSuite(skip_builtin_plugins=True) as suite:
             loader = suite.client.plugin_loader
             run_coroutine(loader.load_plugins)
-            time.sleep(0.1)
+            time.sleep(0.01)
 
             assert check_config_registered(suite, PLUGIN_NAME), \
                 "插件配置应该已注册"
@@ -80,7 +80,7 @@ class TestInitialLoad:
         with E2ETestSuite(skip_builtin_plugins=True) as suite:
             loader = suite.client.plugin_loader
             run_coroutine(loader.load_plugins)
-            time.sleep(0.1)
+            time.sleep(0.01)
 
             handler_count = check_handler_registered(suite, PLUGIN_NAME)
             assert handler_count > 0, "应该有至少一个事件处理器已注册"
@@ -90,13 +90,13 @@ class TestInitialLoad:
         with E2ETestSuite(skip_builtin_plugins=True) as suite:
             loader = suite.client.plugin_loader
             run_coroutine(loader.load_plugins)
-            time.sleep(0.1)
+            time.sleep(0.01)
 
-            suite.inject_group_message_sync("/hot_reload_test")
-            time.sleep(0.1)
+            suite.inject_group_message_sync("/reload_test_cmd")
+            time.sleep(0.01)
 
             suite.assert_reply_sent()
             calls = suite.get_api_calls("send_group_msg")
             assert len(calls) >= 1
             message = str(calls[-1].get("message", ""))
-            assert "热重载测试" in message
+            assert "original_response" in message
