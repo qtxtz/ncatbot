@@ -10,6 +10,8 @@ from ncatbot.utils import get_log
 
 if TYPE_CHECKING:
     from .manager import ServiceManager
+    from ncatbot.core.client import BotClient
+    from ncatbot.plugin_system.loader import PluginLoader
 
 LOG = get_log("Service")
 
@@ -89,6 +91,27 @@ class BaseService(ABC):
     def is_loaded(self) -> bool:
         """服务是否已加载"""
         return self._loaded
+    
+    @property
+    def bot_client(self) -> Optional["BotClient"]:
+        """获取 BotClient 实例"""
+        if self.service_manager:
+            return self.service_manager.bot_client
+        return None
+    
+    @property
+    def plugin_loader(self) -> Optional["PluginLoader"]:
+        """获取插件加载器"""
+        if self.bot_client:
+            return self.bot_client.plugin_loader
+        return None
+    
+    @property
+    def event_bus(self):
+        """获取事件总线"""
+        if self.bot_client:
+            return self.bot_client.event_bus
+        return None
     
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__}(name={self.name}, loaded={self._loaded})>"

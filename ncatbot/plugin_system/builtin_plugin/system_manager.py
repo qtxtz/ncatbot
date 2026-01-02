@@ -1,9 +1,9 @@
 from ..builtin_mixin import NcatBotPlugin
 from ncatbot.core.service.builtin.unified_registry import command_registry, filter_registry, root_filter, option_group
-from ncatbot.core import MessageEvent, NcatBotEvent, NcatBotEventFactory, GroupMessageEvent, PrivateMessageEvent
+from ncatbot.core import MessageEvent, NcatBotEvent, GroupMessageEvent, PrivateMessageEvent
 import psutil
 import ncatbot
-from ncatbot.utils import get_log, PermissionGroup, run_coroutine, config
+from ncatbot.utils import get_log, PermissionGroup, config
 import threading
 import time
 import asyncio
@@ -129,31 +129,38 @@ class SystemManager(NcatBotPlugin):
         LOG.info(f"处理修改的插件目录: {dirs_to_process}")
 
         for plugin_dir in dirs_to_process:
+            plugin_name = self._loader.get_plugin_name_by_folder_name(plugin_dir)
+            if plugin_name is None:
+                LOG.warning(f"无法找到插件目录 {plugin_dir} 对应的插件名称")
+                continue
             try:
-                # 发送卸载请求
-                plugin_name = self._loader.get_plugin_name_by_folder_name(plugin_dir)
-                unload_event = NcatBotEventFactory.create_event(
-                    "plugin_unload_request", name=plugin_name
-                )
-                await self.event_bus.publish(unload_event)
-                LOG.info(f"发送插件卸载请求: {plugin_name}")
+                # 直接调用 loader 卸载插件
+                await self._loader.unload_plugin(plugin_name)
+                LOG.info(f"已卸载插件: {plugin_name}")
 
-                # 稍微延迟后发送加载请求
-                await run_coroutine(lambda: __import__("asyncio").sleep(0.2))
+                # 稍微延迟后加载插件
+                await asyncio.sleep(0.2)
 
-                # 发送加载请求
-                load_event = NcatBotEventFactory.create_event(
-                    "plugin_load_request", name=plugin_name
-                )
-                await self.event_bus.publish(load_event)
-                LOG.info(f"发送插件加载请求: {plugin_name}")
+                # 直接调用 loader 加载插件
+                await self._loader.load_plugin(plugin_name)
+                LOG.info(f"已加载插件: {plugin_name}")
             except Exception as e:
                 LOG.error(f"处理插件 {plugin_name} 时出错: {e}")
 
     async def on_load(self) -> None:
-        self.register_handler("ncatbot.plugin_load_request", self.load_plugin)
-        self.register_handler("ncatbot.plugin_unload_request", self.unload_plugin)
         self.register_handler("ncatbot.message_event", self.handle_message_event)
+        
+        # 订阅消息事件以触发命令和过滤器处理
+        self.event_bus.subscribe(
+            "re:ncatbot.message_event|ncatbot.message_sent_event",
+            self._handle_unified_registry_message,
+            timeout=900,
+        )
+        self.event_bus.subscribe(
+            "re:ncatbot.notice_event|ncatbot.request_event",
+            self._handle_unified_registry_legacy,
+            timeout=900,
+        )
 
         # 启动文件监视守护线程
         self._watch_stop_event.clear()
@@ -227,30 +234,13 @@ class SystemManager(NcatBotPlugin):
         except Exception as e:
             await event.reply(f"插件 {plugin_name} 配置 {config_name} 更新失败: {e}")
 
-    async def unload_plugin(self, event: NcatBotEvent) -> bool:
-        """卸载插件, 可以把自己卸了"""
-        name = event.data.get("name")
-        plugin = self.get_plugin(name)
-        if not plugin:
-            LOG.warning(f"尝试卸载不存在的插件 {name}")
-            return False
-        await self._loader.unload_plugin(name)
-        await self.event_bus.publish(
-            NcatBotEventFactory.create_event("plugin_unload", name=name)
-        )
-        return True
+    async def _handle_unified_registry_message(self, event: NcatBotEvent) -> None:
+        """处理消息事件（命令和过滤器）"""
+        await self.services.unified_registry.handle_message_event(event.data)
 
-    async def load_plugin(self, event: NcatBotEvent):
-        """加载插件"""
-        name = event.data.get("name")
-        plugin = await self._loader.load_plugin(name)
-        if self._loader.get_plugin(name) is None:
-            LOG.warning(f"尝试加载失败的插件 {name}")
-            return False
-        await self.event_bus.publish(
-            NcatBotEventFactory.create_event("plugin_load", name=plugin.name)
-        )
-        return True
+    async def _handle_unified_registry_legacy(self, event: NcatBotEvent) -> bool:
+        """处理通知和请求事件"""
+        return await self.services.unified_registry.handle_legacy_event(event.data)
 
     async def on_unload(self) -> None:
         """插件卸载时的清理工作"""

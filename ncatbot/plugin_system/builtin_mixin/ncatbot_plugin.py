@@ -114,6 +114,8 @@ class NcatBotPlugin(BasePlugin, TimeTaskMixin, ConfigMixin):
 
         self._init_()
         await self.on_load()
+        
+        self.services.unified_registry.handle_plugin_load()
 
     @final
     async def __unload__(self, *a: Any, **kw: Any) -> None:
@@ -127,6 +129,7 @@ class NcatBotPlugin(BasePlugin, TimeTaskMixin, ConfigMixin):
             self.unregister_all_handler()
             # 清理配置项注册（保留配置值）
             self.services.plugin_config.unregister_plugin_configs(self.name)
+            self.services.unified_registry.handle_plugin_unload(self.name)
             self._close_(*a, **kw)
             await self.on_close(*a, **kw)
         except Exception as e:

@@ -38,7 +38,7 @@ class UnifiedRegistryService(BaseService):
     def __init__(self, **config):
         super().__init__(**config)
         self._filter_validator: Optional[FilterValidator] = None
-        self.func_plugin_map: Dict[Callable, object] = {}
+        self._func_plugin_map: Dict[Callable, object] = {}
         self.filter_registry = filter_registry
         self.command_registry = command_registry
         self._binder: Optional[ArgumentBinder] = None
@@ -58,9 +58,34 @@ class UnifiedRegistryService(BaseService):
         self.clear()
         LOG.info("统一注册服务已关闭")
 
+    # ------------------------------------------------------------------
+    # 便捷属性
+    # ------------------------------------------------------------------
+
+    @property
+    def plugins(self) -> List:
+        """获取已加载的插件列表"""
+        if self.plugin_loader:
+            return list(self.plugin_loader.plugins.values())
+        return []
+
     def _normalize_case(self, s: str) -> str:
+        """大小写归一化"""
         # TODO: 实现大小写敏感（可能永远不会做）
         return s
+
+    def _find_plugin_for_function(self, func: Callable):
+        """查找函数所属的插件"""
+        if func in self._func_plugin_map:
+            return self._func_plugin_map[func]
+
+        for plugin in self.plugins:
+            plugin_class = plugin.__class__
+            if func in plugin_class.__dict__.values():
+                self._func_plugin_map[func] = plugin
+                return plugin
+
+        return None
 
     def handle_plugin_unload(self, plugin_name: str) -> None:
         """处理插件卸载，清理相关缓存"""
@@ -80,13 +105,10 @@ class UnifiedRegistryService(BaseService):
         func: Callable,
         event: "MessageEvent",
         *args,
-        plugin_finder: Optional[Callable] = None,
         **kwargs
     ):
         """执行函数"""
-        plugin = None
-        if plugin_finder:
-            plugin = plugin_finder(func)
+        plugin = self._find_plugin_for_function(func)
 
         try:
             # 使用过滤器验证器
@@ -103,23 +125,14 @@ class UnifiedRegistryService(BaseService):
             LOG.info(f"{traceback.format_exc()}")
             return False
 
-    async def run_pure_filters(
-        self,
-        event: "MessageEvent",
-        plugin_finder: Optional[Callable] = None
-    ) -> None:
+    async def run_pure_filters(self, event: "MessageEvent") -> None:
         """遍历执行纯过滤器函数（不含命令函数）"""
         for func in filter_registry._function_filters.values():
             if getattr(func, "__is_command__", False):
                 continue
-            await self._execute_function(func, event, plugin_finder=plugin_finder)
+            await self._execute_function(func, event)
 
-    async def run_command(
-        self,
-        event: "MessageEvent",
-        event_bus,
-        plugin_finder: Optional[Callable] = None
-    ) -> bool:
+    async def run_command(self, event: "MessageEvent") -> bool:
         """运行命令处理"""
         # 前置检查与提取首段文本
         pre: Optional[PreprocessResult] = self._preprocessor.precheck(event)
@@ -157,7 +170,7 @@ class UnifiedRegistryService(BaseService):
             )
         except Exception as e:
             from ncatbot.core.client import NcatBotEvent
-            await event_bus.publish(
+            await self.event_bus.publish(
                 NcatBotEvent(
                     type="ncatbot.param_bind_failed",
                     data={"event": event, "msg": str(e), "cmd": match.command.name},
@@ -168,7 +181,6 @@ class UnifiedRegistryService(BaseService):
         try:
             await self._execute_function(
                 func, event, *bind_result.args,
-                plugin_finder=plugin_finder,
                 **bind_result.named_args
             )
         except Exception:
@@ -176,16 +188,11 @@ class UnifiedRegistryService(BaseService):
 
         return True
 
-    async def handle_message_event(
-        self,
-        event: "MessageEvent",
-        event_bus,
-        plugin_finder: Optional[Callable] = None
-    ) -> None:
+    async def handle_message_event(self, event: "MessageEvent") -> None:
         """处理消息事件（命令和过滤器）"""
         self.initialize_if_needed()
-        await self.run_command(event, event_bus, plugin_finder)
-        await self.run_pure_filters(event, plugin_finder)
+        await self.run_command(event)
+        await self.run_pure_filters(event)
 
     def initialize_if_needed(self) -> None:
         """首次触发时构建命令分发表并做严格冲突检测"""
@@ -245,23 +252,19 @@ class UnifiedRegistryService(BaseService):
             f"TriggerEngine 初始化完成：命令={len(filtered_commands)}, 别名={len(filtered_aliases)}"
         )
 
-    async def handle_legacy_event(
-        self,
-        event_data: "BaseEvent",
-        plugin_finder: Optional[Callable] = None
-    ) -> bool:
+    async def handle_legacy_event(self, event_data: "BaseEvent") -> bool:
         """处理通知和请求事件"""
         if event_data.post_type == "notice":
             for func in legacy_registry._notice_event:
-                await self._execute_function(func, event_data, plugin_finder=plugin_finder)
+                await self._execute_function(func, event_data)
         elif event_data.post_type == "request":
             for func in legacy_registry._request_event:
-                await self._execute_function(func, event_data, plugin_finder=plugin_finder)
+                await self._execute_function(func, event_data)
         return True
 
     def clear(self):
         """清理缓存"""
-        self.func_plugin_map.clear()
+        self._func_plugin_map.clear()
         self._initialized = False
         if self._resolver:
             self._resolver.clear()

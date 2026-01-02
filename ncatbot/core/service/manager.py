@@ -16,6 +16,8 @@ if TYPE_CHECKING:
         RBACService,
         UnifiedRegistryService
     )
+    from ncatbot.core.client import BotClient
+    from ncatbot.plugin_system.loader import PluginLoader
 
 LOG = get_log("ServiceManager")
 
@@ -53,6 +55,21 @@ class ServiceManager:
         self._services: Dict[str, BaseService] = {}
         self._service_classes: Dict[str, Type[BaseService]] = {}
         self._service_configs: Dict[str, Dict[str, Any]] = {}
+        self._bot_client: Optional["BotClient"] = None
+    
+    def set_bot_client(self, bot_client: "BotClient") -> None:
+        """设置 BotClient 引用"""
+        self._bot_client = bot_client
+    
+    @property
+    def bot_client(self) -> Optional["BotClient"]:
+        """获取 BotClient"""
+        return self._bot_client
+    
+    @property
+    def plugin_loader(self) -> Optional["PluginLoader"]:
+        """获取 PluginLoader"""
+        return self._bot_client.plugin_loader # type: ignore
     
     # -------------------------------------------------------------------------
     # 内置服务属性（支持 IDE 类型提示）

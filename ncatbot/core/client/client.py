@@ -74,6 +74,7 @@ class BotClient(EventRegistry, LifecycleManager):
         
         # 服务管理器
         self.services = ServiceManager()
+        self.services.set_bot_client(self)
         
         # 注册内置服务
         self.services.register(MessageRouter)

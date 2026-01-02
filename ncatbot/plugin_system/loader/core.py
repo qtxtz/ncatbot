@@ -12,7 +12,7 @@ from ..pluginsys_err import (
     PluginDependencyError,
     PluginVersionError,
 )
-from ..builtin_plugin import SystemManager, UnifiedRegistryPlugin
+from ..builtin_plugin import SystemManager
 from packaging.specifiers import SpecifierSet
 from packaging.version import parse as parse_version
 
@@ -92,7 +92,6 @@ class PluginLoader:
         """加载内置插件。"""
         plugins = {
             "system_manager": SystemManager,
-            "unified_registry": UnifiedRegistryPlugin,
         }
         for name, plg in plugins.items():
             await self.load_plugin_by_class(plg, name)
