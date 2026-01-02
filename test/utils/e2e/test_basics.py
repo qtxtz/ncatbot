@@ -4,13 +4,16 @@ E2E 测试套件基础功能测试
 测试 E2ETestSuite、EventFactory、MockMessageRouter 的基本功能。
 """
 
+import os
 import pytest
 import asyncio
 
 from ncatbot.utils.testing import E2ETestSuite, EventFactory, TestHelper
 from ncatbot.utils import run_coroutine
 
-from .test_plugins import LifecyclePlugin
+
+# 测试插件目录的路径
+PLUGINS_DIR = os.path.join(os.path.dirname(__file__), "plugins")
 
 
 class TestE2ETestSuiteBasics:
@@ -149,19 +152,25 @@ class TestPluginLifecycle:
     
     def test_plugin_load_unload(self):
         """测试插件加载和卸载"""
-        LifecyclePlugin.lifecycle_events = []
+        import time
         
         with E2ETestSuite() as suite:
-            plugin = suite.register_plugin_sync(LifecyclePlugin)
+            plugin_dir = os.path.join(PLUGINS_DIR, "lifecycle_plugin")
+            suite.index_plugin(plugin_dir)
+            plugin = suite.register_plugin_sync("lifecycle_plugin")
             
-            assert "loaded" in LifecyclePlugin.lifecycle_events
+            # 获取加载后的插件实例的类
+            PluginClass = type(plugin)
+            
+            # 验证 on_load 被调用
+            assert "loaded" in PluginClass.lifecycle_events
             
             suite.unregister_plugin_sync("lifecycle_plugin")
             
-            import time
             time.sleep(0.02)
             
-            assert "closed" in LifecyclePlugin.lifecycle_events
+            # 验证 on_close 被调用
+            assert "closed" in PluginClass.lifecycle_events
 
 
 class TestTestHelper:

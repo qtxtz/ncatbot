@@ -4,17 +4,16 @@ TestHelper 断言有效性测试
 测试 TestHelper 和 E2ETestSuite 的断言方法是否能正确检测回复。
 """
 
+import os
 import pytest
 import time
 
 from ncatbot.utils.testing import E2ETestSuite, TestHelper, EventFactory
 from ncatbot.utils import run_coroutine
 
-from .test_plugins import (
-    SimpleReplyPlugin,
-    FilteredReplyPlugin,
-    NoReplyPlugin,
-)
+
+# 测试插件目录的路径
+PLUGINS_DIR = os.path.join(os.path.dirname(__file__), "plugins")
 
 
 class TestAssertReplyValidity:
@@ -23,7 +22,9 @@ class TestAssertReplyValidity:
     def test_assert_reply_sent_detects_reply(self):
         """验证 assert_reply_sent 能检测到回复"""
         with E2ETestSuite() as suite:
-            suite.register_plugin_sync(SimpleReplyPlugin)
+            plugin_dir = os.path.join(PLUGINS_DIR, "simple_reply_plugin")
+            suite.index_plugin(plugin_dir)
+            suite.register_plugin_sync("simple_reply_plugin")
             
             # 发送命令（需要命令前缀 /）
             suite.inject_group_message_sync("/ping")
@@ -42,7 +43,9 @@ class TestAssertReplyValidity:
     def test_assert_reply_sent_with_content(self):
         """验证 assert_reply_sent 能检测回复内容"""
         with E2ETestSuite() as suite:
-            suite.register_plugin_sync(SimpleReplyPlugin)
+            plugin_dir = os.path.join(PLUGINS_DIR, "simple_reply_plugin")
+            suite.index_plugin(plugin_dir)
+            suite.register_plugin_sync("simple_reply_plugin")
             
             suite.inject_group_message_sync("/ping")
             time.sleep(0.02)
@@ -53,7 +56,9 @@ class TestAssertReplyValidity:
     def test_assert_no_reply_when_no_response(self):
         """验证 assert_no_reply 在无回复时通过"""
         with E2ETestSuite() as suite:
-            suite.register_plugin_sync(NoReplyPlugin)
+            plugin_dir = os.path.join(PLUGINS_DIR, "no_reply_plugin")
+            suite.index_plugin(plugin_dir)
+            suite.register_plugin_sync("no_reply_plugin")
             
             suite.inject_group_message_sync("/silent")
             time.sleep(0.02)
@@ -64,7 +69,9 @@ class TestAssertReplyValidity:
     def test_assert_no_reply_fails_when_reply_exists(self):
         """验证 assert_no_reply 在有回复时失败"""
         with E2ETestSuite() as suite:
-            suite.register_plugin_sync(SimpleReplyPlugin)
+            plugin_dir = os.path.join(PLUGINS_DIR, "simple_reply_plugin")
+            suite.index_plugin(plugin_dir)
+            suite.register_plugin_sync("simple_reply_plugin")
             
             suite.inject_group_message_sync("/ping")
             time.sleep(0.02)
@@ -76,7 +83,9 @@ class TestAssertReplyValidity:
     def test_assert_reply_sent_fails_when_no_reply(self):
         """验证 assert_reply_sent 在无回复时失败"""
         with E2ETestSuite() as suite:
-            suite.register_plugin_sync(NoReplyPlugin)
+            plugin_dir = os.path.join(PLUGINS_DIR, "no_reply_plugin")
+            suite.index_plugin(plugin_dir)
+            suite.register_plugin_sync("no_reply_plugin")
             
             suite.inject_group_message_sync("/silent")
             time.sleep(0.02)
@@ -92,7 +101,9 @@ class TestTestHelperAssertions:
     def test_helper_assert_reply_sent(self):
         """测试 TestHelper.assert_reply_sent"""
         with E2ETestSuite() as suite:
-            suite.register_plugin_sync(SimpleReplyPlugin)
+            plugin_dir = os.path.join(PLUGINS_DIR, "simple_reply_plugin")
+            suite.index_plugin(plugin_dir)
+            suite.register_plugin_sync("simple_reply_plugin")
             helper = TestHelper(suite.client)
             
             helper.send_group_message_sync("/ping")
@@ -104,7 +115,9 @@ class TestTestHelperAssertions:
     def test_helper_assert_no_reply(self):
         """测试 TestHelper.assert_no_reply"""
         with E2ETestSuite() as suite:
-            suite.register_plugin_sync(NoReplyPlugin)
+            plugin_dir = os.path.join(PLUGINS_DIR, "no_reply_plugin")
+            suite.index_plugin(plugin_dir)
+            suite.register_plugin_sync("no_reply_plugin")
             helper = TestHelper(suite.client)
             
             helper.send_group_message_sync("/silent")
@@ -115,7 +128,9 @@ class TestTestHelperAssertions:
     def test_helper_get_latest_reply(self):
         """测试 TestHelper.get_latest_reply"""
         with E2ETestSuite() as suite:
-            suite.register_plugin_sync(SimpleReplyPlugin)
+            plugin_dir = os.path.join(PLUGINS_DIR, "simple_reply_plugin")
+            suite.index_plugin(plugin_dir)
+            suite.register_plugin_sync("simple_reply_plugin")
             helper = TestHelper(suite.client)
             
             helper.send_group_message_sync("/ping")
@@ -132,7 +147,9 @@ class TestFilteredCommandReply:
     def test_group_filter_allows_group_message(self):
         """测试群聊过滤器允许群消息"""
         with E2ETestSuite() as suite:
-            suite.register_plugin_sync(FilteredReplyPlugin)
+            plugin_dir = os.path.join(PLUGINS_DIR, "filtered_reply_plugin")
+            suite.index_plugin(plugin_dir)
+            suite.register_plugin_sync("filtered_reply_plugin")
             
             suite.inject_group_message_sync("/group_ping")
             time.sleep(0.02)
@@ -143,7 +160,9 @@ class TestFilteredCommandReply:
     def test_group_filter_blocks_private_message(self):
         """测试群聊过滤器阻止私聊消息"""
         with E2ETestSuite() as suite:
-            suite.register_plugin_sync(FilteredReplyPlugin)
+            plugin_dir = os.path.join(PLUGINS_DIR, "filtered_reply_plugin")
+            suite.index_plugin(plugin_dir)
+            suite.register_plugin_sync("filtered_reply_plugin")
             
             suite.inject_private_message_sync("/group_ping")
             time.sleep(0.02)
@@ -154,7 +173,9 @@ class TestFilteredCommandReply:
     def test_private_filter_allows_private_message(self):
         """测试私聊过滤器允许私聊消息"""
         with E2ETestSuite() as suite:
-            suite.register_plugin_sync(FilteredReplyPlugin)
+            plugin_dir = os.path.join(PLUGINS_DIR, "filtered_reply_plugin")
+            suite.index_plugin(plugin_dir)
+            suite.register_plugin_sync("filtered_reply_plugin")
             
             suite.inject_private_message_sync("/private_ping")
             time.sleep(0.02)
@@ -169,7 +190,9 @@ class TestCommandWithArgs:
     def test_echo_command_with_args(self):
         """测试 echo 命令带参数"""
         with E2ETestSuite() as suite:
-            suite.register_plugin_sync(SimpleReplyPlugin)
+            plugin_dir = os.path.join(PLUGINS_DIR, "simple_reply_plugin")
+            suite.index_plugin(plugin_dir)
+            suite.register_plugin_sync("simple_reply_plugin")
             
             suite.inject_group_message_sync("/echo hello world")
             time.sleep(0.02)
@@ -180,7 +203,9 @@ class TestCommandWithArgs:
     def test_greet_command_with_name(self):
         """测试 greet 命令带名字参数"""
         with E2ETestSuite() as suite:
-            suite.register_plugin_sync(SimpleReplyPlugin)
+            plugin_dir = os.path.join(PLUGINS_DIR, "simple_reply_plugin")
+            suite.index_plugin(plugin_dir)
+            suite.register_plugin_sync("simple_reply_plugin")
             
             suite.inject_group_message_sync("/greet Alice")
             time.sleep(0.02)
@@ -195,7 +220,9 @@ class TestClearHistoryBetweenTests:
     def test_first_test_sends_reply(self):
         """第一个测试发送回复"""
         with E2ETestSuite() as suite:
-            suite.register_plugin_sync(SimpleReplyPlugin)
+            plugin_dir = os.path.join(PLUGINS_DIR, "simple_reply_plugin")
+            suite.index_plugin(plugin_dir)
+            suite.register_plugin_sync("simple_reply_plugin")
             
             suite.inject_group_message_sync("/ping")
             time.sleep(0.02)
