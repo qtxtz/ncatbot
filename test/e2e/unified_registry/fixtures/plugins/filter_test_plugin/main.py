@@ -6,7 +6,17 @@ from ncatbot.core.service.builtin.unified_registry.filter_system.decorators impo
     group_filter,
     private_filter,
     admin_filter,
+    root_filter,
     on_message,
+    filter,
+)
+from ncatbot.core.service.builtin.unified_registry.filter_system.builtin import (
+    GroupFilter,
+    PrivateFilter,
+    AdminFilter,
+    CustomFilter,
+    TrueFilter,
+    NonSelfFilter,
 )
 from ncatbot.core import MessageEvent
 
@@ -49,6 +59,14 @@ class FilterTestPlugin(NcatBotPlugin):
         """管理员专用踢出命令"""
         await event.reply(f"已踢出用户: {user_id}")
 
+    # ==================== Root 过滤器 ====================
+
+    @root_filter
+    @command_registry.command("shutdown")
+    async def shutdown_cmd(self, event: MessageEvent):
+        """Root 专用关闭命令"""
+        await event.reply("系统关闭中...")
+
     # ==================== 组合过滤器 ====================
 
     @group_filter
@@ -58,3 +76,46 @@ class FilterTestPlugin(NcatBotPlugin):
         """群聊中管理员专用禁言命令"""
         await event.reply(f"已禁言用户 {user_id}，时长 {duration} 秒")
 
+    # ==================== 指定群号的过滤器 ====================
+
+    @filter(GroupFilter(allowed="123456"))
+    @command_registry.command("special_group")
+    async def special_group_cmd(self, event: MessageEvent):
+        """仅特定群可用的命令"""
+        await event.reply("这是特定群专用命令")
+
+    @filter(GroupFilter(allowed=[123456, 789012]))
+    @command_registry.command("multi_group")
+    async def multi_group_cmd(self, event: MessageEvent):
+        """多个指定群可用的命令"""
+        await event.reply("这是多群专用命令")
+
+    # ==================== 自定义过滤器 ====================
+
+    @filter(CustomFilter(lambda e: len(str(e.raw_message)) < 50, "short_msg"))
+    @command_registry.command("short_only")
+    async def short_only_cmd(self, event: MessageEvent):
+        """仅短消息可用的命令"""
+        await event.reply("消息很短")
+
+    # ==================== 组合过滤器 (使用 | 和 &) ====================
+
+    @filter(GroupFilter() | PrivateFilter())
+    @command_registry.command("any_chat")
+    async def any_chat_cmd(self, event: MessageEvent):
+        """群聊或私聊都可用"""
+        await event.reply("任意聊天类型")
+
+    @filter(GroupFilter() & AdminFilter())
+    @command_registry.command("group_admin")
+    async def group_admin_cmd(self, event: MessageEvent):
+        """群聊且管理员"""
+        await event.reply("群聊管理员")
+
+    # ==================== TrueFilter 测试 ====================
+
+    @filter(TrueFilter())
+    @command_registry.command("always_pass")
+    async def always_pass_cmd(self, event: MessageEvent):
+        """永远通过的命令"""
+        await event.reply("总是通过")
