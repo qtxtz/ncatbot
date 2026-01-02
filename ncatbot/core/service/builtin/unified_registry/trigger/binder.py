@@ -9,14 +9,16 @@
 
 import inspect
 from dataclasses import dataclass
-from typing import Tuple, List, Any, Dict
+from typing import Tuple, List, Any, Dict, TYPE_CHECKING
 
 from ..command_system.utils import (
     CommandSpec,
 )
 from ncatbot.utils import get_log
 from ..command_system.lexer.message_tokenizer import MessageTokenizer
-from ncatbot.core import MessageEvent
+
+if TYPE_CHECKING:
+    from ncatbot.core import MessageEvent
 
 LOG = get_log(__name__)
 
@@ -45,7 +47,7 @@ class ArgumentBinder:
     def bind(
         self,
         spec: CommandSpec,
-        event: MessageEvent,
+        event: "MessageEvent",
         path_words: Tuple[str, ...],
         prefixes: List[str],
     ) -> BindResult:

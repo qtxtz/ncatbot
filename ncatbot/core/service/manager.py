@@ -13,7 +13,8 @@ if TYPE_CHECKING:
         MessageRouter,
         PreUploadService,
         PluginConfigService,
-        RBACService
+        RBACService,
+        UnifiedRegistryService
     )
 
 LOG = get_log("ServiceManager")
@@ -76,6 +77,11 @@ class ServiceManager:
     def rbac(self) -> "RBACService":
         """RBAC 服务"""
         return self._services.get("rbac")  # type: ignore
+    
+    @property
+    def unified_registry(self) -> "UnifiedRegistryService":
+        """统一注册服务"""
+        return self._services.get("unified_registry")  # type: ignore
     
     # -------------------------------------------------------------------------
     # 服务管理方法

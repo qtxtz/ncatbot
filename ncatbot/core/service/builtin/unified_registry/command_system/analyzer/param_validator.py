@@ -1,5 +1,4 @@
 from typing import List, Tuple
-from ncatbot.core import MessageSegment
 from ncatbot.utils import get_log
 from ..utils import CommandRegistrationError
 from ..utils import CommandSpec, OptionSpec, OptionGroupSpec, ParameterSpec, FuncSpec
@@ -147,6 +146,9 @@ class ParamsValidator:
         Raises:
             ValueError: 当参数缺少类型注解或类型不支持时
         """
+        # 延迟导入避免循环引用
+        from ncatbot.core.event.message_segments import MessageSegment
+        
         param_list = self.actual_params  # 实际的命令参数
         LOG.debug(param_list)
         args_types = []

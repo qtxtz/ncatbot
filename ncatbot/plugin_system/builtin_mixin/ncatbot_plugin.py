@@ -107,6 +107,7 @@ class NcatBotPlugin(BasePlugin, TimeTaskMixin, ConfigMixin):
         self.workspace.mkdir(exist_ok=True, parents=True)
         
         # 加载配置（迁移逻辑由 Service 处理）
+        await self.services.plugin_config.reload_plugin_config(self.name)
         self.config = await self.services.plugin_config.get_or_migrate_config(
             self.name, self._legacy_data_file
         )
@@ -124,6 +125,8 @@ class NcatBotPlugin(BasePlugin, TimeTaskMixin, ConfigMixin):
         
         try:
             self.unregister_all_handler()
+            # 清理配置项注册（保留配置值）
+            self.services.plugin_config.unregister_plugin_configs(self.name)
             self._close_(*a, **kw)
             await self.on_close(*a, **kw)
         except Exception as e:

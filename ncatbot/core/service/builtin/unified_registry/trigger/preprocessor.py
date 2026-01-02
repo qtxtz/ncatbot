@@ -7,10 +7,12 @@
 """
 
 from dataclasses import dataclass
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 
 from ncatbot.utils import get_log
-from ncatbot.core import MessageEvent
+
+if TYPE_CHECKING:
+    from ncatbot.core import MessageEvent
 
 LOG = get_log(__name__)
 
@@ -31,7 +33,7 @@ class MessagePreprocessor:
     def _normalize(self, s: str) -> str:
         return s if self.case_sensitive else s.lower()
 
-    def precheck(self, event: MessageEvent) -> Optional[PreprocessResult]:
+    def precheck(self, event: "MessageEvent") -> Optional[PreprocessResult]:
         """提取首段文本，并根据配置判断是否进入命令解析流程。"""
         if not event.message.message:
             return None

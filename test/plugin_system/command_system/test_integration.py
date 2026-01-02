@@ -10,7 +10,7 @@
 import time
 from typing import Dict, Any
 
-from ncatbot.plugin_system.builtin_plugin.unified_registry.command_system.lexer import (
+from ncatbot.core.service.builtin.unified_registry.command_system.lexer import (
     StringTokenizer,
     AdvancedCommandParser,
     QuoteMismatchError,

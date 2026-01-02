@@ -1,7 +1,6 @@
 """内置过滤器实现 v2.0"""
 
 from typing import TYPE_CHECKING, Callable, Optional, Union, Iterable
-from ncatbot.core import MessageEvent, MessageSentEvent
 from ncatbot.utils import status
 from ncatbot.utils.assets.literals import PermissionGroup
 from .base import BaseFilter
@@ -14,6 +13,12 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ncatbot.core import MessageEvent
+
+
+def _get_message_sent_event():
+    """延迟获取 MessageSentEvent 类"""
+    from ncatbot.core.event import MessageSentEvent
+    return MessageSentEvent
 
 
 class GroupFilter(BaseFilter):
@@ -69,7 +74,7 @@ class MessageSentFilter(BaseFilter):
 
     def check(self, event: "MessageEvent") -> bool:
         """检查是否为自身上报的消息"""
-        return isinstance(event, MessageSentEvent)
+        return isinstance(event, _get_message_sent_event())
 
 
 class AdminFilter(BaseFilter):
@@ -135,7 +140,7 @@ class NonSelfFilter(BaseFilter):
     """非自身消息过滤器"""
 
     def check(self, event: "MessageEvent") -> bool:
-        return not isinstance(event, MessageSentEvent)
+        return not isinstance(event, _get_message_sent_event())
 
 
 class TrueFilter(BaseFilter):
@@ -148,7 +153,7 @@ class TrueFilter(BaseFilter):
 class CustomFilter(BaseFilter):
     """自定义函数过滤器包装器"""
 
-    def __init__(self, filter_func: Callable[[MessageEvent], bool], name: str = ""):
+    def __init__(self, filter_func: Callable[..., bool], name: str = ""):
         """初始化自定义过滤器
 
         Args:

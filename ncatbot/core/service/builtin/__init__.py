@@ -8,6 +8,7 @@ from .message_router import MessageRouter
 from .preupload import PreUploadService
 from .rbac import RBACService, PermissionPath, PermissionTrie
 from .plugin_config import PluginConfigService, ConfigItem, PluginConfig
+from .unified_registry import UnifiedRegistryService
 
 __all__ = [
     "MessageRouter",
@@ -18,4 +19,5 @@ __all__ = [
     "PluginConfigService",
     "ConfigItem",
     "PluginConfig",
+    "UnifiedRegistryService",
 ]

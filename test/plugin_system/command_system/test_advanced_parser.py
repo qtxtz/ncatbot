@@ -8,7 +8,7 @@
 - 与 StringTokenizer 的组合使用
 """
 
-from ncatbot.plugin_system.builtin_plugin.unified_registry.command_system.lexer import (
+from ncatbot.core.service.builtin.unified_registry.command_system.lexer import (
     StringTokenizer,
     AdvancedCommandParser,
     Token,

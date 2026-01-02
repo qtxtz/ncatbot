@@ -8,7 +8,7 @@
 将输入字符串分解为 Token 序列。
 
 ```python
-from ncatbot.plugin_system.builtin_plugin.unified_registry.command_system.lexer import StringTokenizer
+from ncatbot.core.service.builtin.unified_registry.command_system.lexer import StringTokenizer
 
 tokenizer = StringTokenizer('deploy --env=prod -xvf "my app"')
 tokens = tokenizer.tokenize()
@@ -37,7 +37,7 @@ print(result.elements)       # [Element('text', 'deploy', 0), ...]
 处理 MessageArray，支持文本和非文本元素混合解析。
 
 ```python
-from ncatbot.plugin_system.builtin_plugin.unified_registry.command_system.lexer import MessageTokenizer
+from ncatbot.core.service.builtin.unified_registry.command_system.lexer import MessageTokenizer
 
 tokenizer = MessageTokenizer()
 result = tokenizer.parse_message(message_array)
@@ -74,7 +74,7 @@ class NonTextToken(Token):
 
 ### 字符串级别解析
 ```python
-from ncatbot.plugin_system.builtin_plugin.unified_registry.command_system.lexer import (
+from ncatbot.core.service.builtin.unified_registry.command_system.lexer import (
     StringTokenizer, AdvancedCommandParser
 )
 
@@ -89,7 +89,7 @@ print(f"元素: {[e.content for e in result.elements]}")  # ['backup', 'my files
 
 ### 消息级别解析（推荐）
 ```python
-from ncatbot.plugin_system.builtin_plugin.unified_registry.command_system.lexer import parse_message_command
+from ncatbot.core.service.builtin.unified_registry.command_system.lexer import parse_message_command
 
 # 一行解析复杂消息
 result = parse_message_command(message_array)
@@ -142,7 +142,7 @@ for name, segment in result.get_segment_params().items():
 ## 错误处理
 
 ```python
-from ncatbot.plugin_system.builtin_plugin.unified_registry.command_system.lexer import (
+from ncatbot.core.service.builtin.unified_registry.command_system.lexer import (
     QuoteMismatchError, InvalidEscapeSequenceError
 )
 

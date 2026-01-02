@@ -96,6 +96,16 @@ class PluginConfigService(BaseService):
         """获取指定插件的所有已注册配置项"""
         return self._config_items.get(plugin_name, {})
     
+    def unregister_plugin_configs(self, plugin_name: str) -> None:
+        """注销插件的所有配置项注册（不删除配置值，仅清理注册信息）
+        
+        用于插件卸载时清理配置项注册，以便插件重新加载时可以再次注册。
+        配置值会保留在 _configs 中，实现配置持久化。
+        """
+        if plugin_name in self._config_items:
+            del self._config_items[plugin_name]
+            LOG.debug(f"已清理插件 {plugin_name} 的配置项注册")
+    
     # -------------------------------------------------------------------------
     # 配置读写
     # -------------------------------------------------------------------------

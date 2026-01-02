@@ -6,7 +6,7 @@
 
 from .base import BaseService
 from .manager import ServiceManager
-from .builtin import MessageRouter, PreUploadService, RBACService
+from .builtin import MessageRouter, PreUploadService, RBACService, UnifiedRegistryService
 
 __all__ = [
     "BaseService",
@@ -14,4 +14,5 @@ __all__ = [
     "MessageRouter",
     "PreUploadService",
     "RBACService",
+    "UnifiedRegistryService",
 ]

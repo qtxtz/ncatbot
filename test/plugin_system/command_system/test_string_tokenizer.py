@@ -8,7 +8,7 @@
 - 错误处理
 """
 
-from ncatbot.plugin_system.builtin_plugin.unified_registry.command_system.lexer import (
+from ncatbot.core.service.builtin.unified_registry.command_system.lexer import (
     StringTokenizer,
     TokenType,
     QuoteMismatchError,
@@ -269,7 +269,7 @@ class TestStringTokenizer:
 def test_integration_with_imports():
     """测试导入和集成"""
     # 测试所有必要的导入都可用
-    from ncatbot.plugin_system.builtin_plugin.unified_registry.command_system.lexer import (
+    from ncatbot.core.service.builtin.unified_registry.command_system.lexer import (
         StringTokenizer,
         TokenType,
     )

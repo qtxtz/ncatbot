@@ -1,5 +1,5 @@
 from ..builtin_mixin import NcatBotPlugin
-from .unified_registry import command_registry, filter_registry, root_filter, option_group
+from ncatbot.core.service.builtin.unified_registry import command_registry, filter_registry, root_filter, option_group
 from ncatbot.core import MessageEvent, NcatBotEvent, NcatBotEventFactory, GroupMessageEvent, PrivateMessageEvent
 import psutil
 import ncatbot

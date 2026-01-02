@@ -1,6 +1,5 @@
 from ncatbot.utils import get_log
 from ..utils import FuncSpec
-from ncatbot.core import MessageEvent
 import inspect
 
 LOG = get_log(__name__)
@@ -12,6 +11,9 @@ class SigValidator:
 
     def analyze_signature(self):
         """分析函数签名，获取实际参数列表。"""
+        # 延迟导入避免循环引用
+        from ncatbot.core.event import MessageEvent
+        
         # TODO: 提示对方法签名的严格要求
         """验证函数签名是否符合要求，并确定 event 与实际参数起始索引"""
         if len(self.descriptor.param_list) < 1:
