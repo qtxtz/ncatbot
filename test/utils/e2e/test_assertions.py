@@ -27,7 +27,7 @@ class TestAssertReplyValidity:
             
             # 发送命令（需要命令前缀 /）
             suite.inject_group_message_sync("/ping")
-            time.sleep(0.1)  # 等待异步处理
+            time.sleep(0.02)  # 等待异步处理
             
             # 断言应该能检测到回复
             suite.assert_reply_sent()
@@ -45,7 +45,7 @@ class TestAssertReplyValidity:
             suite.register_plugin_sync(SimpleReplyPlugin)
             
             suite.inject_group_message_sync("/ping")
-            time.sleep(0.1)
+            time.sleep(0.02)
             
             # 断言包含特定内容
             suite.assert_reply_sent(contains="pong")
@@ -56,7 +56,7 @@ class TestAssertReplyValidity:
             suite.register_plugin_sync(NoReplyPlugin)
             
             suite.inject_group_message_sync("/silent")
-            time.sleep(0.1)
+            time.sleep(0.02)
             
             # 应该没有回复
             suite.assert_no_reply()
@@ -67,7 +67,7 @@ class TestAssertReplyValidity:
             suite.register_plugin_sync(SimpleReplyPlugin)
             
             suite.inject_group_message_sync("/ping")
-            time.sleep(0.1)
+            time.sleep(0.02)
             
             # 有回复时应该失败
             with pytest.raises(AssertionError):
@@ -79,7 +79,7 @@ class TestAssertReplyValidity:
             suite.register_plugin_sync(NoReplyPlugin)
             
             suite.inject_group_message_sync("/silent")
-            time.sleep(0.1)
+            time.sleep(0.02)
             
             # 无回复时应该失败
             with pytest.raises(AssertionError):
@@ -96,7 +96,7 @@ class TestTestHelperAssertions:
             helper = TestHelper(suite.client)
             
             helper.send_group_message_sync("/ping")
-            time.sleep(0.1)
+            time.sleep(0.02)
             
             # 使用 helper 的断言方法
             helper.assert_reply_sent()
@@ -108,7 +108,7 @@ class TestTestHelperAssertions:
             helper = TestHelper(suite.client)
             
             helper.send_group_message_sync("/silent")
-            time.sleep(0.1)
+            time.sleep(0.02)
             
             helper.assert_no_reply()
     
@@ -119,7 +119,7 @@ class TestTestHelperAssertions:
             helper = TestHelper(suite.client)
             
             helper.send_group_message_sync("/ping")
-            time.sleep(0.1)
+            time.sleep(0.02)
             
             # 获取最后一条回复
             last_reply = helper.get_latest_reply()
@@ -135,7 +135,7 @@ class TestFilteredCommandReply:
             suite.register_plugin_sync(FilteredReplyPlugin)
             
             suite.inject_group_message_sync("/group_ping")
-            time.sleep(0.1)
+            time.sleep(0.02)
             
             # 群消息应该有回复
             suite.assert_api_called("send_group_msg")
@@ -146,7 +146,7 @@ class TestFilteredCommandReply:
             suite.register_plugin_sync(FilteredReplyPlugin)
             
             suite.inject_private_message_sync("/group_ping")
-            time.sleep(0.1)
+            time.sleep(0.02)
             
             # 私聊消息不应该触发群聊命令的回复
             suite.assert_api_not_called("send_group_msg")
@@ -157,7 +157,7 @@ class TestFilteredCommandReply:
             suite.register_plugin_sync(FilteredReplyPlugin)
             
             suite.inject_private_message_sync("/private_ping")
-            time.sleep(0.1)
+            time.sleep(0.02)
             
             # 私聊消息应该有回复
             suite.assert_api_called("send_private_msg")
@@ -172,7 +172,7 @@ class TestCommandWithArgs:
             suite.register_plugin_sync(SimpleReplyPlugin)
             
             suite.inject_group_message_sync("/echo hello world")
-            time.sleep(0.1)
+            time.sleep(0.02)
             
             # 应该有回复
             suite.assert_reply_sent(contains="Echo:")
@@ -183,7 +183,7 @@ class TestCommandWithArgs:
             suite.register_plugin_sync(SimpleReplyPlugin)
             
             suite.inject_group_message_sync("/greet Alice")
-            time.sleep(0.1)
+            time.sleep(0.02)
             
             # 应该有回复包含名字
             suite.assert_reply_sent(contains="Hello")
@@ -198,7 +198,7 @@ class TestClearHistoryBetweenTests:
             suite.register_plugin_sync(SimpleReplyPlugin)
             
             suite.inject_group_message_sync("/ping")
-            time.sleep(0.1)
+            time.sleep(0.02)
             
             suite.assert_reply_sent()
     

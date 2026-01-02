@@ -75,9 +75,9 @@ dmypy.json
 .settings/
 
 # Runtime
-data/
+/data
 logs/
-plugins/
+/plugins
 
 # development
 dev/

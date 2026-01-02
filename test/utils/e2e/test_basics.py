@@ -159,7 +159,7 @@ class TestPluginLifecycle:
             suite.unregister_plugin_sync("lifecycle_plugin")
             
             import time
-            time.sleep(0.1)
+            time.sleep(0.02)
             
             assert "closed" in LifecyclePlugin.lifecycle_events
 
