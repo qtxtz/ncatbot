@@ -1,5 +1,7 @@
 import sys
 import importlib
+import importlib.util
+import importlib.machinery
 import toml
 from pathlib import Path
 import re
@@ -23,7 +25,8 @@ class _ModuleImporter:
         self.directory = Path(directory).resolve()
         # 存储每个插件解析出的 manifest 数据： name -> dict
         self._manifests: Dict[str, dict] = {}
-        self._plugin_folders: Dict[str, str] = {}
+        # 插件名 -> 插件目录的绝对路径
+        self._plugin_folders: Dict[str, Path] = {}
         # 原始插件名 -> sanitized 名称（用于生成合法的包名）
         self._sanitized_names: Dict[str, str] = {}
         self._used_sanitized: set = set()
@@ -60,14 +63,11 @@ class _ModuleImporter:
         Supports values with or without a `.py` suffix. Returns True if the
         entry file exists, False otherwise.
         """
-        main_path = Path(plugin_dir) / main_field
+        main_path = plugin_dir / main_field
         if main_path.exists():
             return True
         # 如果未带 .py 后缀，再尝试添加 .py
-        if (
-            not main_field.endswith(".py")
-            and (Path(plugin_dir) / (main_field + ".py")).exists()
-        ):
+        if not main_field.endswith(".py") and (plugin_dir / (main_field + ".py")).exists():
             return True
         LOG.warning(
             "文件夹 %s 的 manifest 'main' 指向的入口文件未找到: %s，跳过",
@@ -76,60 +76,93 @@ class _ModuleImporter:
         )
         return False
 
-    def inspect_all(self) -> List[str]:
-        """返回所有合法的插件名"""
-        for entry in self.directory.iterdir():
-            manifest_path = entry / "manifest.toml"
-            if entry.is_dir() and manifest_path.exists():
-                try:
-                    manifest = toml.load(manifest_path)
-                    # 基本校验：必须包含 name/version/main
-                    if (
-                        not manifest.get("name")
-                        or not manifest.get("version")
-                        or not manifest.get("main")
-                    ):
-                        LOG.warning("插件 %s 的 manifest 缺少必填字段，跳过", entry)
-                        continue
-                    plugin_name = manifest.get("name")
-                    self._ensure_sanitized(plugin_name)
-                    main_field = manifest.get("main")
-                    if not self._ensure_entry(entry, main_field):
-                        continue
+    def _index_single_plugin(self, plugin_dir: Path) -> Optional[str]:
+        """索引单个插件目录
 
-                    if plugin_name in self._plugin_folders:
-                        LOG.warning("插件 %s 已存在，跳过加载", plugin_name)
-                        LOG.info(
-                            "文件夹 %s 和文件夹 %s 下存在同名插件 %s",
-                            self._plugin_folders[plugin_name],
-                            entry.name,
-                            plugin_name,
-                        )
-                        LOG.info("跳过 %s 的载入", entry.name)
-                        continue
-                    self._plugin_folders[plugin_name] = entry.name
-                    self._manifests[plugin_name] = manifest
-                except Exception:
-                    LOG.exception("解析 manifest 失败: %s", manifest_path)
-                    continue
-            else:
-                LOG.debug("跳过非插件文件/目录或缺少 manifest: %s", entry)
+        Args:
+            plugin_dir: 插件目录路径
+
+        Returns:
+            插件名称，如果索引失败则返回 None
+        """
+        plugin_dir = Path(plugin_dir).resolve()
+        manifest_path = plugin_dir / "manifest.toml"
+
+        if not plugin_dir.is_dir():
+            LOG.debug("跳过非目录: %s", plugin_dir)
+            return None
+
+        if not manifest_path.exists():
+            LOG.debug("跳过缺少 manifest.toml 的目录: %s", plugin_dir)
+            return None
+
+        try:
+            manifest = toml.load(manifest_path)
+
+            # 基本校验：必须包含 name/version/main
+            plugin_name = manifest.get("name")
+            version = manifest.get("version")
+            main_field = manifest.get("main")
+
+            if not plugin_name or not version or not main_field:
+                LOG.warning("插件 %s 的 manifest 缺少必填字段，跳过", plugin_dir)
+                return None
+
+            if not self._ensure_entry(plugin_dir, main_field):
+                return None
+
+            if plugin_name in self._plugin_folders:
+                LOG.warning("插件 %s 已存在，跳过加载", plugin_name)
+                LOG.info(
+                    "文件夹 %s 和文件夹 %s 下存在同名插件 %s",
+                    self._plugin_folders[plugin_name],
+                    plugin_dir,
+                    plugin_name,
+                )
+                return None
+
+            self._plugin_folders[plugin_name] = plugin_dir
+            self._manifests[plugin_name] = manifest
+            self._ensure_sanitized(plugin_name)
+
+            LOG.debug("已索引插件: %s (路径: %s)", plugin_name, plugin_dir)
+            return plugin_name
+
+        except Exception:
+            LOG.exception("解析 manifest 失败: %s", manifest_path)
+            return None
+
+    def inspect_all(self) -> List[str]:
+        """扫描并索引 directory 下所有合法的插件，返回插件名列表"""
+        for entry in self.directory.iterdir():
+            self._index_single_plugin(entry)
         return list(self._plugin_folders.keys())
+
+    def index_external_plugin(self, plugin_dir: Path) -> Optional[str]:
+        """索引一个外部插件文件夹
+
+        Args:
+            plugin_dir: 插件文件夹路径
+
+        Returns:
+            插件名称，如果索引失败则返回 None
+        """
+        return self._index_single_plugin(plugin_dir)
 
     def get_plugin_name_by_folder(self, folder_name: str) -> Optional[str]:
         """根据文件夹名称获取插件名称
-        
+
         支持两种情况：
         1. folder_name 是完整路径
         2. folder_name 是文件夹名称，需要匹配存储路径的最后一部分
         """
-        from pathlib import Path
+        folder_path = Path(folder_name)
         for plugin_name, stored_path in self._plugin_folders.items():
-            # 直接匹配
-            if stored_path == folder_name:
+            # 完整路径匹配
+            if stored_path == folder_path or str(stored_path) == folder_name:
                 return plugin_name
             # 匹配路径的最后一部分（文件夹名）
-            if Path(stored_path).name == folder_name:
+            if stored_path.name == folder_name:
                 return plugin_name
         return None
 
@@ -147,11 +180,11 @@ class _ModuleImporter:
         pkg_name = self._get_plugin_pkg_name(plugin_name)
 
         # Collect candidates: modules that are the plugin package or its submodules.
-        # Also keep backward-compatible check for modules named by plugin_name (if ever used).
-        modules_to_remove = []
-        for module_name in list(sys.modules.keys()):
-            if module_name == pkg_name or module_name.startswith(f"{pkg_name}."):
-                modules_to_remove.append(module_name)
+        modules_to_remove = [
+            module_name
+            for module_name in list(sys.modules.keys())
+            if module_name == pkg_name or module_name.startswith(f"{pkg_name}.")
+        ]
 
         if not modules_to_remove:
             LOG.debug("模块 %s 未加载，无需卸载", plugin_name)
@@ -179,18 +212,19 @@ class _ModuleImporter:
     def load_plugin_module(self, plugin_name: str) -> Optional[ModuleType]:
         # 清除导入缓存，确保读取最新的源文件
         importlib.invalidate_caches()
-        
+
         # 清除插件目录的 __pycache__，确保重新编译源文件
         plugin_dir = self._get_plugin_dir(plugin_name)
         pycache_dir = plugin_dir / "__pycache__"
         if pycache_dir.exists():
             import shutil
+
             try:
                 shutil.rmtree(pycache_dir)
                 LOG.debug("已清除插件 %s 的字节码缓存", plugin_name)
             except Exception as e:
                 LOG.warning("清除字节码缓存失败: %s", e)
-        
+
         original_sys_path = sys.path.copy()
         created_pkg = False
         created_module = False
@@ -250,22 +284,22 @@ class _ModuleImporter:
             sys.path = original_sys_path
 
     def _get_plugin_pkg_name(self, name: str) -> str:
-        # 使用 sanitized 名称生成包名，若未记录则退回到原始 name（兼容老数据）
+        # 使用 sanitized 名称生成包名，若未记录则退回到原始 name
         sanitized = self._sanitized_names.get(name, name)
         return f"ncatbot_plugin.{sanitized}"
 
     def _get_plugin_entry_stem(self, name: str) -> str:
         """手滑把 .py 漏了也无所谓了"""
-        filename: str = self.get_plugin_manifest(name).get("main")
+        manifest = self.get_plugin_manifest(name)
+        if manifest is None:
+            raise ValueError(f"插件 {name} 的 manifest 未找到")
+        filename: str = manifest.get("main", "")
         if filename.endswith(".py"):
             return filename[:-3]
         return filename
 
     def _get_plugin_entry_file(self, name: str) -> str:
-        # 使用插件目录作为基准来查找入口文件，返回字符串形式以兼容现有调用处
-        return str(
-            self._get_plugin_dir(name) / (self._get_plugin_entry_stem(name) + ".py")
-        )
+        return str(self._get_plugin_dir(name) / (self._get_plugin_entry_stem(name) + ".py"))
 
     def _get_plugin_main_module_name(self, name: str) -> str:
         return f"{self._get_plugin_pkg_name(name)}.{self._get_plugin_entry_stem(name)}"
@@ -277,71 +311,9 @@ class _ModuleImporter:
         """
         return self._manifests.get(plugin_name)
 
-    def index_external_plugin(self, plugin_dir: Path) -> Optional[str]:
-        """索引一个外部插件文件夹，读取元数据并写入索引
-        
-        Args:
-            plugin_dir: 插件文件夹的绝对路径
-            
-        Returns:
-            插件名称，如果索引失败则返回 None
-        """
-        plugin_dir = Path(plugin_dir).resolve()
-        manifest_path = plugin_dir / "manifest.toml"
-        
-        if not plugin_dir.is_dir() or not manifest_path.exists():
-            LOG.warning("插件目录无效或缺少 manifest.toml: %s", plugin_dir)
-            return None
-            
-        try:
-            manifest = toml.load(manifest_path)
-            
-            # 基本校验
-            if (
-                not manifest.get("name")
-                or not manifest.get("version")
-                or not manifest.get("main")
-            ):
-                LOG.warning("插件 %s 的 manifest 缺少必填字段", plugin_dir)
-                return None
-                
-            plugin_name = manifest.get("name")
-            main_field = manifest.get("main")
-            
-            if not self._ensure_entry(plugin_dir, main_field):
-                return None
-                
-            if plugin_name in self._plugin_folders:
-                LOG.warning("插件 %s 已存在，跳过索引", plugin_name)
-                return None
-            
-            # 对于外部插件，使用绝对路径作为文件夹标识
-            self._plugin_folders[plugin_name] = str(plugin_dir)
-            self._manifests[plugin_name] = manifest
-            self._ensure_sanitized(plugin_name)
-            
-            LOG.info("已索引外部插件: %s (路径: %s)", plugin_name, plugin_dir)
-            return plugin_name
-            
-        except Exception:
-            LOG.exception("索引外部插件失败: %s", plugin_dir)
-            return None
-
     def _get_plugin_dir(self, name: str) -> Path:
-        """获取插件目录路径
-        
-        支持两种情况：
-        1. 相对路径（标准插件）：基于 self.directory
-        2. 绝对路径（外部插件）：直接使用存储的路径
-        """
-        folder = self._plugin_folders[name]
-        folder_path = Path(folder)
-        
-        # 如果是绝对路径，直接返回
-        if folder_path.is_absolute():
-            return folder_path
-        # 否则是相对路径，基于 directory
-        return Path(self.directory) / folder
+        """获取插件目录路径"""
+        return self._plugin_folders[name]
 
     def _maybe_install_deps(self, plugin_path: Path) -> None:
         if not _AUTO_INSTALL:
