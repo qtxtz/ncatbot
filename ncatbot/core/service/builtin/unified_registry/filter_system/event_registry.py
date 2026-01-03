@@ -22,6 +22,7 @@ class EventRegistry:
         # handler -> plugin_name 映射
         self._notice_handlers: Dict[Callable, str] = {}
         self._request_handlers: Dict[Callable, str] = {}
+        self._meta_handlers: Dict[Callable, str] = {}
 
     @classmethod
     def set_current_plugin_name(cls, plugin_name: str):
@@ -46,6 +47,16 @@ class EventRegistry:
     def request_handlers(self) -> List[Callable]:
         """获取所有 request 处理器"""
         return list(self._request_handlers.keys())
+
+    @property
+    def meta_handlers(self) -> List[Callable]:
+        """获取所有元事件处理器"""
+        return list(self._meta_handlers.keys())
+
+    def meta_handler(self, func: Callable) -> Callable:
+        """注册元事件处理器"""
+        self._meta_handlers[func] = self._current_plugin_name
+        return func
 
     def revoke_plugin(self, plugin_name: str) -> None:
         """撤销指定插件的所有处理器"""
