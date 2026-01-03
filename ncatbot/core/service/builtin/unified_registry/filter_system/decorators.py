@@ -35,6 +35,9 @@ __all__ = [
     "on_group_increase",
     "on_group_decrease",
     "on_group_request",
+    "on_startup",
+    "on_heartbeat",
+    "on_shutdown",
     # 过滤器装饰器
     "filter",
     "admin_filter",
@@ -82,6 +85,11 @@ def on_request(func: Callable) -> Callable:
 def on_notice(func: Callable) -> Callable:
     """通知事件装饰器"""
     return event_registry.notice_handler(func)
+
+
+def on_meta(func: Callable) -> Callable:
+    """元事件装饰器"""
+    return event_registry.meta_handler(func)
 
 
 def on_group_poke(func: Callable) -> Callable:
@@ -153,6 +161,40 @@ def on_group_request(func: Callable) -> Callable:
         GroupFilter(), CustomFilter(request_filter, "group_request_filter")
     )(func)
     return on_request(decorated_func)
+
+
+def on_startup(func: Callable) -> Callable:
+    """启动事件装饰器"""
+    from ncatbot.core.event.events import MetaEvent
+    from ncatbot.core.event.enums import MetaEventType
+
+    def startup_filter(event) -> bool:
+        return (
+            isinstance(event, MetaEvent)
+            and event.meta_event_type == MetaEventType.LIFECYCLE
+            and event.sub_type == "connect"
+        )
+
+    decorated_func = filter(CustomFilter(startup_filter, "startup_filter"))(func)
+    return on_meta(decorated_func)
+
+
+def on_heartbeat(func: Callable) -> Callable:
+    from ncatbot.core.event.events import MetaEvent
+    from ncatbot.core.event.enums import MetaEventType
+
+    def heartbeat_filter(event) -> bool:
+        return (
+            isinstance(event, MetaEvent)
+            and event.meta_event_type == MetaEventType.HEARTBEAT
+        )
+
+    decorated_func = filter(CustomFilter(heartbeat_filter, "heartbeat_filter"))(func)
+    return on_meta(decorated_func)
+
+
+def on_shutdown(func: Callable) -> Callable:
+    raise NotImplementedError("on_shutdown is not implemented")
 
 
 # ==========================================================================

@@ -16,7 +16,6 @@ class MessageRouter(BaseService):
     改进点：
     1. 移除 threading.Lock 和 queue.Queue，消除线程阻塞风险。
     2. 使用 asyncio.Future 实现高效的请求-响应匹配。
-    3. 移除 asyncio.to_thread，大幅降低并发开销。
     """
 
     name = "message_router"

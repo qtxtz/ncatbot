@@ -239,7 +239,7 @@ class TestEventBusHandlerTypes:
 
     @pytest.mark.asyncio
     async def test_sync_handler_execution(self, event_bus):
-        """同步处理器正确执行（to_thread）"""
+        """同步处理器正确执行"""
         result = []
 
         def sync_handler(event):

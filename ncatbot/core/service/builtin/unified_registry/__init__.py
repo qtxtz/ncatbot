@@ -21,4 +21,4 @@ __all__ = [
 
 from . import filter_system
 
-__all__.extend(getattr(filter_system, "__all__", []))  # type: ignore
+__all__.extend(getattr(filter_system.decorators, "__all__", []))  # type: ignore
