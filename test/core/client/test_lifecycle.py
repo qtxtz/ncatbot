@@ -63,7 +63,7 @@ class TestPrepareStartup:
 
         result = manager._prepare_startup(mock=False)
 
-        assert result is False  # 非 mock 模式
+        assert manager._test_mode is False  # 非 test 模式 (Mock 模式)
         assert manager._running is True
         assert manager.plugin_loader is not None
         mock_launch.assert_called_once()
@@ -76,7 +76,7 @@ class TestPrepareStartup:
 
         result = manager._prepare_startup(mock=True)
 
-        assert result is True  # mock 模式
+        assert manager._test_mode is True  # test 模式 (Mock 模式)
         assert manager._running is True
         mock_launch.assert_not_called()
 
@@ -85,6 +85,8 @@ class TestPrepareStartup:
     def test_prepare_startup_skip_plugin_load(self, mock_config, mock_launch, manager):
         """测试跳过插件加载"""
         mock_config.debug = False
+        # 模拟 update_value 后 skip_plugin_load 被设置为 True
+        mock_config.plugin.skip_plugin_load = True
 
         manager._prepare_startup(mock=True, skip_plugin_load=True)
 

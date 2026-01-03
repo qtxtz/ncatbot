@@ -150,7 +150,7 @@ class TestEventBusTimeout:
     async def test_handler_timeout(self, event_bus_short_timeout):
         """处理器超时触发 HandlerTimeoutError"""
         async def slow_handler(event):
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.12)
             return "done"
         
         event_bus_short_timeout.subscribe("test.event", slow_handler)
@@ -165,10 +165,10 @@ class TestEventBusTimeout:
     async def test_handler_custom_timeout(self, event_bus):
         """自定义超时时间"""
         async def slow_handler(event):
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(0.02)
             return "done"
         
-        event_bus.subscribe("test.event", slow_handler, timeout=0.1)
+        event_bus.subscribe("test.event", slow_handler, timeout=0.01)
         
         event = NcatBotEvent("test.event", {})
         await event_bus.publish(event)

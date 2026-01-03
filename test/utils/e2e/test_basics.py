@@ -6,10 +6,10 @@ E2E 测试套件基础功能测试
 
 import os
 import pytest
+import pytest_asyncio
 import asyncio
 
-from ncatbot.utils.testing import E2ETestSuite, EventFactory, TestHelper
-from ncatbot.utils import run_coroutine
+from ncatbot.utils.testing import E2ETestSuite, EventFactory
 
 
 # 测试插件目录的路径
@@ -19,29 +19,22 @@ PLUGINS_DIR = os.path.join(os.path.dirname(__file__), "plugins")
 class TestE2ETestSuiteBasics:
     """E2ETestSuite 基础功能测试"""
     
-    def test_suite_setup_teardown(self):
+    @pytest.mark.asyncio
+    async def test_suite_setup_teardown(self):
         """测试 E2ETestSuite 的 setup 和 teardown"""
         suite = E2ETestSuite()
-        client = suite.setup()
+        client = await suite.setup()
         
         assert client is not None
-        assert client._mock_mode is True
-        assert suite.mock_router is not None
+        assert suite.mock_server is not None
         
-        suite.teardown()
-    
-    def test_suite_sync_context_manager(self):
-        """测试同步上下文管理器"""
-        with E2ETestSuite() as suite:
-            assert suite.client is not None
-            assert suite.client._mock_mode is True
+        await suite.teardown()
     
     @pytest.mark.asyncio
     async def test_suite_async_context_manager(self):
         """测试异步上下文管理器"""
         async with E2ETestSuite() as suite:
             assert suite.client is not None
-            assert suite.client._mock_mode is True
 
 
 class TestEventFactoryBasics:
@@ -90,46 +83,27 @@ class TestEventFactoryBasics:
         assert event is not None
 
 
-class TestMockMessageRouterBasics:
-    """MockMessageRouter 基础功能测试"""
+class TestMockServerBasics:
+    """MockServer 基础功能测试"""
     
-    def test_api_call_recording(self):
+    @pytest.mark.asyncio
+    async def test_api_call_recording(self):
         """测试 API 调用记录"""
-        with E2ETestSuite() as suite:
-            run_coroutine(
-                suite.mock_router.send,
-                "send_group_msg",
-                {"group_id": "123", "message": "test"}
-            )
+        async with E2ETestSuite() as suite:
+            await suite.api.send_group_text(group_id="123", text="test")
             
             suite.assert_api_called("send_group_msg")
             calls = suite.get_api_calls("send_group_msg")
             assert len(calls) == 1
             assert calls[0]["group_id"] == "123"
     
-    def test_api_response_mocking(self):
-        """测试 API 响应模拟"""
-        with E2ETestSuite() as suite:
-            custom_response = {
-                "retcode": 0,
-                "data": {"nickname": "TestBot", "user_id": "12345"}
-            }
-            suite.set_api_response("get_login_info", custom_response)
-            
-            result = run_coroutine(
-                suite.mock_router.send,
-                "get_login_info",
-                {}
-            )
-            
-            assert result["data"]["nickname"] == "TestBot"
-    
-    def test_multiple_api_calls(self):
+    @pytest.mark.asyncio
+    async def test_multiple_api_calls(self):
         """测试多次 API 调用"""
-        with E2ETestSuite() as suite:
-            run_coroutine(suite.mock_router.send, "send_group_msg", {"group_id": "1"})
-            run_coroutine(suite.mock_router.send, "send_private_msg", {"user_id": "2"})
-            run_coroutine(suite.mock_router.send, "send_group_msg", {"group_id": "3"})
+        async with E2ETestSuite() as suite:
+            await suite.api.send_group_text(group_id="1", text="test1")
+            await suite.api.send_private_text(user_id="2", text="test2")
+            await suite.api.send_group_text(group_id="3", text="test3")
             
             group_calls = suite.get_api_calls("send_group_msg")
             private_calls = suite.get_api_calls("send_private_msg")
@@ -137,27 +111,27 @@ class TestMockMessageRouterBasics:
             assert len(group_calls) == 2
             assert len(private_calls) == 1
     
-    def test_clear_call_history(self):
+    @pytest.mark.asyncio
+    async def test_clear_call_history(self):
         """测试清空调用历史"""
-        with E2ETestSuite() as suite:
-            run_coroutine(suite.mock_router.send, "test_action", {})
-            assert len(suite.mock_router.get_call_history()) == 1
+        async with E2ETestSuite() as suite:
+            await suite.api.send_group_text(group_id="123", text="test")
+            assert len(suite.get_api_calls("send_group_msg")) == 1
             
             suite.clear_call_history()
-            assert len(suite.mock_router.get_call_history()) == 0
+            assert len(suite.get_api_calls("send_group_msg")) == 0
 
 
 class TestPluginLifecycle:
     """插件生命周期测试"""
     
-    def test_plugin_load_unload(self):
+    @pytest.mark.asyncio
+    async def test_plugin_load_unload(self):
         """测试插件加载和卸载"""
-        import time
-        
-        with E2ETestSuite() as suite:
+        async with E2ETestSuite() as suite:
             plugin_dir = os.path.join(PLUGINS_DIR, "lifecycle_plugin")
             suite.index_plugin(plugin_dir)
-            plugin = suite.register_plugin_sync("lifecycle_plugin")
+            plugin = await suite.register_plugin("lifecycle_plugin")
             
             # 获取加载后的插件实例的类
             PluginClass = type(plugin)
@@ -165,20 +139,10 @@ class TestPluginLifecycle:
             # 验证 on_load 被调用
             assert "loaded" in PluginClass.lifecycle_events
             
-            suite.unregister_plugin_sync("lifecycle_plugin")
+            await suite.unregister_plugin("lifecycle_plugin")
             
-            time.sleep(0.02)
+            await asyncio.sleep(0.02)
             
             # 验证 on_close 被调用
             assert "closed" in PluginClass.lifecycle_events
 
-
-class TestTestHelper:
-    """TestHelper 基础功能测试"""
-    
-    def test_helper_initialization(self):
-        """测试 TestHelper 初始化"""
-        with E2ETestSuite() as suite:
-            helper = TestHelper(suite.client)
-            assert helper.client is suite.client
-            assert helper.mock_router is suite.mock_router

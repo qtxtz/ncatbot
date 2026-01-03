@@ -4,6 +4,7 @@
 """
 
 import pytest
+import pytest_asyncio
 import sys
 from pathlib import Path
 
@@ -27,93 +28,90 @@ def _cleanup_modules():
 class TestCompleteFlow:
     """完整流程测试"""
 
-    def test_full_test_flow(self):
+    @pytest.mark.asyncio
+    async def test_full_test_flow(self):
         """测试完整的端到端测试流程"""
         _cleanup_modules()
         
         # 1. 初始化测试套件
         suite = E2ETestSuite()
-        suite.setup()
+        await suite.setup()
         
         try:
             # 2. 注册插件
             suite.index_plugin(str(PLUGIN_DIR))
-            suite.register_plugin_sync("hello_plugin")
+            await suite.register_plugin("hello_plugin")
             
-            # 3. 设置 Mock 响应
-            suite.set_api_response(
-                "get_user_info",
-                {"retcode": 0, "data": {"nickname": "测试用户", "level": 10}},
-            )
+            # 3. 发送测试消息
+            await suite.inject_private_message("/hello")
             
-            # 4. 发送测试消息
-            suite.inject_private_message_sync("/hello")
-            
-            # 5. 验证回复
+            # 4. 验证回复
             suite.assert_reply_sent("你好")
             
-            # 6. 检查 API 调用
+            # 5. 检查 API 调用
             calls = suite.get_api_calls("send_private_msg")
             assert len(calls) > 0
             
-            # 7. 清理历史
+            # 6. 清理历史
             suite.clear_call_history()
             calls_after_clear = suite.get_api_calls("send_private_msg")
             assert len(calls_after_clear) == 0
             
         finally:
-            # 8. 清理
-            suite.teardown()
+            # 7. 清理
+            await suite.teardown()
             _cleanup_modules()
 
-    def test_context_manager_flow(self):
+    @pytest.mark.asyncio
+    async def test_context_manager_flow(self):
         """测试上下文管理器方式的测试流程"""
         _cleanup_modules()
         
-        with E2ETestSuite() as suite:
+        async with E2ETestSuite() as suite:
             suite.index_plugin(str(PLUGIN_DIR))
-            suite.register_plugin_sync("hello_plugin")
+            await suite.register_plugin("hello_plugin")
             
-            suite.inject_private_message_sync("/hello")
+            await suite.inject_private_message("/hello")
             suite.assert_reply_sent("你好")
         
         _cleanup_modules()
 
-    def test_multiple_commands(self):
+    @pytest.mark.asyncio
+    async def test_multiple_commands(self):
         """测试多个命令的连续执行"""
         _cleanup_modules()
         
-        with E2ETestSuite() as suite:
+        async with E2ETestSuite() as suite:
             suite.index_plugin(str(PLUGIN_DIR))
-            suite.register_plugin_sync("hello_plugin")
+            await suite.register_plugin("hello_plugin")
             
             # 测试 hello 命令
-            suite.inject_private_message_sync("/hello")
+            await suite.inject_private_message("/hello")
             suite.assert_reply_sent("你好")
             
             # 清理后测试 echo 命令
             suite.clear_call_history()
-            suite.inject_private_message_sync("/echo 测试文本")
+            await suite.inject_private_message("/echo 测试文本")
             suite.assert_reply_sent("测试文本")
             
             # 测试带选项的 echo 命令
             suite.clear_call_history()
-            suite.inject_private_message_sync("/echo 详细测试 -v")
+            await suite.inject_private_message("/echo 详细测试 -v")
             suite.assert_reply_sent("verbose")
         
         _cleanup_modules()
 
-    def test_alias_command(self):
+    @pytest.mark.asyncio
+    async def test_alias_command(self):
         """测试命令别名"""
         _cleanup_modules()
         
-        with E2ETestSuite() as suite:
+        async with E2ETestSuite() as suite:
             suite.index_plugin(str(PLUGIN_DIR))
-            suite.register_plugin_sync("hello_plugin")
+            await suite.register_plugin("hello_plugin")
             
             # 使用别名 hi 代替 hello
-            suite.inject_private_message_sync("/hi")
+            await suite.inject_private_message("/hi")
             suite.assert_reply_sent("你好")
         
         _cleanup_modules()
-

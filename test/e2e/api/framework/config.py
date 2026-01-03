@@ -66,12 +66,12 @@ class TestConfig:
     @property
     def test_group(self) -> Optional[int]:
         """获取测试群号"""
-        return self.targets.get("test_group")
+        return self.targets.get("111222333")
 
     @property
     def test_user(self) -> Optional[int]:
         """获取测试用户 QQ 号"""
-        return self.targets.get("test_user")
+        return self.targets.get("444444444")
 
     @property
     def test_admin_group(self) -> Optional[int]:

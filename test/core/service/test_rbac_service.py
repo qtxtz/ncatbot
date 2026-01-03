@@ -191,11 +191,11 @@ class TestPermissionInheritance:
         rbac_service.set_role_inheritance("admin", "basic")
         
         # 创建管理员用户并分配角色
-        rbac_service.assign_role("user", "admin_user", "admin")
+        rbac_service.assign_role("user", "111111111", "admin")
         
         # 管理员应该有基础权限（继承）和管理权限
-        assert rbac_service.check("admin_user", "basic.read")
-        assert rbac_service.check("admin_user", "admin.write")
+        assert rbac_service.check("111111111", "basic.read")
+        assert rbac_service.check("111111111", "admin.write")
     
     def test_circular_inheritance_rejected(self, rbac_service):
         """测试循环继承被拒绝"""
