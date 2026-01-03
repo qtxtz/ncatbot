@@ -19,6 +19,7 @@ from ncatbot.core.service.builtin import (
     PluginConfigService,
     FileWatcherService,
     PluginDataService,
+    TimeTaskService,
 )
 
 from .event_bus import EventBus
@@ -92,6 +93,7 @@ class BotClient(EventRegistry, LifecycleManager):
         self.services.register(UnifiedRegistryService)
         self.services.register(FileWatcherService)
         self.services.register(PluginDataService)
+        self.services.register(TimeTaskService)
 
         # API（延迟绑定 send 回调，在服务加载后绑定）
         self.api: BotAPI = None  # 将在 _setup_api 中初始化

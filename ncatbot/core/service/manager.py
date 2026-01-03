@@ -17,6 +17,7 @@ if TYPE_CHECKING:
         UnifiedRegistryService,
         FileWatcherService,
         PluginDataService,
+        TimeTaskService,
     )
     from ncatbot.core.client import BotClient
     from ncatbot.plugin_system.loader import PluginLoader
@@ -122,6 +123,11 @@ class ServiceManager:
     def plugin_data(self) -> "PluginDataService":
         """插件数据持久化服务"""
         return self._services.get("plugin_data")  # type: ignore
+
+    @property
+    def time_task(self) -> "TimeTaskService":
+        """定时任务服务"""
+        return self._services.get("time_task")  # type: ignore
 
     # -------------------------------------------------------------------------
     # 服务管理方法

@@ -6,11 +6,12 @@ NapCat 服务管理模块
 
 import json
 import time
+import asyncio
 from typing import Optional
 
 import websockets
 
-from ....utils import NcatBotError, get_log, ncatbot_config, run_coroutine
+from ....utils import NcatBotError, get_log, ncatbot_config
 from .auth import AuthHandler, LoginStatus
 from .config_manager import ConfigManager
 from .platform import PlatformOps, UnsupportedPlatformError
@@ -90,7 +91,7 @@ class NapCatService:
             服务是否正常
         """
         if timeout == 0:
-            result = run_coroutine(self._test_websocket_async, show_info)
+            result = asyncio.run(self._test_websocket_async, show_info)
             return bool(result)
 
         expire_time = time.time() + timeout
