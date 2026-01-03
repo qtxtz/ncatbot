@@ -2,8 +2,6 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 
 class TestShowCommandHelp:
     """show_command_help 命令测试"""
@@ -69,10 +67,9 @@ class TestShowMeta:
         mock_dist = MagicMock()
         mock_dist.version = "1.0.0"
 
-        with patch(
-            "ncatbot.cli.commands.info_commands.config", mock_config
-        ), patch(
-            "pkg_resources.get_distribution", return_value=mock_dist
+        with (
+            patch("ncatbot.cli.commands.info_commands.config", mock_config),
+            patch("pkg_resources.get_distribution", return_value=mock_dist),
         ):
             from ncatbot.cli.commands.info_commands import show_meta
 
@@ -84,11 +81,12 @@ class TestShowMeta:
 
     def test_show_meta_error(self, mock_config, capsys):
         """测试获取版本失败"""
-        with patch(
-            "ncatbot.cli.commands.info_commands.config", mock_config
-        ), patch(
-            "pkg_resources.get_distribution",
-            side_effect=Exception("Not found"),
+        with (
+            patch("ncatbot.cli.commands.info_commands.config", mock_config),
+            patch(
+                "pkg_resources.get_distribution",
+                side_effect=Exception("Not found"),
+            ),
         ):
             from ncatbot.cli.commands.info_commands import show_meta
 
@@ -127,4 +125,3 @@ class TestShowCategories:
 
         captured = capsys.readouterr()
         assert "未知" in captured.out
-

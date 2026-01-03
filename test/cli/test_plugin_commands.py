@@ -1,10 +1,6 @@
 """插件命令单元测试"""
 
-import shutil
-from pathlib import Path
 from unittest.mock import patch
-
-import pytest
 
 
 class TestCreatePluginTemplate:
@@ -15,7 +11,9 @@ class TestCreatePluginTemplate:
         with patch("ncatbot.cli.commands.plugin_commands.config", mock_config):
             from ncatbot.cli.commands.plugin_commands import create_plugin_template
 
-            create_plugin_template("test_plugin", author="TestAuthor", non_interactive=True)
+            create_plugin_template(
+                "test_plugin", author="TestAuthor", non_interactive=True
+            )
 
             plugin_dir = temp_plugins_dir / "test_plugin"
             assert plugin_dir.exists()
@@ -56,14 +54,17 @@ class TestCreatePluginTemplate:
 
             assert (temp_plugins_dir / "my_cool_plugin").exists()
 
-    def test_create_plugin_overwrite_cancel(self, mock_config, temp_plugins_dir, capsys):
+    def test_create_plugin_overwrite_cancel(
+        self, mock_config, temp_plugins_dir, capsys
+    ):
         """测试覆盖取消"""
         # 先创建一个插件
         (temp_plugins_dir / "existing").mkdir()
 
-        with patch(
-            "ncatbot.cli.commands.plugin_commands.config", mock_config
-        ), patch("builtins.input", return_value="n"):
+        with (
+            patch("ncatbot.cli.commands.plugin_commands.config", mock_config),
+            patch("builtins.input", return_value="n"),
+        ):
             from ncatbot.cli.commands.plugin_commands import create_plugin_template
 
             create_plugin_template("existing", non_interactive=False)
@@ -78,9 +79,10 @@ class TestCreatePluginTemplate:
         existing_dir.mkdir()
         (existing_dir / "old_file.txt").write_text("old content")
 
-        with patch(
-            "ncatbot.cli.commands.plugin_commands.config", mock_config
-        ), patch("builtins.input", return_value="y"):
+        with (
+            patch("ncatbot.cli.commands.plugin_commands.config", mock_config),
+            patch("builtins.input", return_value="y"),
+        ):
             from ncatbot.cli.commands.plugin_commands import create_plugin_template
 
             create_plugin_template("existing", non_interactive=False)
@@ -96,9 +98,10 @@ class TestRemovePlugin:
 
     def test_remove_plugin(self, mock_config, sample_plugin, capsys):
         """测试删除插件"""
-        with patch(
-            "ncatbot.cli.commands.plugin_commands.config", mock_config
-        ), patch("builtins.input", return_value="y"):
+        with (
+            patch("ncatbot.cli.commands.plugin_commands.config", mock_config),
+            patch("builtins.input", return_value="y"),
+        ):
             from ncatbot.cli.commands.plugin_commands import remove_plugin
 
             remove_plugin("sample_plugin")
@@ -119,9 +122,10 @@ class TestRemovePlugin:
 
     def test_remove_plugin_cancel(self, mock_config, sample_plugin, capsys):
         """测试取消删除"""
-        with patch(
-            "ncatbot.cli.commands.plugin_commands.config", mock_config
-        ), patch("builtins.input", return_value="n"):
+        with (
+            patch("ncatbot.cli.commands.plugin_commands.config", mock_config),
+            patch("builtins.input", return_value="n"),
+        ):
             from ncatbot.cli.commands.plugin_commands import remove_plugin
 
             remove_plugin("sample_plugin")
@@ -181,4 +185,3 @@ class TestListPlugins:
 
             captured = capsys.readouterr()
             assert "不存在" in captured.out
-

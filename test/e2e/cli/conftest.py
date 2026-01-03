@@ -1,10 +1,5 @@
 """CLI 端到端测试配置"""
 
-import os
-import shutil
-import tempfile
-from pathlib import Path
-
 import pytest
 
 from ncatbot.utils import ncatbot_config
@@ -45,22 +40,22 @@ def sample_plugin_in_env(cli_test_env):
     # 创建 manifest.toml
     manifest = plugin_dir / "manifest.toml"
     manifest.write_text(
-        '''name = "sample_plugin"
+        """name = "sample_plugin"
 version = "1.0.0"
 author = "Test Author"
 description = "A sample plugin for testing"
 main = "plugin.py"
-'''
+"""
     )
 
     # 创建 plugin.py
     plugin_py = plugin_dir / "plugin.py"
     plugin_py.write_text(
-        '''from ncatbot.plugin_system import NcatBotPlugin
+        """from ncatbot.plugin_system import NcatBotPlugin
 
 class SamplePlugin(NcatBotPlugin):
     pass
-'''
+"""
     )
 
     # 创建 __init__.py
@@ -68,4 +63,3 @@ class SamplePlugin(NcatBotPlugin):
     init_py.write_text("from .plugin import SamplePlugin\n")
 
     return plugin_dir
-

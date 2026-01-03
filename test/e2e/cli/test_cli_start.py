@@ -5,10 +5,6 @@
 """
 
 import asyncio
-import signal
-import io
-import sys
-from contextlib import redirect_stdout
 
 import pytest
 import pytest_asyncio
@@ -43,7 +39,6 @@ class TestStartCommand:
     @pytest.mark.asyncio
     async def test_bot_client_connects_to_server(self, test_suite: E2ETestSuite):
         """测试 BotClient 连接到服务器"""
-        client = test_suite.client
 
         # 验证 MockServer 正在运行
         assert test_suite.mock_server is not None
@@ -112,4 +107,3 @@ class TestStartErrorHandling:
             # 恢复原始配置
             ncatbot_config.napcat.ws_uri = original_uri
             BotClient.reset_singleton()
-

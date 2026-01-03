@@ -34,7 +34,9 @@ class TestParseArgs:
 
     def test_parse_args_with_args(self):
         """测试带参数的命令"""
-        with patch.object(sys, "argv", ["ncatbot", "-c", "install", "-a", "plugin1", "plugin2"]):
+        with patch.object(
+            sys, "argv", ["ncatbot", "-c", "install", "-a", "plugin1", "plugin2"]
+        ):
             from ncatbot.cli.main import parse_args
 
             args = parse_args()
@@ -137,9 +139,10 @@ class TestHandleCommandMode:
         mock_args.command = "error_cmd"
         mock_args.args = []
 
-        with patch(
-            "ncatbot.cli.main.registry"
-        ) as mock_registry, pytest.raises(SystemExit):
+        with (
+            patch("ncatbot.cli.main.registry") as mock_registry,
+            pytest.raises(SystemExit),
+        ):
             mock_registry.execute.side_effect = Exception("Command failed")
 
             from ncatbot.cli.main import handle_command_mode
@@ -154,9 +157,10 @@ class TestHandleInteractiveMode:
         """测试交互模式退出"""
         from ncatbot.cli.utils import CLIExit
 
-        with patch("builtins.input", side_effect=["q"]), patch(
-            "ncatbot.cli.main.registry"
-        ) as mock_registry:
+        with (
+            patch("builtins.input", side_effect=["q"]),
+            patch("ncatbot.cli.main.registry") as mock_registry,
+        ):
             mock_registry.execute.side_effect = CLIExit()
 
             from ncatbot.cli.main import handle_interactive_mode
@@ -177,9 +181,10 @@ class TestHandleInteractiveMode:
         """测试空输入"""
         from ncatbot.cli.utils import CLIExit
 
-        with patch("builtins.input", side_effect=["", "q"]), patch(
-            "ncatbot.cli.main.registry"
-        ) as mock_registry:
+        with (
+            patch("builtins.input", side_effect=["", "q"]),
+            patch("ncatbot.cli.main.registry") as mock_registry,
+        ):
             # 第一次空输入不调用 execute，第二次 q 调用并抛出 CLIExit
             mock_registry.execute.side_effect = CLIExit()
 
@@ -199,9 +204,11 @@ class TestMain:
         mock_dist = MagicMock()
         mock_dist.version = "1.0.0"
 
-        with patch.object(sys, "argv", ["ncatbot", "--version"]), patch(
-            "pkg_resources.get_distribution", return_value=mock_dist
-        ), patch("ncatbot.cli.main.config") as mock_config:
+        with (
+            patch.object(sys, "argv", ["ncatbot", "--version"]),
+            patch("pkg_resources.get_distribution", return_value=mock_dist),
+            patch("ncatbot.cli.main.config") as mock_config,
+        ):
             mock_config.bt_uin = "123456789"
 
             from ncatbot.cli.main import main
@@ -213,10 +220,10 @@ class TestMain:
 
     def test_main_invalid_work_dir(self, capsys):
         """测试无效工作目录"""
-        with patch.object(
-            sys, "argv", ["ncatbot", "-w", "/nonexistent/path"]
-        ), pytest.raises(SystemExit):
+        with (
+            patch.object(sys, "argv", ["ncatbot", "-w", "/nonexistent/path"]),
+            pytest.raises(SystemExit),
+        ):
             from ncatbot.cli.main import main
 
             main()
-

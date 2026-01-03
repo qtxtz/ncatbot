@@ -5,10 +5,8 @@
 
 import io
 import sys
-from contextlib import redirect_stdout, redirect_stderr
-from pathlib import Path
+from contextlib import redirect_stdout
 
-import pytest
 
 from ncatbot.cli.commands.registry import registry
 
@@ -361,7 +359,4 @@ class TestCommandRegistration:
     def test_all_commands_visible_in_help(self):
         """测试所有命令都在帮助中可见"""
         for name, cmd in registry.commands.items():
-            assert cmd.show_in_help is True, (
-                f"命令 '{name}' 应该在帮助中可见"
-            )
-
+            assert cmd.show_in_help is True, f"命令 '{name}' 应该在帮助中可见"

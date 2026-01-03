@@ -1,9 +1,6 @@
 """CLI 测试共享 fixtures"""
 
-import os
-import tempfile
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -47,22 +44,22 @@ def sample_plugin(temp_plugins_dir):
     # 创建 manifest.toml
     manifest = plugin_dir / "manifest.toml"
     manifest.write_text(
-        '''name = "sample_plugin"
+        """name = "sample_plugin"
 version = "1.0.0"
 author = "Test Author"
 description = "A sample plugin for testing"
 main = "plugin.py"
-'''
+"""
     )
 
     # 创建 plugin.py
     plugin_py = plugin_dir / "plugin.py"
     plugin_py.write_text(
-        '''from ncatbot.plugin_system import NcatBotPlugin
+        """from ncatbot.plugin_system import NcatBotPlugin
 
 class SamplePlugin(NcatBotPlugin):
     pass
-'''
+"""
     )
 
     # 创建 __init__.py
@@ -78,4 +75,3 @@ def cli_registry():
     from ncatbot.cli.commands.registry import CommandRegistry
 
     return CommandRegistry()
-

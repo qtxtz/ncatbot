@@ -1,7 +1,5 @@
 """命令注册表单元测试"""
 
-import pytest
-
 from ncatbot.cli.commands.registry import Command, CommandRegistry
 
 
@@ -204,11 +202,15 @@ class TestCommandRegistry:
         """测试按分类获取帮助"""
         registry = CommandRegistry()
 
-        @registry.register(name="cmd1", description="命令1", usage="cmd1", category="sys")
+        @registry.register(
+            name="cmd1", description="命令1", usage="cmd1", category="sys"
+        )
         def cmd1():
             pass
 
-        @registry.register(name="cmd2", description="命令2", usage="cmd2", category="plg")
+        @registry.register(
+            name="cmd2", description="命令2", usage="cmd2", category="plg"
+        )
         def cmd2():
             pass
 
@@ -222,4 +224,3 @@ class TestCommandRegistry:
 
         help_text = registry.get_help("unknown")
         assert "未知的分类" in help_text
-

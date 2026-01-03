@@ -1,8 +1,6 @@
 """配置命令单元测试"""
 
-from unittest.mock import MagicMock, patch
-
-import pytest
+from unittest.mock import patch
 
 
 class TestSetQQ:
@@ -10,9 +8,10 @@ class TestSetQQ:
 
     def test_set_qq_with_argument(self, mock_config):
         """测试直接传入 QQ 号"""
-        with patch(
-            "ncatbot.cli.commands.config_commands.config", mock_config
-        ), patch("builtins.input", side_effect=["123456789"]):
+        with (
+            patch("ncatbot.cli.commands.config_commands.config", mock_config),
+            patch("builtins.input", side_effect=["123456789"]),
+        ):
             from ncatbot.cli.commands.config_commands import set_qq
 
             result = set_qq("123456789")
@@ -23,9 +22,10 @@ class TestSetQQ:
 
     def test_set_qq_interactive(self, mock_config):
         """测试交互式输入 QQ 号"""
-        with patch(
-            "ncatbot.cli.commands.config_commands.config", mock_config
-        ), patch("builtins.input", side_effect=["987654321", "987654321"]):
+        with (
+            patch("ncatbot.cli.commands.config_commands.config", mock_config),
+            patch("builtins.input", side_effect=["987654321", "987654321"]),
+        ):
             from ncatbot.cli.commands.config_commands import set_qq
 
             result = set_qq()
@@ -35,10 +35,9 @@ class TestSetQQ:
 
     def test_set_qq_invalid_input(self, mock_config, capsys):
         """测试非数字输入"""
-        with patch(
-            "ncatbot.cli.commands.config_commands.config", mock_config
-        ), patch(
-            "builtins.input", side_effect=["abc", "123456789", "123456789"]
+        with (
+            patch("ncatbot.cli.commands.config_commands.config", mock_config),
+            patch("builtins.input", side_effect=["abc", "123456789", "123456789"]),
         ):
             from ncatbot.cli.commands.config_commands import set_qq
 
@@ -50,11 +49,12 @@ class TestSetQQ:
 
     def test_set_qq_mismatch_confirmation(self, mock_config, capsys):
         """测试确认不匹配"""
-        with patch(
-            "ncatbot.cli.commands.config_commands.config", mock_config
-        ), patch(
-            "builtins.input",
-            side_effect=["123456789", "987654321", "123456789", "123456789"],
+        with (
+            patch("ncatbot.cli.commands.config_commands.config", mock_config),
+            patch(
+                "builtins.input",
+                side_effect=["123456789", "987654321", "123456789", "123456789"],
+            ),
         ):
             from ncatbot.cli.commands.config_commands import set_qq
 
@@ -81,9 +81,10 @@ class TestSetRoot:
 
     def test_set_root_interactive(self, mock_config):
         """测试交互式输入"""
-        with patch(
-            "ncatbot.cli.commands.config_commands.config", mock_config
-        ), patch("builtins.input", return_value="444555666"):
+        with (
+            patch("ncatbot.cli.commands.config_commands.config", mock_config),
+            patch("builtins.input", return_value="444555666"),
+        ):
             from ncatbot.cli.commands.config_commands import set_root
 
             result = set_root()
@@ -105,4 +106,3 @@ class TestShowConfig:
             assert "123456789" in captured.out  # bt_uin
             assert "987654321" in captured.out  # root
             assert "ws://localhost:3001" in captured.out
-
