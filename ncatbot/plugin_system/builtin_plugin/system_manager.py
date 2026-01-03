@@ -96,7 +96,7 @@ class SystemManager(NcatBotPlugin):
             LOG.info(f"已卸载插件: {plugin_name}")
             
             # 短暂延迟后重新加载
-            await asyncio.sleep(0.05)
+            await asyncio.sleep(0.02)
             
             # 加载插件
             await self._loader.load_plugin(plugin_name)

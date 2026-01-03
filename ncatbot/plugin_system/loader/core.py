@@ -37,7 +37,7 @@ class PluginLoader:
         self.plugins: Dict[str, BasePlugin] = {}
         self.event_bus = event_bus or EventBus()
         self._debug = debug
-        self._importer = _ModuleImporter(str(ncatbot_config.plugin.plugins_dir))
+        self._importer = _ModuleImporter()
         self._resolver = _DependencyResolver()
         
         # 服务管理器由外部注入
@@ -49,22 +49,6 @@ class PluginLoader:
     # -------------------- 对外 API --------------------
     def get_plugin_name_by_folder_name(self, folder_name: str) -> Optional[str]:
         return self._importer.get_plugin_name_by_folder(folder_name)
-
-    async def _init_plugin_in_thread(self, plugin: BasePlugin) -> None:
-        """在插件的线程中初始化"""
-
-        def _run_init():
-            # 在线程中创建新的事件循环
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            try:
-                # 运行初始化
-                loop.run_until_complete(plugin.__onload__())
-            finally:
-                loop.close()
-
-        # 在插件的线程池中执行初始化
-        await asyncio.get_event_loop().run_in_executor(plugin.thread_pool, _run_init)
 
     async def _load_plugin_by_class(
         self, plugin_class: Type[BasePlugin], name: str, **kwargs
@@ -86,7 +70,7 @@ class PluginLoader:
         # Ensure name is set (may be provided via manifest)
 
         self.plugins[name] = plugin
-        await self._init_plugin_in_thread(plugin)
+        await plugin.__onload__()
         return plugin
 
     async def load_builtin_plugins(self) -> None:
@@ -98,22 +82,17 @@ class PluginLoader:
             await self._load_plugin_by_class(plg, name)
         LOG.info("已加载内置插件数 [%d]", len(self.plugins))
 
-    async def load_plugins(self, **kwargs) -> None:
+    async def load_external_plugins(self, path: Path, **kwargs) -> None:
         """从目录批量加载。"""
-        path = Path(ncatbot_config.plugin.plugins_dir).resolve()
-        await self.load_builtin_plugins()
         if not path.exists():
             LOG.info("插件目录: %s 不存在……跳过加载插件", path)
             return
 
-        if ncatbot_config.plugin.skip_plugin_load:
-            LOG.info("跳过外部插件加载")
-            return
-
-        await self._pre_first_load()
+        self._service_manager.file_watcher.add_watch_dir(str(path))
+        await self._pre_first_load(path)
         LOG.info("从 %s 导入插件", path)
 
-        plugin_manifests = self._importer.get_plugin_manifests()
+        plugin_manifests = self._importer.get_plugin_manifests(path)
         self._resolver.build(plugin_manifests)
 
         load_order = self._resolver.resolve()
@@ -253,10 +232,10 @@ class PluginLoader:
         return None
 
     # ------------------- Hook ------------------------
-    async def _pre_first_load(self):
+    async def _pre_first_load(self, plugin_root: Path):
         # 第一次扫描插件目录前
-        interactive_migrate_plugins(ncatbot_config.plugin.plugins_dir)
-        self._importer.inspect_all()
+        interactive_migrate_plugins(plugin_root)
+        self._importer.index_all_plugins(plugin_root)
 
     async def _after_first_load(self):
         # 完成第一次加载操作后

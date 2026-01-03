@@ -113,10 +113,6 @@ class BasePlugin:
             "dependencies": self.dependencies,
             "config": self.config,
         }.copy()
-
-    @property
-    def thread_pool(self) -> ThreadPoolExecutor:
-        return None # type: ignore
     
     @property
     def rbac(self) -> "RBACService":

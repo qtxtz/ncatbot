@@ -21,8 +21,7 @@ _AUTO_INSTALL = config.auto_install_pip_pack
 class _ModuleImporter:
     """把「目录->模块对象」的细节收敛到这里，方便做单元测试。"""
 
-    def __init__(self, directory: str):
-        self.directory = Path(directory).resolve()
+    def __init__(self):
         # 存储每个插件解析出的 manifest 数据： name -> dict
         self._manifests: Dict[str, dict] = {}
         # 插件名 -> 插件目录的绝对路径
@@ -132,9 +131,9 @@ class _ModuleImporter:
             LOG.exception("解析 manifest 失败: %s", manifest_path)
             return None
 
-    def inspect_all(self) -> List[str]:
+    def index_all_plugins(self, plugin_root: Path) -> List[str]:
         """扫描并索引 directory 下所有合法的插件，返回插件名列表"""
-        for entry in self.directory.iterdir():
+        for entry in plugin_root.iterdir():
             self._index_single_plugin(entry)
         return list(self._plugin_folders.keys())
 
@@ -166,9 +165,9 @@ class _ModuleImporter:
                 return plugin_name
         return None
 
-    def get_plugin_manifests(self) -> Dict[str, Dict]:
+    def get_plugin_manifests(self, plugin_root: Path) -> Dict[str, Dict]:
         if not self._manifests:
-            self.inspect_all()
+            raise ValueError("未索引任何插件")
         return copy.copy(self._manifests)
 
     def unload_plugin_module(self, plugin_name: str) -> bool:
