@@ -135,9 +135,21 @@ class PluginConfigService(BaseService):
         return (old_value, value)
     
     def set_atomic(self, plugin_name: str, name: str, value: Any) -> tuple:
-        """设置配置值（原子操作，立即保存该项）"""
+        """设置配置值（原子操作，立即保存该项）
+        
+        注意：在异步环境中推荐使用 set_atomic_async 以确保保存完成。
+        """
         result = self.set(plugin_name, name, value)
         self._persistence.atomic_save_item(self._configs, plugin_name, name)
+        return result
+    
+    async def set_atomic_async(self, plugin_name: str, name: str, value: Any) -> tuple:
+        """设置配置值（异步原子操作，等待保存完成）
+        
+        推荐在异步环境中使用此方法，确保配置保存完成后再继续。
+        """
+        result = self.set(plugin_name, name, value)
+        await self._persistence.atomic_save_item_async(self._configs, plugin_name, name)
         return result
     
     def delete_config_item(self, plugin_name: str, name: str) -> None:
@@ -190,6 +202,15 @@ class PluginConfigService(BaseService):
         """批量设置插件配置（原子操作，只保存修改的配置项）"""
         self.set_plugin_config(plugin_name, config)
         self._persistence.atomic_save_items(self._configs, plugin_name, list(config.keys()))
+    
+    async def set_plugin_config_atomic_async(
+        self, plugin_name: str, config: Dict[str, Any]
+    ) -> None:
+        """批量设置插件配置（异步原子操作，等待保存完成）"""
+        self.set_plugin_config(plugin_name, config)
+        await self._persistence.atomic_save_items_async(
+            self._configs, plugin_name, list(config.keys())
+        )
     
     def delete_plugin_config(self, plugin_name: str) -> None:
         """删除插件的所有配置"""
