@@ -61,7 +61,7 @@ class SystemManager(NcatBotPlugin):
             timeout=900,
         )
         self.event_bus.subscribe(
-            "re:ncatbot.notice_event|ncatbot.request_event",
+            "re:ncatbot.notice_event|ncatbot.request_event|ncatbot.meta_event",
             self._handle_unified_registry_legacy,
             timeout=900,
         )

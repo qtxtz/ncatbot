@@ -137,6 +137,12 @@ class UnifiedRegistryService(BaseService):
             await self._executor.execute(func, event)
         return True
 
+    async def handle_meta_event(self, event: "BaseEvent") -> bool:
+        """处理元事件"""
+        for func in self.event_registry.meta_handlers:
+            await self._executor.execute(func, event)
+        return True
+
     async def handle_legacy_event(self, event_data: "BaseEvent") -> bool:
         """处理通知和请求事件（兼容旧 API）"""
         self.initialize_if_needed()
@@ -144,6 +150,8 @@ class UnifiedRegistryService(BaseService):
             return await self.handle_notice_event(event_data)
         elif event_data.post_type == "request":
             return await self.handle_request_event(event_data)
+        elif event_data.post_type == "meta":
+            return await self.handle_meta_event(event_data)
         return True
 
     # ==========================================================================
