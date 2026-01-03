@@ -66,7 +66,7 @@ class PluginLoader:
             service_manager=self._service_manager,
             **kwargs,
         )
-        plugin.api = self._service_manager.bot_client.api # type: ignore
+        plugin.api = self._service_manager.bot_client.api  # type: ignore
         # Ensure name is set (may be provided via manifest)
 
         self.plugins[name] = plugin
@@ -80,7 +80,7 @@ class PluginLoader:
         }
         for name, plg in plugins.items():
             await self._load_plugin_by_class(plg, name)
-        LOG.info("已加载内置插件数 [%d]", len(self.plugins))
+        LOG.info("已加载内置插件数 [%d]", len(plugins))
 
     async def load_external_plugins(self, path: Path, **kwargs) -> None:
         """从目录批量加载。"""
