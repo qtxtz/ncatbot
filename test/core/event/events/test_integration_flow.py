@@ -19,17 +19,17 @@ class TestMessageEventReplyFlow:
         """测试群消息回复"""
         data = {
             "time": 1767072511,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "group",
             "sub_type": "normal",
             "message_id": "2009890763",
-            "user_id": "3051561876",
+            "user_id": "3333355556",
             "group_id": "701784439",
             "message": [{"type": "text", "data": {"text": "/hello"}}],
             "raw_message": "/hello",
             "font": 14,
-            "sender": {"user_id": "3051561876", "nickname": "测试", "role": "owner"},
+            "sender": {"user_id": "3333355556", "nickname": "测试", "role": "owner"},
         }
 
         event = EventParser.parse(data, mock_api)
@@ -47,16 +47,16 @@ class TestMessageEventReplyFlow:
         """测试私聊消息回复"""
         data = {
             "time": 1767072441,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "private",
             "sub_type": "friend",
             "message_id": "400060831",
-            "user_id": "3051561876",
+            "user_id": "3333355556",
             "message": [{"type": "text", "data": {"text": "hi"}}],
             "raw_message": "hi",
             "font": 14,
-            "sender": {"user_id": "3051561876", "nickname": "测试"},
+            "sender": {"user_id": "3333355556", "nickname": "测试"},
         }
 
         event = EventParser.parse(data, mock_api)
@@ -66,7 +66,7 @@ class TestMessageEventReplyFlow:
 
         call = mock_api.get_last_call()
         assert call[0] == "post_private_msg"
-        assert call[1] == "3051561876"  # user_id
+        assert call[1] == "3333355556"  # user_id
         assert call[2] == "Hi there!"
 
     @pytest.mark.asyncio
@@ -74,7 +74,7 @@ class TestMessageEventReplyFlow:
         """测试带额外参数的回复"""
         data = {
             "time": 1767072511,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "group",
             "sub_type": "normal",
@@ -103,7 +103,7 @@ class TestGroupAdminOperationsFlow:
         """测试删除消息"""
         data = {
             "time": 1767072511,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "group",
             "sub_type": "normal",
@@ -129,7 +129,7 @@ class TestGroupAdminOperationsFlow:
         """测试禁言用户"""
         data = {
             "time": 1767072511,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "group",
             "sub_type": "normal",
@@ -157,7 +157,7 @@ class TestGroupAdminOperationsFlow:
         """测试踢出用户"""
         data = {
             "time": 1767072511,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "group",
             "sub_type": "normal",
@@ -185,7 +185,7 @@ class TestGroupAdminOperationsFlow:
         """测试完整的违规处理流程"""
         data = {
             "time": 1767072511,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "group",
             "sub_type": "normal",

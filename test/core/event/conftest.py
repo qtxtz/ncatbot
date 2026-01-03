@@ -21,7 +21,7 @@ _data_file_path: Optional[Path] = None
 _data_available: Optional[bool] = None
 
 
-def parse_event_dict_str(data_str: str) -> Dict[str, Any] | None:
+def parse_event_dict_str(data_str: str) -> Optional[Dict[str, Any]]:
     """解析事件字典字符串
 
     支持两种格式:
@@ -132,7 +132,7 @@ def load_test_data(data_file: Path) -> List[Dict[str, Any]]:
     return events
 
 
-def _extract_dict_from_position(text: str, start_pos: int) -> str | None:
+def _extract_dict_from_position(text: str, start_pos: int) -> Optional[str]:
     """从指定位置提取完整的字典字符串"""
     brace_count = 0
     in_string = False

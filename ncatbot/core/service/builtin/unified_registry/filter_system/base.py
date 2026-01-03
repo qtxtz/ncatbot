@@ -1,7 +1,7 @@
 """过滤器基础模块 v2.0"""
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Callable, Optional
 
 from ncatbot.utils import get_log
 
@@ -19,7 +19,7 @@ class BaseFilter(ABC):
     简化设计：过滤器函数只接受 event 参数
     """
 
-    def __init__(self, name: str | None = None):
+    def __init__(self, name: Optional[str] = None):
         self.name = name or self.__class__.__name__
 
     @abstractmethod

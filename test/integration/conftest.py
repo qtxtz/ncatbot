@@ -218,17 +218,17 @@ def sample_message_event():
     """示例消息事件数据"""
     return {
         "time": 1767072511,
-        "self_id": "1550507358",
+        "self_id": "1115557735",
         "post_type": "message",
         "message_type": "group",
         "sub_type": "normal",
         "message_id": "2009890763",
-        "user_id": "3051561876",
+        "user_id": "3333355556",
         "group_id": "701784439",
         "message": [{"type": "text", "data": {"text": "Hello"}}],
         "raw_message": "Hello",
         "font": 14,
-        "sender": {"user_id": "3051561876", "nickname": "测试用户", "role": "member"},
+        "sender": {"user_id": "3333355556", "nickname": "测试用户", "role": "member"},
     }
 
 
@@ -237,16 +237,16 @@ def sample_private_message_event():
     """示例私聊消息事件"""
     return {
         "time": 1767072441,
-        "self_id": "1550507358",
+        "self_id": "1115557735",
         "post_type": "message",
         "message_type": "private",
         "sub_type": "friend",
         "message_id": "400060831",
-        "user_id": "3051561876",
+        "user_id": "3333355556",
         "message": [{"type": "text", "data": {"text": "Hi"}}],
         "raw_message": "Hi",
         "font": 14,
-        "sender": {"user_id": "3051561876", "nickname": "测试用户"},
+        "sender": {"user_id": "3333355556", "nickname": "测试用户"},
     }
 
 
@@ -255,7 +255,7 @@ def sample_notice_event():
     """示例通知事件数据"""
     return {
         "time": 1767072600,
-        "self_id": "1550507358",
+        "self_id": "1115557735",
         "post_type": "notice",
         "notice_type": "group_increase",
         "sub_type": "approve",
@@ -270,10 +270,10 @@ def sample_request_event():
     """示例请求事件数据"""
     return {
         "time": 1767072700,
-        "self_id": "1550507358",
+        "self_id": "1115557735",
         "post_type": "request",
         "request_type": "friend",
-        "user_id": "3051561876",
+        "user_id": "3333355556",
         "comment": "请加我好友",
         "flag": "request_flag_123",
     }
@@ -284,7 +284,7 @@ def sample_meta_event():
     """示例元事件数据"""
     return {
         "time": 1767072800,
-        "self_id": "1550507358",
+        "self_id": "1115557735",
         "post_type": "meta_event",
         "meta_event_type": "lifecycle",
         "sub_type": "connect",

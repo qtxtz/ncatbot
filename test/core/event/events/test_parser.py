@@ -57,16 +57,16 @@ class TestEventParserParse:
         """测试解析私聊消息"""
         data = {
             "time": 1767072441,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "private",
             "sub_type": "friend",
             "message_id": "400060831",
-            "user_id": "3051561876",
+            "user_id": "3333355556",
             "message": [{"type": "text", "data": {"text": "hello"}}],
             "raw_message": "hello",
             "font": 14,
-            "sender": {"user_id": "3051561876", "nickname": "测试"},
+            "sender": {"user_id": "3333355556", "nickname": "测试"},
         }
 
         event = EventParser.parse(data, mock_api)
@@ -78,12 +78,12 @@ class TestEventParserParse:
         """测试解析群消息"""
         data = {
             "time": 1767072511,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "group",
             "sub_type": "normal",
             "message_id": "2009890763",
-            "user_id": "3051561876",
+            "user_id": "3333355556",
             "group_id": "701784439",
             "message": [],
             "raw_message": "",
@@ -100,7 +100,7 @@ class TestEventParserParse:
         """测试解析生命周期事件"""
         data = {
             "time": 1767072412,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "meta_event",
             "meta_event_type": "lifecycle",
             "sub_type": "connect",
@@ -115,7 +115,7 @@ class TestEventParserParse:
         """测试解析心跳事件"""
         data = {
             "time": 1767072414,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "meta_event",
             "meta_event_type": "heartbeat",
             "status": {"online": True, "good": True},
@@ -149,12 +149,12 @@ class TestEventParserParse:
         """测试解析后 API 已绑定"""
         data = {
             "time": 1767072441,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "private",
             "sub_type": "friend",
             "message_id": "400060831",
-            "user_id": "3051561876",
+            "user_id": "3333355556",
             "message": [],
             "raw_message": "",
             "sender": {},

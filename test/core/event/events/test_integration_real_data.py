@@ -128,7 +128,7 @@ class TestEdgeCases:
         """测试空消息列表"""
         data = {
             "time": 1767072441,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "private",
             "sub_type": "friend",
@@ -147,7 +147,7 @@ class TestEdgeCases:
         """测试 Unicode 内容"""
         data = {
             "time": 1767072441,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "private",
             "sub_type": "friend",
@@ -167,7 +167,7 @@ class TestEdgeCases:
         """测试可选字段为 None"""
         data = {
             "time": 1767072511,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "group",
             "sub_type": "normal",
@@ -188,7 +188,7 @@ class TestEdgeCases:
         """测试额外字段被忽略"""
         data = {
             "time": 1767072441,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "private",
             "sub_type": "friend",
@@ -216,7 +216,7 @@ class TestEdgeCases:
 
         data = {
             "time": 1767072441,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "private",
             "sub_type": "friend",

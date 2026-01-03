@@ -44,7 +44,7 @@ pip install -e '.[dev]'
 ### 启用 pre-commit 钩子（只需执行一次）
 
 ```bash
-pre-commit install
+uv run pre-commit install
 ```
 - pre-commit 会在 `git commit` 时检查代码格式并做一定自动修复。若 pre-commit 自动修复了文件，请执行 `git add` 将修复后的文件重新暂存后再提交。
 - 如果存在无法自动修复的错误，请尽量认真阅读错误描述并修复。若确有必要跳过本地检查（不推荐），可使用 `git commit --no-verify`。
@@ -71,14 +71,30 @@ git commit -m "docs: 更新安装指南"
 运行测试：
 
 ```bash
-pytest
+uv run pytest
 ```
 
 运行带覆盖率的测试：
 
 ```bash
-pytest --cov=ncatbot --cov-report=term-missing
+uv run pytest --cov=ncatbot --cov-report=term-missing
 ```
+
+### 多版本测试（可选）
+
+如需在多个 Python 版本（3.9, 3.10, 3.12, 3.13）上运行测试，可使用 tox：
+
+```bash
+uv run tox
+```
+
+也可以只运行特定版本：
+
+```bash
+uv run tox -e py312
+```
+
+> 注意：多版本测试不是提交 PR 的必要条件，CI 会自动在多版本上运行测试。
 
 ## 依赖管理
 

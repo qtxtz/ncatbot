@@ -10,7 +10,7 @@ NcatBot Event: 订阅的事件触发的回调是 NcatBotEvent(带类型 type 和
 """
 
 import inspect
-from typing import Callable, Optional, Type, Literal, TYPE_CHECKING
+from typing import Callable, Optional, Type, Literal, TYPE_CHECKING, Union
 
 from ..event.enums import EventType
 from .ncatbot_event import NcatBotEvent
@@ -49,7 +49,7 @@ class EventRegistry:
 
     def subscribe(
         self,
-        event_type: str | EventType,
+        event_type: Union[str, EventType],
         handler: Callable,
         priority: int = 0,
         timeout: Optional[float] = None,
@@ -70,7 +70,7 @@ class EventRegistry:
 
     def register_handler(
         self,
-        event_type: str | EventType,
+        event_type: Union[str, EventType],
         handler: Callable,
         priority: int = 0,
         timeout: Optional[float] = None,

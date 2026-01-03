@@ -35,17 +35,17 @@ class TestPrivateMessageEvent:
         """测试从字典创建私聊消息事件"""
         data = {
             "time": 1767072441,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "private",
             "sub_type": "friend",
             "message_id": "400060831",
-            "user_id": "3051561876",
+            "user_id": "3333355556",
             "message": [{"type": "text", "data": {"text": "hello"}}],
             "raw_message": "hello",
             "font": 14,
             "sender": {
-                "user_id": "3051561876",
+                "user_id": "3333355556",
                 "nickname": "测试用户",
                 "sex": "unknown",
                 "age": 0,
@@ -57,7 +57,7 @@ class TestPrivateMessageEvent:
         assert event.message_type == MessageType.PRIVATE
         assert event.sub_type == "friend"
         assert event.message_id == "400060831"
-        assert event.user_id == "3051561876"
+        assert event.user_id == "3333355556"
         assert event.raw_message == "hello"
         assert isinstance(event.sender, BaseSender)
         assert event.sender.nickname == "测试用户"
@@ -66,12 +66,12 @@ class TestPrivateMessageEvent:
         """测试 message_id 自动转为字符串"""
         data = {
             "time": 1767072441,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "private",
             "sub_type": "friend",
             "message_id": 400060831,  # 整数
-            "user_id": 3051561876,  # 整数
+            "user_id": 3333355556,  # 整数
             "message": [],
             "raw_message": "",
             "sender": {},
@@ -80,7 +80,7 @@ class TestPrivateMessageEvent:
         event = PrivateMessageEvent(**data)
 
         assert event.message_id == "400060831"
-        assert event.user_id == "3051561876"
+        assert event.user_id == "3333355556"
         assert isinstance(event.message_id, str)
         assert isinstance(event.user_id, str)
 
@@ -126,18 +126,18 @@ class TestGroupMessageEvent:
         """测试从字典创建群消息事件"""
         data = {
             "time": 1767072511,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "group",
             "sub_type": "normal",
             "message_id": "2009890763",
-            "user_id": "3051561876",
+            "user_id": "3333355556",
             "group_id": "701784439",
             "message": [{"type": "text", "data": {"text": "test"}}],
             "raw_message": "test",
             "font": 14,
             "sender": {
-                "user_id": "3051561876",
+                "user_id": "3333355556",
                 "nickname": "测试",
                 "card": "群名片",
                 "role": "owner",
@@ -156,7 +156,7 @@ class TestGroupMessageEvent:
         """测试 group_id 自动转为字符串"""
         data = {
             "time": 1767072511,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "message_type": "group",
             "sub_type": "normal",
             "message_id": "123",
@@ -203,18 +203,18 @@ class TestGroupMessageEvent:
 
         data = {
             "time": 1767072511,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message_sent",  # 自己发送的消息
             "message_type": "group",
             "sub_type": "normal",
             "message_id": "2009890763",
-            "user_id": "1550507358",  # 通常是自己的 ID
+            "user_id": "1115557735",  # 通常是自己的 ID
             "group_id": "701784439",
             "message": [{"type": "text", "data": {"text": "我发送的消息"}}],
             "raw_message": "我发送的消息",
             "font": 14,
             "sender": {
-                "user_id": "1550507358",
+                "user_id": "1115557735",
                 "nickname": "机器人",
                 "card": "",
                 "role": "member",
@@ -226,7 +226,7 @@ class TestGroupMessageEvent:
         assert event.post_type == PostType.MESSAGE_SENT
         assert event.message_type == MessageType.GROUP
         assert event.group_id == "701784439"
-        assert event.user_id == "1550507358"
+        assert event.user_id == "1115557735"
         assert event.message.concatenate_text() == "我发送的消息"
 
 

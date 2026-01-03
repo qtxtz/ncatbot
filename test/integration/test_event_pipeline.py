@@ -76,7 +76,7 @@ class TestEventPipelineBasic:
         await dispatcher.dispatch(sample_private_message_event)
 
         assert len(received) == 1
-        assert received[0].data.user_id == "3051561876"
+        assert received[0].data.user_id == "3333355556"
         assert received[0].data.message_type == "private"
 
     @pytest.mark.asyncio

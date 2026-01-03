@@ -136,7 +136,7 @@ class TestLifecycleMetaEvent:
         """测试连接事件"""
         data = {
             "time": 1767072412,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "meta_event",
             "meta_event_type": "lifecycle",
             "sub_type": "connect",
@@ -151,7 +151,7 @@ class TestLifecycleMetaEvent:
         """测试启用事件"""
         data = {
             "time": 1767072412,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "meta_event",
             "meta_event_type": "lifecycle",
             "sub_type": "enable",
@@ -165,7 +165,7 @@ class TestLifecycleMetaEvent:
         """测试禁用事件"""
         data = {
             "time": 1767072412,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "meta_event",
             "meta_event_type": "lifecycle",
             "sub_type": "disable",
@@ -183,7 +183,7 @@ class TestHeartbeatMetaEvent:
         """测试从字典创建心跳事件"""
         data = {
             "time": 1767072414,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "meta_event",
             "meta_event_type": "heartbeat",
             "status": {"online": True, "good": True},
@@ -202,7 +202,7 @@ class TestHeartbeatMetaEvent:
         """测试不同的心跳间隔"""
         data = {
             "time": 1767072414,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "meta_event",
             "meta_event_type": "heartbeat",
             "status": {"online": True, "good": True},

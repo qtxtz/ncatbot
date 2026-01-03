@@ -1,3 +1,5 @@
+from typing import Optional
+
 from tqdm import tqdm
 import socket
 import json
@@ -13,8 +15,8 @@ _log = get_log()
 
 def post_json(
     url: str,
-    payload: dict | None = None,
-    headers: dict | None = None,
+    payload: Optional[dict] = None,
+    headers: Optional[dict] = None,
     timeout: float = 5.0,
 ) -> dict:
     body = None
@@ -47,7 +49,7 @@ def post_json(
         raise
 
 
-def get_json(url: str, headers: dict | None = None, timeout: float = 5.0) -> dict:
+def get_json(url: str, headers: Optional[dict] = None, timeout: float = 5.0) -> dict:
     req_headers = {
         "User-Agent": "ncatbot/1.0",
         "Accept": "application/json",

@@ -16,17 +16,17 @@ class TestMessageEventSerialization:
         """测试私聊消息事件序列化"""
         data = {
             "time": 1767072441,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "private",
             "sub_type": "friend",
             "message_id": "400060831",
-            "user_id": "3051561876",
+            "user_id": "3333355556",
             "message": [{"type": "text", "data": {"text": "hello"}}],
             "raw_message": "hello",
             "font": 14,
             "sender": {
-                "user_id": "3051561876",
+                "user_id": "3333355556",
                 "nickname": "测试",
             },
         }
@@ -43,18 +43,18 @@ class TestMessageEventSerialization:
         """测试群消息事件序列化"""
         data = {
             "time": 1767072511,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "group",
             "sub_type": "normal",
             "message_id": "2009890763",
-            "user_id": "3051561876",
+            "user_id": "3333355556",
             "group_id": "701784439",
             "message": [{"type": "text", "data": {"text": "test"}}],
             "raw_message": "test",
             "font": 14,
             "sender": {
-                "user_id": "3051561876",
+                "user_id": "3333355556",
                 "nickname": "测试",
                 "card": "群名片",
                 "role": "owner",
@@ -76,7 +76,7 @@ class TestMetaEventSerialization:
         """测试心跳事件序列化"""
         data = {
             "time": 1767072414,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "meta_event",
             "meta_event_type": "heartbeat",
             "status": {"online": True, "good": True},
@@ -99,16 +99,16 @@ class TestSerializationRoundtrip:
         """测试私聊消息事件往返"""
         original_data = {
             "time": 1767072441,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "message",
             "message_type": "private",
             "sub_type": "friend",
             "message_id": "400060831",
-            "user_id": "3051561876",
+            "user_id": "3333355556",
             "message": [{"type": "text", "data": {"text": "hello"}}],
             "raw_message": "hello",
             "font": 14,
-            "sender": {"user_id": "3051561876", "nickname": "测试"},
+            "sender": {"user_id": "3333355556", "nickname": "测试"},
         }
 
         # 创建 -> 序列化 -> 重新创建
@@ -126,7 +126,7 @@ class TestSerializationRoundtrip:
         """测试心跳事件往返"""
         original_data = {
             "time": 1767072414,
-            "self_id": "1550507358",
+            "self_id": "1115557735",
             "post_type": "meta_event",
             "meta_event_type": "heartbeat",
             "status": {"online": True, "good": True},

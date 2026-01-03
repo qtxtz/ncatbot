@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Type, ClassVar
+from typing import Any, Dict, List, Type, ClassVar, Optional
 from pydantic import BaseModel, ConfigDict
 from abc import ABC
 
@@ -47,7 +47,7 @@ def parse_message_segment(data: Dict[str, Any]) -> MessageSegment:
     if not seg_type:
         raise ValueError("Missing 'type' field in message segment data")
 
-    target_cls: Type[MessageSegment] | None = TYPE_MAP.get(seg_type)
+    target_cls: Optional[Type[MessageSegment]] = TYPE_MAP.get(seg_type)
     if not target_cls:
         raise ValueError(f"Unknown message segment type: {seg_type}")
     return target_cls.from_dict(data)
