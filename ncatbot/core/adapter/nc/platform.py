@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import Optional
 
 from ncatbot.utils import (
-    INSTALL_SCRIPT_URL,
     get_log,
     ncatbot_config,
 )
@@ -243,6 +242,10 @@ class WindowsOps(PlatformOps):
 class LinuxOps(PlatformOps):
     """Linux 平台操作"""
 
+    LINUX_INSTALL_SCRIPT_URL = (
+        "https://nclatest.znin.net/NapNeko/NapCat-Installer/main/script/install.sh"
+    )
+
     @property
     def napcat_dir(self) -> Path:
         target = Path("/opt/QQ/resources/app/app_launcher/napcat")
@@ -277,7 +280,7 @@ class LinuxOps(PlatformOps):
 
         try:
             LOG.info("正在下载一键安装脚本...")
-            cmd = f"sudo bash -c 'curl -sS {INSTALL_SCRIPT_URL} -o install && printf \"n\\ny\\n\" | sudo bash install'"
+            cmd = f"sudo bash -c 'curl -sS {self.LINUX_INSTALL_SCRIPT_URL} -o install && printf \"n\\ny\\n\" | sudo bash install'"
             process = subprocess.Popen(
                 cmd,
                 shell=True,

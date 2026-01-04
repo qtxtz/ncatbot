@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING, Callable, Optional, Union, Iterable
 from ncatbot.utils import global_status
-from ncatbot.utils.assets.literals import PermissionGroup
+from ncatbot.core import PermissionGroup
 from .base import BaseFilter
 
 __all__ = [

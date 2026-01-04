@@ -19,6 +19,7 @@ from ncatbot.core import (
     MessageEvent,
     NcatBotEvent,
     GroupMessageEvent,
+    PermissionGroup,
     PrivateMessageEvent,
 )
 from ncatbot.core.service.builtin.unified_registry import (
@@ -27,7 +28,7 @@ from ncatbot.core.service.builtin.unified_registry import (
     option_group,
     admin_filter,
 )
-from ncatbot.utils import get_log, PermissionGroup
+from ncatbot.utils import get_log
 
 from ..builtin_mixin import NcatBotPlugin
 

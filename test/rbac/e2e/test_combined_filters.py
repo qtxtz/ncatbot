@@ -6,7 +6,7 @@
 import pytest
 
 from ncatbot.utils.testing import E2ETestSuite
-from ncatbot.utils.assets.literals import PermissionGroup
+from ncatbot.core import PermissionGroup
 
 from .conftest import RBAC_PLUGIN_DIR, cleanup_modules
 

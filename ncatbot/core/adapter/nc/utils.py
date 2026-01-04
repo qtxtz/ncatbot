@@ -18,7 +18,7 @@ import urllib.request
 import urllib.error
 from tqdm import tqdm
 from pathlib import Path
-from ncatbot.utils import global_status, get_log, PYPI_URL
+from ncatbot.utils import global_status, get_log
 
 LOG = get_log("Adapter")
 
@@ -128,7 +128,9 @@ def get_pypi_latest_version(package_name: str) -> Optional[str]:
         最新版本号，获取失败返回 None
     """
     try:
-        url = urllib.parse.urljoin(PYPI_URL, f"{package_name}/json")
+        url = urllib.parse.urljoin(
+            "https://mirrors.aliyun.com/pypi/simple/", f"{package_name}/json"
+        )
         req = urllib.request.Request(url, headers={"User-Agent": "ncatbot/1.0"})
         with urllib.request.urlopen(req, timeout=3) as response:
             data = response.read()

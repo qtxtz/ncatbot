@@ -192,7 +192,9 @@ class PluginLoader:
     def list_plugins(self, *, obj: bool = False) -> List[Union[str, BasePlugin]]:
         return list(self.plugins.values()) if obj else list(self.plugins.keys())
 
-    # -------------------- 私有辅助 --------------------
+    # =======================
+    # region 内部方法
+    # =======================
     @staticmethod
     def _is_valid(item: object) -> bool:
         """Return True if `item` is a tuple whose first element is a subclass of BasePlugin.

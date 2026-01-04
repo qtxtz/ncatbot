@@ -4,6 +4,7 @@ NcatBot 核心模块
 提供 Bot 客户端、事件系统和 API 接口。
 """
 
+from enum import Enum
 from .client import BotClient, EventBus, NcatBotEvent, EventType, NcatBotEventFactory
 from .helper import ForwardConstructor  # noqa: F401
 from .api import BotAPI
@@ -35,3 +36,10 @@ __all__ = [
 ]
 
 __all__.extend(getattr(event, "__all__", []))  # type: ignore
+
+
+class PermissionGroup(Enum):
+    # 权限组常量
+    ROOT = "root"
+    ADMIN = "admin"
+    USER = "user"
