@@ -3,11 +3,9 @@
 import os
 import tempfile
 
-import pytest
 import yaml
 
 from ncatbot.utils.config.manager import ConfigManager, get_config_manager
-from ncatbot.utils.config.models import Config
 
 
 class TestConfigManager:
@@ -18,7 +16,7 @@ class TestConfigManager:
         with tempfile.TemporaryDirectory() as tmpdir:
             path = os.path.join(tmpdir, "config.yaml")
             with open(path, "w") as f:
-                yaml.dump({"bt_uin": "999888777"}, f)
+                yaml.dump({"bot_uin": "999888777"}, f)
 
             manager = ConfigManager(path)
             assert manager._config is None
@@ -30,13 +28,13 @@ class TestConfigManager:
         with tempfile.TemporaryDirectory() as tmpdir:
             path = os.path.join(tmpdir, "config.yaml")
             with open(path, "w") as f:
-                yaml.dump({"bt_uin": "111"}, f)
+                yaml.dump({"bot_uin": "111"}, f)
 
             manager = ConfigManager(path)
             assert manager.bot_uin == "111"
 
             with open(path, "w") as f:
-                yaml.dump({"bt_uin": "222"}, f)
+                yaml.dump({"bot_uin": "222"}, f)
 
             manager.reload()
             assert manager.bot_uin == "222"
@@ -206,7 +204,7 @@ class TestConfigManagerUtility:
             manager.set_bot_uin("999888777")
             assert manager.is_default_uin() is False
 
-    def test_validate_security(self):
+    def test_get_security_issue(self):
         """安全校验。"""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = os.path.join(tmpdir, "config.yaml")
@@ -214,7 +212,7 @@ class TestConfigManagerUtility:
                 yaml.dump({}, f)
 
             manager = ConfigManager(path)
-            issues = manager.validate_security()
+            issues = manager.get_issues()
             assert isinstance(issues, list)
 
 

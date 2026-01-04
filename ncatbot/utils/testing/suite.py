@@ -8,11 +8,11 @@
 # pyright: reportReturnType=false
 # pyright: reportOptionalMemberAccess=false
 
+import shutil
 from typing import List, Optional, TYPE_CHECKING
-from copy import deepcopy
 from contextlib import asynccontextmanager
 
-from ncatbot.utils import get_log, ncatbot_config
+from ncatbot.utils import get_log, ncatbot_config, CONFIG_PATH
 from .mixins import PluginMixin, InjectorMixin, AssertionMixin
 
 if TYPE_CHECKING:
@@ -54,7 +54,7 @@ class E2ETestSuite(PluginMixin, InjectorMixin, AssertionMixin):
 
     def __init__(
         self,
-        bt_uin: str = "123456789",
+        bot_uin: str = "123456789",
         mock_server: Optional["NapCatMockServer"] = None,
         port: Optional[int] = None,
     ):
@@ -99,8 +99,8 @@ class E2ETestSuite(PluginMixin, InjectorMixin, AssertionMixin):
             self._owns_mock_server = True
 
         # 配置类级别变量以保证只在第一次运行时保存
-        if E2ETestSuite._origin_config is None:
-            E2ETestSuite._origin_config = deepcopy(ncatbot_config)
+
+        shutil.copyfile(CONFIG_PATH, ".temp.config.yaml")
 
         # 配置 WebSocket URI 指向 MockServer
         ncatbot_config.napcat.ws_uri = self._mock_server.uri
@@ -109,9 +109,9 @@ class E2ETestSuite(PluginMixin, InjectorMixin, AssertionMixin):
         BotClient.reset_singleton()
         self._client = BotClient()
         await self._client.run_backend_async(
-            bt_uin=self._bt_uin,
+            bot_uin=self._bot_uin,
             mock=True,
-            skip_plugin_load=True,
+            load_plugin=True,
         )
 
         # 设置反向引用，供 TestHelper 使用
@@ -133,7 +133,7 @@ class E2ETestSuite(PluginMixin, InjectorMixin, AssertionMixin):
             await self._mock_server.stop()
             self._mock_server = None
             self._owns_mock_server = False
-        self._origin_config.save()
+        shutil.move(".temp.config.yaml", CONFIG_PATH)
         LOG.info("测试套件已清理")
 
     async def __aenter__(self) -> "E2ETestSuite":

@@ -5,7 +5,7 @@ from typing import Dict, Optional, Callable, Awaitable
 
 from ..base import BaseService
 from ncatbot.core.adapter.nc import NapCatWebSocket
-from ncatbot.utils import get_log
+from ncatbot.utils import get_log, ncatbot_config
 
 LOG = get_log("MessageRouter")
 
@@ -31,7 +31,7 @@ class MessageRouter(BaseService):
         **config,
     ):
         super().__init__(**config)
-        self._uri = uri
+        self._uri = uri or ncatbot_config.get_uri_with_token()
         self._event_dispatcher = event_dispatcher
 
         self._ws: Optional[NapCatWebSocket] = None

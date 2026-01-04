@@ -13,7 +13,7 @@ import copy
 
 from ...base import BaseService
 from ncatbot.utils import get_log
-from ncatbot.utils.config.constants import CONFIG_PATH
+from ncatbot.utils.config import CONFIG_PATH
 from .types import PluginConfig, ConfigItem
 from .persistence import ConfigPersistence
 

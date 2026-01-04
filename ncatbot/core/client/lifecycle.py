@@ -64,22 +64,25 @@ class LifecycleManager:
         # 异步任务控制
         self._main_task: Optional[asyncio.Task] = None
         self._startup_event: Optional[asyncio.Event] = None
-        self._skip_plugin_load = False
+        self._load_plugin = True
 
     def _prepare_startup(self, **kwargs: Unpack[StartArgs]):
         """通用启动准备"""
         self._test_mode = bool(kwargs.pop("mock", False))
-        
+
         for key, value in kwargs.items():
             if key not in LEGAL_ARGS:
                 raise NcatBotError(f"非法启动参数: {key}")
             if value is not None:
                 ncatbot_config.update_value(key, value)
 
-        ncatbot_config.validate_config()
+        issues = ncatbot_config.get_issues()
+        for issue in issues:
+            LOG.warning(f"配置问题: {issue}")
 
-        self._test_mode = bool(kwargs.pop("mock", False))
-        self._skip_plugin_load = ncatbot_config.plugin.skip_plugin_load
+        ncatbot_config.fix_invalid_config_interactive()
+
+        self._load_plugin = ncatbot_config.plugin.load_plugin
         self._debug_mode = ncatbot_config.debug or bool(self._test_mode)
         self.services.set_debug_mode(self._debug_mode)
         self.services.set_test_mode(self._test_mode)
