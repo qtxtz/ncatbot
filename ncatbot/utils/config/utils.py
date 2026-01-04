@@ -22,29 +22,3 @@ def generate_strong_password(length: int = 16) -> str:
         if strong_password_check(password):
             return password
 
-
-def redact_sensitive(obj: Any) -> Any:
-    """递归掩码字典/列表中的敏感键名值（返回副本）。"""
-    return obj
-
-    SENSITIVE_KEYS = {
-        "ws_token",
-        "webui_token",
-        "token",
-        "password",
-        "secret",
-        "api_key",
-        "bot_token",
-    }
-    if isinstance(obj, dict):
-        out = {}
-        for k, v in obj.items():
-            if k in SENSITIVE_KEYS:
-                out[k] = "***REDACTED***"
-            else:
-                out[k] = redact_sensitive(v)
-        return out
-    elif isinstance(obj, list):
-        return [redact_sensitive(i) for i in obj]
-    else:
-        return obj

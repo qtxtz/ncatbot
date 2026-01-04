@@ -78,7 +78,7 @@ class ConfigManager:
             "host": ncatbot_config.napcat.ws_listen_ip,
             "port": int(ws_port),
             "messagePostFormat": "array",
-            "reportSelfMessage": ncatbot_config.napcat.report_self_message,
+            "reportSelfMessage": False,
             "token": str(ws_token) if ws_token else "",
             "enableForcePushEvent": True,
             "debug": False,
@@ -91,7 +91,7 @@ class ConfigManager:
             "network": {"websocketServers": []},
             "musicSignUrl": "",
             "enableLocalFile2Url": False,
-            "parseMultMsg": ncatbot_config.napcat.report_forward_message_detail,
+            "parseMultMsg": True,
         }
 
     def configure_onebot(self) -> None:
@@ -100,10 +100,6 @@ class ConfigManager:
         if self.onebot_config_path.exists():
             config = self._read_json(self.onebot_config_path)
             # 同步解析合并转发消息配置
-            expected = ncatbot_config.napcat.report_forward_message_detail
-            if config.get("parseMultMsg") != expected:
-                LOG.warning(f"解析合并转发消息配置不匹配, 将修改为: {expected}")
-                config["parseMultMsg"] = expected
         else:
             config = self._get_default_onebot_config()
 
