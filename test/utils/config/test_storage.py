@@ -3,7 +3,6 @@
 import os
 import tempfile
 
-import pytest
 import yaml
 
 from ncatbot.utils.config.storage import ConfigStorage
@@ -45,7 +44,7 @@ class TestConfigStorageLoad:
 
     def test_load_valid_file(self):
         """加载有效文件。"""
-        data = {"bt_uin": "123456789", "debug": True}
+        data = {"bot_uin": "123456789", "debug": True}
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             yaml.dump(data, f)
@@ -54,7 +53,7 @@ class TestConfigStorageLoad:
         try:
             storage = ConfigStorage(path)
             config = storage.load()
-            assert config.bt_uin == "123456789"
+            assert config.bot_uin == "123456789"
             assert config.debug is True
         finally:
             os.unlink(path)
@@ -62,7 +61,7 @@ class TestConfigStorageLoad:
     def test_load_nested_config(self):
         """加载嵌套配置。"""
         data = {
-            "bt_uin": "123456789",
+            "bot_uin": "123456789",
             "napcat": {"ws_uri": "ws://localhost:3001"},
             "plugin": {"plugins_dir": "my_plugins"},
         }
@@ -83,7 +82,7 @@ class TestConfigStorageLoad:
         """加载不存在的文件返回默认配置。"""
         storage = ConfigStorage("/nonexistent/config.yaml")
         config = storage.load()
-        assert config.bt_uin == "123456"  # 默认值
+        assert config.bot_uin == "123456"  # 默认值
 
     def test_load_empty_file(self):
         """加载空文件返回默认配置。"""
@@ -94,7 +93,7 @@ class TestConfigStorageLoad:
         try:
             storage = ConfigStorage(path)
             config = storage.load()
-            assert config.bt_uin == "123456"  # 默认值
+            assert config.bot_uin == "123456"  # 默认值
         finally:
             os.unlink(path)
 
@@ -108,13 +107,13 @@ class TestConfigStorageSave:
             path = os.path.join(tmpdir, "config.yaml")
             storage = ConfigStorage(path)
 
-            config = Config(bt_uin="999888777", debug=True)
+            config = Config(bot_uin="999888777", debug=True)
             storage.save(config)
 
             # 验证文件内容
             with open(path, "r", encoding="utf-8") as f:
                 data = yaml.safe_load(f)
-            assert data["bt_uin"] == "999888777"
+            assert data["bot_uin"] == "999888777"
             assert data["debug"] is True
 
     def test_save_excludes_computed_fields(self):
@@ -151,7 +150,7 @@ class TestConfigStorageSave:
             storage = ConfigStorage(path)
 
             original = Config(
-                bt_uin="999888777",
+                bot_uin="999888777",
                 debug=True,
                 napcat=NapCatConfig(ws_uri="ws://example.com:3001"),
                 plugin=PluginConfig(plugins_dir="my_plugins"),
@@ -159,7 +158,7 @@ class TestConfigStorageSave:
             storage.save(original)
 
             loaded = storage.load()
-            assert loaded.bt_uin == original.bt_uin
+            assert loaded.bot_uin == original.bot_uin
             assert loaded.debug == original.debug
             assert loaded.napcat.ws_uri == original.napcat.ws_uri
             assert loaded.plugin.plugins_dir == original.plugin.plugins_dir

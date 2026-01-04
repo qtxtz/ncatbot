@@ -10,9 +10,11 @@ class ConfigValueError(Exception):
     def __init__(self, msg) -> None:
         super().__init__(f"配置项错误: {msg}")
 
+
 class UinValueError(ConfigValueError):
     def __init__(self, value: str):
         super().__init__(f"QQ 号必须是整数数字, 但读到 {value}")
+
 
 def ensure_uin(value):
     value = str(value)
@@ -20,12 +22,14 @@ def ensure_uin(value):
         raise UinValueError(value)
     return value
 
+
 class ConfigManager:
     """配置管理器，提供配置的读写接口。"""
 
     def __init__(self, path: Optional[str] = None):
         self._storage = ConfigStorage(path)
         self._config: Optional[Config] = None
+        self._field_paths: Optional[dict] = None
 
     @property
     def config(self) -> Config:
@@ -37,12 +41,44 @@ class ConfigManager:
     def reload(self) -> Config:
         """重新加载配置。"""
         self._config = self._storage.load()
+        self._field_paths = None  # 清除缓存的字段路径
         return self._config
 
     def save(self) -> None:
         """保存当前配置。"""
         if self._config is not None:
             self._storage.save(self._config)
+
+    def update_value(self, key: str, value):
+        """更新配置项的值，支持嵌套键和字段别名。
+
+        Args:
+            key: 配置项键，支持：
+                - 直接键：'bot_uin', 'debug'
+                - 嵌套键：'napcat.ws_uri', 'plugin.plugins_dir'
+                - 别名：'ws_uri' → 'napcat.ws_uri', 'plugins_dir' → 'plugin.plugins_dir'
+            value: 新值
+
+        Raises:
+            ConfigValueError: 未知的配置项
+        """
+        # 先检查别名映射（自动生成）
+        full_key = self.config.get_field_paths().get(key, key)
+
+        keys = full_key.split(".")
+        obj = self.config
+
+        # 递归找到父对象
+        for k in keys[:-1]:
+            if not hasattr(obj, k):
+                raise ConfigValueError(f"未知的配置项: {key}")
+            obj = getattr(obj, k)
+
+        # 设置最后一个键的值
+        final_key = keys[-1]
+        if not hasattr(obj, final_key):
+            raise ConfigValueError(f"未知的配置项: {key}")
+        setattr(obj, final_key, value)
 
     # ==================== NapCat 配置 ====================
 
@@ -65,6 +101,9 @@ class ConfigManager:
     def set_webui_enabled(self, value: bool) -> None:
         self.napcat.enable_webui = value
 
+    def get_uri_with_token(self) -> str:
+        return f"{self.napcat.ws_uri}?access_token={self.napcat.ws_token}"
+
     # ==================== 插件配置 ====================
 
     @property
@@ -81,23 +120,23 @@ class ConfigManager:
 
     @property
     def bot_uin(self) -> str:
-        return self.config.bt_uin
+        return self.config.bot_uin
 
     @property
     def root(self) -> str:
         return self.config.root
-    
+
     @property
     def debug(self) -> bool:
         return self.config.debug
-    
+
     @debug.setter
     def debug(self, value: bool) -> None:
         self.config.debug = value
 
     def set_bot_uin(self, value: str) -> None:
-        self.config.bt_uin = ensure_uin(value)
-    
+        self.config.bot_uin = ensure_uin(value)
+
     def set_root(self, value: str) -> None:
         self.config.root = ensure_uin(value)
 
@@ -132,12 +171,8 @@ class ConfigManager:
         """确保插件目录存在。"""
         self.plugin.ensure_dir_exists()
 
-    def fix_invalid_config(self):
-        """修复无效配置，提示用户输入。
-        
-        Args:
-            auto_mode: 是否启用自动模式（对应 --auto 参数）
-        """ 
+    def fix_invalid_config_interactive(self):
+        """修复无效配置，提示用户输入。"""
         if self.is_default_uin():
             for _ in range(3):
                 try:
@@ -147,12 +182,13 @@ class ConfigManager:
                     pass
             else:
                 raise ConfigValueError("不正确的 QQ 号")
-                
+
         if self.napcat.get_security_issues(auto_fix=False):
-            if input("NapCat Token 强度不足, 是否自动修复").lower() in ['y', "yes"]:
+            if input("NapCat Token 强度不足, 是否自动修复").lower() in ["y", "yes"]:
                 self.napcat.fix_security_issues()
             else:
                 raise ValueError("NapCat Token 强度不足, 拒绝启动")
+
 
 # 默认管理器实例
 _default_manager: Optional[ConfigManager] = None

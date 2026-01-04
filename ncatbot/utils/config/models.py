@@ -33,7 +33,7 @@ class BaseConfig(BaseModel):
 
             # 获取值用于递归判断
             field_value = getattr(self, field_name)
-            
+
             # 递归逻辑保持不变
             if isinstance(field_value, BaseConfig):
                 nested_paths = field_value.get_field_paths(current_path)
@@ -158,6 +158,7 @@ class NapCatConfig(BaseConfig):
         self.ws_token = generate_strong_token()
         self.webui_token = generate_strong_token()
 
+
 # ==================== 主配置模型 ====================
 
 
@@ -171,7 +172,9 @@ class Config(BaseConfig):
     root: str = DEFAULT_ROOT
     debug: bool = False
     enable_webui_interaction: bool = True
-    github_proxy: Optional[str] = Field(default_factory=lambda: os.getenv("GITHUB_PROXY"))
+    github_proxy: Optional[str] = Field(
+        default_factory=lambda: os.getenv("GITHUB_PROXY")
+    )
     check_ncatbot_update: bool = True
     skip_ncatbot_install_check: bool = False
     websocket_timeout: int = 15
@@ -201,5 +204,3 @@ class Config(BaseConfig):
     def to_dict(self) -> dict:
         """导出为字典，用于保存到文件。"""
         return self.model_dump(exclude_none=True)
-
-
