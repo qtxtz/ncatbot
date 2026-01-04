@@ -201,9 +201,9 @@ class RegisteredLoggerFilter(logging.Filter):
 
         # DEBUG 级别的日志只有注册过的 logger 才通过
         try:
-            from ncatbot.utils.status import status
+            from ncatbot.utils.status import global_status
 
-            return status.is_registered_logger(record.name)
+            return global_status.is_registered_logger(record.name)
         except ImportError:
             # 如果状态模块未初始化，则默认通过
             return True
@@ -331,9 +331,9 @@ def get_log(name: Optional[str] = None) -> logging.Logger:
     # 注册非根 logger
     if name is not None:
         try:
-            from ncatbot.utils.status import status
+            from ncatbot.utils.status import global_status
 
-            status.register_logger(name)
+            global_status.register_logger(name)
         except ImportError:
             # 如果状态模块未初始化，则忽略注册
             pass

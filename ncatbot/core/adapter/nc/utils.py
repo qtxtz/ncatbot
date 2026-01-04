@@ -17,8 +17,8 @@ import json
 import urllib.request
 import urllib.error
 from tqdm import tqdm
-
-from ncatbot.utils import status, get_log, PYPI_URL
+from pathlib import Path
+from ncatbot.utils import global_status, get_log, PYPI_URL
 
 LOG = get_log("Adapter")
 
@@ -26,7 +26,7 @@ LOG = get_log("Adapter")
 # ==================== 文件操作 ====================
 
 
-def download_file(url: str, file_name: str) -> None:
+def download_file(url: str, file_path: Path) -> None:
     """
     下载文件（带进度条）
 
@@ -43,7 +43,7 @@ def download_file(url: str, file_name: str) -> None:
                 total=total_size,
                 unit="iB",
                 unit_scale=True,
-                desc=f"Downloading {file_name}",
+                desc=f"Downloading {file_path}",
                 bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]",
                 colour="green",
                 dynamic_ncols=True,
@@ -52,7 +52,7 @@ def download_file(url: str, file_name: str) -> None:
                 maxinterval=1.0,
             )
 
-            with open(file_name, "wb") as f:
+            with open(file_path, "wb") as f:
                 while True:
                     data = response.read(1024)
                     if not data:
@@ -62,11 +62,11 @@ def download_file(url: str, file_name: str) -> None:
 
             progress_bar.close()
     except Exception as e:
-        LOG.error(f"从 {url} 下载 {file_name} 失败: {e}")
+        LOG.error(f"从 {url} 下载 {file_path} 失败: {e}")
         raise
 
 
-def unzip_file(file_name: str, extract_path: str, remove: bool = False) -> None:
+def unzip_file(file_path: Path, extract_path: Path, remove: bool = False) -> None:
     """
     解压 ZIP 文件
 
@@ -76,14 +76,14 @@ def unzip_file(file_name: str, extract_path: str, remove: bool = False) -> None:
         remove: 解压后是否删除 ZIP 文件
     """
     try:
-        with zipfile.ZipFile(file_name, "r") as zip_ref:
+        with zipfile.ZipFile(file_path, "r") as zip_ref:
             zip_ref.extractall(extract_path)
-            LOG.info(f"解压 {file_name} 成功")
+            LOG.info(f"解压 {file_path} 成功")
 
         if remove:
-            os.remove(file_name)
+            os.remove(file_path)
     except Exception as e:
-        LOG.error(f"解压 {file_name} 失败: {e}")
+        LOG.error(f"解压 {file_path} 失败: {e}")
         raise
 
 
@@ -260,8 +260,8 @@ def get_json(url: str, headers: Optional[dict] = None, timeout: float = 5.0) -> 
 
 def get_proxy_url():
     """获取 github 代理 URL"""
-    if status.current_github_proxy is not None:
-        return status.current_github_proxy
+    if global_status.current_github_proxy is not None:
+        return global_status.current_github_proxy
     TIMEOUT = 10
     github_proxy_urls = [
         "https://ghfast.top/",
@@ -294,11 +294,11 @@ def get_proxy_url():
         available_proxy.append(url)
 
     if len(available_proxy) > 0:
-        status.current_github_proxy = available_proxy[0]
+        global_status.current_github_proxy = available_proxy[0]
         return available_proxy[0]
     else:
         LOG.warning("无法连接到任何 GitHub 代理, 将直接连接 GitHub")
-        status.current_github_proxy = None
+        global_status.current_github_proxy = None
         return ""
 
 

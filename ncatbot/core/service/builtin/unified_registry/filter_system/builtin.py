@@ -1,7 +1,7 @@
 """内置过滤器实现 v2.0"""
 
 from typing import TYPE_CHECKING, Callable, Optional, Union, Iterable
-from ncatbot.utils import status
+from ncatbot.utils import global_status
 from ncatbot.utils.assets.literals import PermissionGroup
 from .base import BaseFilter
 
@@ -83,13 +83,13 @@ class AdminFilter(BaseFilter):
 
     def check(self, event: "MessageEvent") -> bool:
         """检查用户是否有管理员权限"""
-        if not status.global_access_manager:
+        if not global_status.global_access_manager:
             return False
 
         user_id = event.user_id
-        return status.global_access_manager.user_has_role(
+        return global_status.global_access_manager.user_has_role(
             user_id, PermissionGroup.ADMIN.value
-        ) or status.global_access_manager.user_has_role(
+        ) or global_status.global_access_manager.user_has_role(
             user_id, PermissionGroup.ROOT.value
         )
 
@@ -128,11 +128,11 @@ class RootFilter(BaseFilter):
 
     def check(self, event: "MessageEvent") -> bool:
         """检查用户是否有root权限"""
-        if not status.global_access_manager:
+        if not global_status.global_access_manager:
             return False
 
         user_id = event.user_id
-        return status.global_access_manager.user_has_role(
+        return global_status.global_access_manager.user_has_role(
             user_id, PermissionGroup.ROOT.value
         )
 

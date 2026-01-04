@@ -12,10 +12,16 @@ from typing import Optional
 
 import qrcode
 
-from ncatbot.utils import NAPCAT_WEBUI_SALT, get_log, ncatbot_config
+from ncatbot.utils import get_log, ncatbot_config
 from .utils import post_json
 
 LOG = get_log("ncatbot.core.adapter.nc.auth")
+
+
+def gen_hashed_token(token: str) -> str:
+    """生成 NapCat WebUI 认证所需的哈希令牌"""
+    NAPCAT_WEBUI_SALT = "napcat"
+    return hashlib.sha256(f"{token}.{NAPCAT_WEBUI_SALT}".encode()).hexdigest()
 
 
 class LoginStatus(IntEnum):
@@ -100,9 +106,7 @@ class AuthHandler:
     def _try_auth(self) -> Optional[str]:
         """尝试认证，返回 Credential"""
         # 新版本认证方式
-        hashed_token = hashlib.sha256(
-            f"{ncatbot_config.napcat.webui_token}.{NAPCAT_WEBUI_SALT}".encode()
-        ).hexdigest()
+        hashed_token = gen_hashed_token(ncatbot_config.napcat.webui_token)
 
         try:
             content = post_json(

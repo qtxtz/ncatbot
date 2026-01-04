@@ -16,14 +16,12 @@ from typing import Optional
 
 from ncatbot.utils import (
     INSTALL_SCRIPT_URL,
-    LINUX_NAPCAT_DIR,
-    WINDOWS_NAPCAT_DIR,
     get_log,
     ncatbot_config,
 )
 from .utils import download_file, unzip_file, gen_url_with_proxy, get_json
 
-LOG = get_log("ncatbot.core.adapter.nc.platform")
+LOG = get_log("Adapter")
 
 
 class UnsupportedPlatformError(Exception):
@@ -147,7 +145,7 @@ class WindowsOps(PlatformOps):
 
     @property
     def napcat_dir(self) -> Path:
-        return Path(WINDOWS_NAPCAT_DIR)
+        return Path(os.path.abspath("napcat"))
 
     def is_napcat_running(self, uin: Optional[str] = None) -> bool:
         # Windows 暂未实现精确检测
@@ -173,9 +171,9 @@ class WindowsOps(PlatformOps):
             LOG.info(f"下载链接: {download_url}")
             LOG.info("正在下载 napcat 客户端...")
 
-            zip_path = f"{WINDOWS_NAPCAT_DIR}.zip"
+            zip_path = self.napcat_dir.parent / "NapCat.Shell.zip"
             download_file(download_url, zip_path)
-            unzip_file(zip_path, WINDOWS_NAPCAT_DIR, remove=True)
+            unzip_file(zip_path, self.napcat_dir, remove=True)
             return True
         except Exception as e:
             LOG.error(f"安装失败: {e}")
@@ -247,7 +245,7 @@ class LinuxOps(PlatformOps):
 
     @property
     def napcat_dir(self) -> Path:
-        target = Path(LINUX_NAPCAT_DIR)
+        target = Path("/opt/QQ/resources/app/app_launcher/napcat")
         if target.exists():
             return target
         return Path.home() / "Napcat/opt/QQ/resources/app/app_launcher/napcat"
@@ -323,7 +321,7 @@ class LinuxOps(PlatformOps):
         process.wait()
 
         if process.returncode != 0:
-            LOG.error(f"启动失败，请检查目录 {LINUX_NAPCAT_DIR}")
+            LOG.error(f"启动失败，请检查目录 {self.napcat_dir} 是否存在")
             raise FileNotFoundError("napcat cli 可能没有被正确安装")
 
         if not self.is_napcat_running(uin):

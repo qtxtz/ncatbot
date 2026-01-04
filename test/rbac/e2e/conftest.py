@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from ncatbot.utils import status
+from ncatbot.utils import global_status
 from ncatbot.core.service.builtin.rbac.service import RBACService
 
 
@@ -42,11 +42,11 @@ def rbac_service_for_e2e():
     service = RBACService(storage_path=str(TEST_STORAGE))
 
     # 设置为全局访问管理器
-    old_manager = status.global_access_manager
-    status.global_access_manager = service
+    old_manager = global_status.global_access_manager
+    global_status.global_access_manager = service
 
     yield service
 
     # 恢复原状态
-    status.global_access_manager = old_manager
+    global_status.global_access_manager = old_manager
     cleanup_test_storage()

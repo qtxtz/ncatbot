@@ -144,12 +144,12 @@ class TestGlobalStatus:
 
     def test_global_status_exists(self):
         """Test that global status singleton is accessible."""
-        from ncatbot.utils.status import status
+        from ncatbot.utils.status import global_status
 
-        assert status is not None
+        assert global_status is not None
 
     def test_global_status_is_status_instance(self):
         """Test that global status is a Status instance."""
-        from ncatbot.utils.status import status, Status
+        from ncatbot.utils.status import global_status, Status
 
-        assert isinstance(status, Status)
+        assert isinstance(global_status, Status)

@@ -5,7 +5,7 @@ import pytest_asyncio
 from pathlib import Path
 
 from ncatbot.utils.testing import E2ETestSuite
-from ncatbot.utils import status
+from ncatbot.utils import global_status
 
 # 测试插件目录
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
@@ -73,26 +73,26 @@ async def groups_suite():
 @pytest.fixture
 def mock_admin():
     """模拟管理员权限"""
-    original_manager = status.global_access_manager
+    original_manager = global_status.global_access_manager
 
     class AdminManager:
         def user_has_role(self, user_id, role):
             return True
 
-    status.global_access_manager = AdminManager()
+    global_status.global_access_manager = AdminManager()
     yield
-    status.global_access_manager = original_manager
+    global_status.global_access_manager = original_manager
 
 
 @pytest.fixture
 def mock_non_admin():
     """模拟非管理员权限"""
-    original_manager = status.global_access_manager
+    original_manager = global_status.global_access_manager
 
     class NonAdminManager:
         def user_has_role(self, user_id, role):
             return False
 
-    status.global_access_manager = NonAdminManager()
+    global_status.global_access_manager = NonAdminManager()
     yield
-    status.global_access_manager = original_manager
+    global_status.global_access_manager = original_manager

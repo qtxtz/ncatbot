@@ -66,4 +66,4 @@ class Status:
 
 
 # Global status instance
-status = Status()
+global_status = Status()
