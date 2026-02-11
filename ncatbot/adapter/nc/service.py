@@ -91,7 +91,7 @@ class NapCatService:
             服务是否正常
         """
         if timeout == 0:
-            result = asyncio.run(self._test_websocket_async, show_info)
+            result = asyncio.run(self._test_websocket_async(show_info))
             return bool(result)
 
         expire_time = time.time() + timeout
