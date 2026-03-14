@@ -12,7 +12,6 @@ from unittest.mock import MagicMock, AsyncMock, patch
 from ncatbot.core.client.lifecycle import LifecycleManager, NcatBotError
 from ncatbot.core.api import BotAPI
 from ncatbot.core.service import ServiceManager
-from ncatbot.core.client.registry import EventRegistry
 
 # ======================= Fixtures =======================
 
@@ -47,7 +46,6 @@ def mock_services():
 @pytest.fixture
 def manager(mock_services, event_bus):
     """LifecycleManager 实例"""
-    registry = MagicMock(spec=EventRegistry)
 
     # Patch Config 防止读取真实配置文件
     with patch("ncatbot.core.client.lifecycle.ncatbot_config") as mock_cfg:
@@ -55,7 +53,7 @@ def manager(mock_services, event_bus):
         # 模拟插件配置路径
         mock_cfg.plugin.plugins_dir = "plugins"
 
-        manager = LifecycleManager(mock_services, event_bus, registry)
+        manager = LifecycleManager(mock_services, event_bus)
         yield manager
 
         # Teardown: 确保测试后关闭

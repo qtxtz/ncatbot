@@ -1,0 +1,99 @@
+from __future__ import annotations
+
+from typing import Literal, Optional
+
+from pydantic import Field
+
+from .base import BaseEventData
+from .enums import NoticeType, NotifySubType, PostType
+from .misc import FileInfo
+
+__all__ = [
+    "NoticeEventData",
+    "GroupUploadNoticeEventData",
+    "GroupAdminNoticeEventData",
+    "GroupDecreaseNoticeEventData",
+    "GroupIncreaseNoticeEventData",
+    "GroupBanNoticeEventData",
+    "FriendAddNoticeEventData",
+    "GroupRecallNoticeEventData",
+    "FriendRecallNoticeEventData",
+    "NotifyEventData",
+    "PokeNotifyEventData",
+    "LuckyKingNotifyEventData",
+    "HonorNotifyEventData",
+]
+
+
+class NoticeEventData(BaseEventData):
+    post_type: PostType = Field(default=PostType.NOTICE)
+    notice_type: NoticeType
+    group_id: Optional[str] = None
+    user_id: Optional[str] = None
+
+
+class GroupUploadNoticeEventData(NoticeEventData):
+    notice_type: NoticeType = Field(default=NoticeType.GROUP_UPLOAD)
+    file: FileInfo
+
+
+class GroupAdminNoticeEventData(NoticeEventData):
+    notice_type: NoticeType = Field(default=NoticeType.GROUP_ADMIN)
+    sub_type: str = Field(default="set")
+
+
+class GroupDecreaseNoticeEventData(NoticeEventData):
+    notice_type: NoticeType = Field(default=NoticeType.GROUP_DECREASE)
+    sub_type: str = Field(default="leave")
+    operator_id: str
+
+
+class GroupIncreaseNoticeEventData(NoticeEventData):
+    notice_type: NoticeType = Field(default=NoticeType.GROUP_INCREASE)
+    sub_type: str = Field(default="approve")
+    operator_id: str
+
+
+class GroupBanNoticeEventData(NoticeEventData):
+    notice_type: NoticeType = Field(default=NoticeType.GROUP_BAN)
+    sub_type: str = Field(default="ban")
+    operator_id: str
+    duration: int
+
+
+class FriendAddNoticeEventData(NoticeEventData):
+    notice_type: NoticeType = Field(default=NoticeType.FRIEND_ADD)
+
+
+class GroupRecallNoticeEventData(NoticeEventData):
+    notice_type: NoticeType = Field(default=NoticeType.GROUP_RECALL)
+    operator_id: str
+    message_id: str
+
+
+class FriendRecallNoticeEventData(NoticeEventData):
+    notice_type: NoticeType = Field(default=NoticeType.FRIEND_RECALL)
+    message_id: str
+
+
+# --- Notify 子类 ---
+
+
+class NotifyEventData(NoticeEventData):
+    notice_type: NoticeType = Field(default=NoticeType.NOTIFY)
+    sub_type: str
+
+
+class PokeNotifyEventData(NotifyEventData):
+    sub_type: str = Field(default=NotifySubType.POKE)
+    target_id: str
+
+
+class LuckyKingNotifyEventData(NotifyEventData):
+    sub_type: str = Field(default=NotifySubType.LUCKY_KING)
+    target_id: str
+
+
+class HonorNotifyEventData(NotifyEventData):
+    sub_type: str = Field(default=NotifySubType.HONOR)
+    honor_type: Literal["talkative", "performer", "emotion"]

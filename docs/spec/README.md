@@ -16,6 +16,8 @@
 | SPEC-05 | [Event 标准模型规范](./05-Event标准模型规范.md) | 标准事件体系、Adapter 转换契约、ContextMixin 改造 | 📝 Draft |
 | SPEC-06 | [生命周期规范](./06-生命周期规范.md) | 启动流程、关闭流程、事件流、API 调用流 | 📝 Draft |
 | SPEC-07 | [迁移计划](./07-迁移计划.md) | 组件迁移映射、分阶段实施路线、验证标准 | 📝 Draft |
+| SPEC-08 | [消除 BotClient 反向引用](./08-消除BotClient反向引用.md) | 接口隔离 Protocol 设计、`set_bot_client` 消除、分步迁移 | 📝 Draft |
+| SPEC-09 | [模块依赖分析与接口提取](./09-模块依赖分析与接口提取.md) | 全模块依赖/反向引用清单、Protocol 设计、DI 注入方案 | 📝 Draft |
 
 ## 核心设计决策
 

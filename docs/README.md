@@ -14,6 +14,8 @@
 | [服务层](./06-服务层.md) | BaseService 体系、ServiceManager、内置服务详解 |
 | [适配器与网络通信](./07-适配器与网络通信.md) | NapCat 适配器、WebSocket 通信、登录认证、平台适配 |
 | [工具与 CLI](./08-工具与CLI.md) | 配置系统、日志系统、CLI 命令行、MCP 支持 |
+| [消息体系详解](./09-消息体系详解.md) | MessageSegment / MessageArray 消息内容模型 |
+| [架构图](./10-架构图.md) | 顶层模块关系图 + 各模块内部 Mermaid 结构图 |
 | [架构重设计规范](./spec/README.md) | v5.0 四层架构规范：Adapter/Service/Registry/API/Event/生命周期/迁移计划 |
 
 ## 快速导航

@@ -5,7 +5,7 @@ EventRegistry 核心功能测试
 import pytest
 from unittest.mock import MagicMock
 
-from ncatbot.core.client.registry import EventRegistry
+from ncatbot.legacy.client.registry import EventRegistry
 from ncatbot.core import NcatBotEvent
 from ncatbot.core import EventType
 

@@ -11,7 +11,7 @@
 import pytest
 from unittest.mock import Mock, patch
 
-from ncatbot.core.service.builtin.unified_registry.service import UnifiedRegistryService
+from ncatbot.legacy.unified_registry.service import UnifiedRegistryService
 from ncatbot.core.service.builtin.unified_registry.filter_system.event_registry import (
     EventRegistry,
 )

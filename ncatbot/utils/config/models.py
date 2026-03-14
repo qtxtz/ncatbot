@@ -1,18 +1,12 @@
-"""配置数据模型层 - 使用 Pydantic 定义配置结构和校验逻辑。"""
+"""配置数据模型 - 纯 Pydantic 结构定义，不含业务逻辑。"""
 
 import os
-import urllib.parse
 from typing import Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from .utils import strong_password_check, generate_strong_token
-
-
 # ==================== 常量 ====================
 
-DEFAULT_WS_TOKEN = "napcat_ws"
-DEFAULT_WEBUI_TOKEN = "napcat_webui"
 DEFAULT_BOT_UIN = "123456"
 DEFAULT_ROOT = "123456"
 
@@ -21,28 +15,22 @@ DEFAULT_ROOT = "123456"
 
 
 class BaseConfig(BaseModel):
-    """配置基类，提供通用的配置操作方法。"""
+    """配置基类。"""
 
     model_config = ConfigDict(validate_assignment=True, extra="allow")
 
     def get_field_paths(self, prefix: str = "") -> Dict[str, str]:
+        """递归获取所有字段的点分路径映射。"""
         paths = {}
-        for field_name in type(self).model_fields.keys():
-            current_path = f"{prefix}.{field_name}" if prefix else field_name
-            paths[field_name] = current_path
-
-            # 获取值用于递归判断
-            field_value = getattr(self, field_name)
-
-            # 递归逻辑保持不变
-            if isinstance(field_value, BaseConfig):
-                nested_paths = field_value.get_field_paths(current_path)
-                paths.update(nested_paths)
-
+        for field_name in type(self).model_fields:
+            current = f"{prefix}.{field_name}" if prefix else field_name
+            paths[field_name] = current
+            value = getattr(self, field_name)
+            if isinstance(value, BaseConfig):
+                paths.update(value.get_field_paths(current))
         return paths
 
     def to_dict(self) -> dict:
-        """导出为字典。"""
         return self.model_dump()
 
 
@@ -50,9 +38,7 @@ class BaseConfig(BaseModel):
 
 
 class PluginConfig(BaseConfig):
-    """插件配置。"""
-
-    model_config = ConfigDict(validate_assignment=True, extra="allow")
+    """插件相关配置。"""
 
     plugins_dir: str = Field(default="plugins")
     plugin_whitelist: List[str] = Field(default_factory=list)
@@ -64,20 +50,15 @@ class PluginConfig(BaseConfig):
     def _validate_plugins_dir(cls, v: str) -> str:
         return v if v else "plugins"
 
-    def ensure_dir_exists(self) -> None:
-        """确保插件目录存在。"""
-        if not os.path.exists(self.plugins_dir):
-            os.makedirs(self.plugins_dir)
-
 
 class NapCatConfig(BaseConfig):
-    """NapCat 客户端配置。"""
+    """NapCat 客户端连接配置。"""
 
     ws_uri: str = "ws://localhost:3001"
-    ws_token: str = DEFAULT_WS_TOKEN
+    ws_token: str = "napcat_ws"
     ws_listen_ip: str = "localhost"
     webui_uri: str = "http://localhost:6099"
-    webui_token: str = DEFAULT_WEBUI_TOKEN
+    webui_token: str = "napcat_webui"
     enable_webui: bool = True
     enable_update_check: bool = False
     stop_napcat: bool = False
@@ -103,71 +84,34 @@ class NapCatConfig(BaseConfig):
 
     @property
     def ws_host(self) -> Optional[str]:
-        """WebSocket 主机地址。"""
+        import urllib.parse
+
         return urllib.parse.urlparse(self.ws_uri).hostname
 
     @property
     def ws_port(self) -> Optional[int]:
-        """WebSocket 端口。"""
+        import urllib.parse
+
         return urllib.parse.urlparse(self.ws_uri).port
 
     @property
     def webui_host(self) -> Optional[str]:
-        """WebUI 主机地址。"""
+        import urllib.parse
+
         return urllib.parse.urlparse(self.webui_uri).hostname
 
     @property
     def webui_port(self) -> Optional[int]:
-        """WebUI 端口。"""
+        import urllib.parse
+
         return urllib.parse.urlparse(self.webui_uri).port
-
-    def get_issues(self) -> List[str]:
-        """
-        返回问题列表。
-        """
-        return self.get_security_issues()
-
-    def get_security_issues(self, auto_fix: bool = True) -> List[str]:
-        """
-        返回安全性问题列表
-        Args:
-            auto_fix: 是否自动修复弱密码（仅限默认值）
-        """
-        issues = []
-        can_auto_fix = auto_fix
-
-        # WS Token 检查
-        if self.ws_listen_ip == "0.0.0.0" and not strong_password_check(self.ws_token):
-            if self.ws_token != DEFAULT_WS_TOKEN:
-                can_auto_fix = False
-                issues.append("WS 令牌强度不足")
-
-        # WebUI Token 检查
-        if self.enable_webui and not strong_password_check(self.webui_token):
-            if self.webui_token != DEFAULT_WEBUI_TOKEN:
-                can_auto_fix = False
-                issues.append("WebUI 令牌强度不足")
-
-        if can_auto_fix:
-            self.fix_security_issues()
-            return []
-
-        return issues
-
-    def fix_security_issues(self) -> None:
-        self.ws_token = generate_strong_token()
-        self.webui_token = generate_strong_token()
-
-
-# ==================== 主配置模型 ====================
 
 
 class Config(BaseConfig):
-    """主配置模型。"""
+    """主配置模型 — 聚合所有子配置。"""
 
     napcat: NapCatConfig = Field(default_factory=NapCatConfig)
     plugin: PluginConfig = Field(default_factory=PluginConfig)
-
     bot_uin: str = DEFAULT_BOT_UIN
     root: str = DEFAULT_ROOT
     debug: bool = False
@@ -189,18 +133,5 @@ class Config(BaseConfig):
     def _validate_timeout(cls, v: int) -> int:
         return max(1, v)
 
-    def is_local(self) -> bool:
-        """NapCat 是否为本地服务。"""
-        return self.napcat.ws_host in ("localhost", "127.0.0.1")
-
-    def is_default_uin(self) -> bool:
-        """是否使用默认 QQ 号。"""
-        return self.bot_uin == DEFAULT_BOT_UIN
-
-    def is_default_root(self) -> bool:
-        """是否使用默认管理员 QQ 号。"""
-        return self.root == DEFAULT_ROOT
-
     def to_dict(self) -> dict:
-        """导出为字典，用于保存到文件。"""
         return self.model_dump(exclude_none=True)

@@ -21,15 +21,10 @@ class TestLifecycleManagerInit:
 
     def test_init_with_required_components(self, event_bus, mock_services):
         """测试使用必需组件初始化"""
-        from ncatbot.core.client.registry import EventRegistry
-
-        registry = EventRegistry(event_bus)
-
-        manager = LifecycleManager(mock_services, event_bus, registry)
+        manager = LifecycleManager(mock_services, event_bus)
 
         assert manager.services is mock_services
         assert manager.event_bus is event_bus
-        assert manager.registry is registry
         assert manager._running is False
         assert manager.api is None
         assert manager.dispatcher is None
@@ -37,11 +32,7 @@ class TestLifecycleManagerInit:
 
     def test_init_state(self, event_bus, mock_services):
         """测试初始状态"""
-        from ncatbot.core.client.registry import EventRegistry
-
-        registry = EventRegistry(event_bus)
-
-        manager = LifecycleManager(mock_services, event_bus, registry)
+        manager = LifecycleManager(mock_services, event_bus)
 
         assert manager._load_plugin is True
         assert manager._startup_event is None
@@ -53,10 +44,7 @@ class TestPrepareStartup:
 
     @pytest.fixture
     def manager(self, event_bus, mock_services):
-        from ncatbot.core.client.registry import EventRegistry
-
-        registry = EventRegistry(event_bus)
-        return LifecycleManager(mock_services, event_bus, registry)
+        return LifecycleManager(mock_services, event_bus)
 
     @patch("ncatbot.core.client.lifecycle.ncatbot_config")
     def test_prepare_startup_normal_mode(self, mock_config, manager):
@@ -97,14 +85,11 @@ class TestPrepareStartup:
 
 
 class TestShutdown:
-    """shutdown 方法测试"""
+    """”shutdown 方法测试"""
 
     @pytest.fixture
     def manager(self, event_bus, mock_services):
-        from ncatbot.core.client.registry import EventRegistry
-
-        registry = EventRegistry(event_bus)
-        return LifecycleManager(mock_services, event_bus, registry)
+        return LifecycleManager(mock_services, event_bus)
 
     @pytest.mark.asyncio
     async def test_shutdown_when_not_running(self, manager):
@@ -152,10 +137,7 @@ class TestBotExit:
 
     @pytest.fixture
     def manager(self, event_bus, mock_services):
-        from ncatbot.core.client.registry import EventRegistry
-
-        registry = EventRegistry(event_bus)
-        return LifecycleManager(mock_services, event_bus, registry)
+        return LifecycleManager(mock_services, event_bus)
 
     def test_bot_exit_when_not_running(self, manager):
         """测试未运行时调用 bot_exit"""
@@ -182,14 +164,11 @@ class TestBotExit:
 
 
 class TestCleanup:
-    """_cleanup 方法测试"""
+    """”_cleanup 方法测试"""
 
     @pytest.fixture
     def manager(self, event_bus, mock_services):
-        from ncatbot.core.client.registry import EventRegistry
-
-        registry = EventRegistry(event_bus)
-        return LifecycleManager(mock_services, event_bus, registry)
+        return LifecycleManager(mock_services, event_bus)
 
     @pytest.mark.asyncio
     async def test_cleanup_when_not_running(self, manager):

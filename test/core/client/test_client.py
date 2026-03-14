@@ -75,34 +75,30 @@ class TestBotClientComponents:
 
 
 class TestBotClientInheritance:
-    """测试 BotClient 继承"""
+    """测试 BotClient 核心组件"""
 
-    def test_client_inherits_registry(self):
-        """继承 EventRegistry 的所有方法"""
-        from ncatbot.core.client.client import BotClient
-        from ncatbot.core.client.registry import EventRegistry
-
-        client = BotClient()
-
-        assert isinstance(client, EventRegistry)
-        assert hasattr(client, "on_group_message")
-        assert hasattr(client, "on_private_message")
-        assert hasattr(client, "on_notice")
-        assert hasattr(client, "on_startup")
-        assert hasattr(client, "subscribe")
-        assert hasattr(client, "register_handler")
-
-    def test_client_decorators_work(self):
-        """装饰器方法正常工作"""
+    def test_client_has_event_bus(self):
+        """BotClient 有 EventBus"""
         from ncatbot.core.client.client import BotClient
 
         client = BotClient()
 
-        @client.on_group_message()
+        assert hasattr(client, "event_bus")
+        assert hasattr(client, "handler_dispatcher")
+        assert hasattr(client, "registry_engine")
+
+    def test_client_event_bus_works(self):
+        """EventBus 订阅正常工作"""
+        from ncatbot.core.client.client import BotClient
+
+        client = BotClient()
+
         async def handler(event):
             pass
 
-        assert "message_event" in client.event_bus._exact
+        client.event_bus.subscribe("test_event", handler)
+
+        assert "test_event" in client.event_bus._exact
 
 
 class TestBotClientPluginManagement:
@@ -185,4 +181,4 @@ class TestBotClientBuiltinHandlers:
 
         client = BotClient()
 
-        assert "meta_event" in client.event_bus._exact
+        assert "ncatbot.meta_event" in client.event_bus._exact

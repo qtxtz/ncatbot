@@ -10,7 +10,7 @@ import pytest
 from ncatbot.core.client.event_bus import EventBus
 from ncatbot.core import NcatBotEvent
 from ncatbot.core.client.dispatcher import EventDispatcher
-from ncatbot.core.client.registry import EventRegistry
+from ncatbot.legacy.client.registry import EventRegistry
 
 
 # ==================== EventBus Fixtures ====================
