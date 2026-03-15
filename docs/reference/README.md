@@ -16,6 +16,7 @@
 | [services/](services/) | 服务层参考（RBAC、定时任务、配置存储） |
 | [adapter/](adapter/) | 适配器参考（WebSocket、协议处理） |
 | [utils/](utils/) | 工具模块参考（日志、IO、装饰器） |
+| [cli/](cli/) | CLI 命令参考（全部命令签名与参数） |
 | [testing/](testing/) | 测试框架参考（TestHarness、事件工厂、Mock） |
 
 ---
@@ -125,6 +126,19 @@ Bot 可调用的所有 API 方法签名，按功能分类：
 
 ---
 
+## cli/ — CLI 命令
+
+`ncatbot` 命令行工具完整参考：
+
+- **init** — 初始化项目
+- **run / dev** — 启动 Bot
+- **config** — 配置管理（show / get / set / check）
+- **plugin** — 插件管理（list / create / enable / disable / ...）
+- **napcat** — NapCat 诊断（ws / webui）
+- **REPL** — 交互式命令行
+
+---
+
 ## testing/ — 测试框架
 
 插件测试工具集：
@@ -144,5 +158,6 @@ Bot 可调用的所有 API 方法签名，按功能分类：
 | 插件开发教程 | [guide/plugin/](../guide/plugin/) |
 | 消息发送教程 | [guide/send_message/](../guide/send_message/) |
 | 插件测试教程 | [guide/testing/](../guide/testing/) |
+| CLI 命令用法 | [guide/cli/](../guide/cli/) |
 | 设计决策（为什么这样设计） | [contributing/design_decisions/](../contributing/design_decisions/) |
 | 模块内部实现细节 | [contributing/module_internals/](../contributing/module_internals/) |

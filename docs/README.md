@@ -24,7 +24,7 @@ docs/
 ├── architecture.md                  # 架构总览
 │
 ├── guide/                           # 使用指南
-│   ├── README.md                    #   指南首页 & Quick Start
+│   ├── README.md                    #   指南首页 & 框架使用 & Quick Start
 │   ├── plugin/                      #   插件开发（12 篇）
 │   │   ├── README.md                #     插件开发首页 & Quick Start
 │   │   ├── 1.quick-start.md         #     快速入门
@@ -61,6 +61,10 @@ docs/
 │   │   ├── 1_model.md               #     权限模型
 │   │   ├── 2a_integration.md        #     插件集成（上）
 │   │   └── 2b_integration.md        #     插件集成（下）
+│   ├── cli/                         #   CLI 命令行工具（2 篇）
+│   │   ├── README.md                #     CLI 指南首页 & Quick Start
+│   │   ├── 1_getting_started.md     #     项目初始化与启动
+│   │   └── 2_management.md          #     插件与配置管理
 │   └── testing/                     #   插件测试（3 篇）
 │       ├── README.md                #     测试指南首页 & Quick Start
 │       ├── 1.quick-start.md         #     快速入门
@@ -102,6 +106,9 @@ docs/
 │   │   ├── 1a_io_logging.md         #     IO 与日志（上）
 │   │   ├── 1b_io_logging.md         #     IO 与日志（下）
 │   │   └── 2_decorators_misc.md     #     装饰器与杂项工具
+│   ├── cli/                         #   CLI 命令参考（1 篇）
+│   │   ├── README.md                #     CLI 参考首页 & Quick Start
+│   │   └── 1_commands.md            #     全部命令签名与参数
 │   └── testing/                     #   测试框架（2 篇）
 │       ├── README.md                #     测试框架首页 & 模块结构
 │       ├── 1_harness.md             #     TestHarness / PluginTestHarness
@@ -139,6 +146,7 @@ docs/
 | [send_message/](guide/send_message/) | 消息发送指南 | 6 | ⭐ |
 | [api_usage/](guide/api_usage/) | Bot API 使用指南 | 3 | ⭐⭐ |
 | [configuration/](guide/configuration/) | 配置管理指南 | 2 | ⭐⭐ |
+| [cli/](guide/cli/) | CLI 命令行工具指南 | 2 | ⭐ |
 | [rbac/](guide/rbac/) | RBAC 权限管理指南 | 3 | ⭐⭐⭐ |
 | [testing/](guide/testing/) | 插件测试指南 | 3 | ⭐⭐ |
 
@@ -180,6 +188,11 @@ docs/
 - [插件集成（上）](guide/rbac/2a_integration.md) — 权限注册与角色分配
 - [插件集成（下）](guide/rbac/2b_integration.md) — 权限检查与实战
 
+#### cli/ — CLI 命令行工具
+
+- [项目初始化与启动](guide/cli/1_getting_started.md) — init / run / dev / REPL
+- [插件与配置管理](guide/cli/2_management.md) — plugin / config / napcat 命令
+
 #### testing/ — 插件测试
 
 - [快速入门](guide/testing/1.quick-start.md) — 5 步写出第一个测试
@@ -200,6 +213,7 @@ docs/
 | [services/](reference/services/) | 服务层参考 | 2 |
 | [adapter/](reference/adapter/) | 适配器参考 | 2 |
 | [utils/](reference/utils/) | 工具模块参考 | 3 |
+| [cli/](reference/cli/) | CLI 命令参考 | 1 |
 | [testing/](reference/testing/) | 测试框架参考 | 2 |
 
 #### api/ — Bot API 方法
@@ -242,6 +256,10 @@ docs/
 - [IO 与日志（上）](reference/utils/1a_io_logging.md) — 日志器、文件读写
 - [IO 与日志（下）](reference/utils/1b_io_logging.md) — 网络请求、下载工具
 - [装饰器与杂项](reference/utils/2_decorators_misc.md) — 装饰器、辅助函数
+
+#### cli/ — CLI 命令
+
+- [命令签名与参数](reference/cli/1_commands.md) — 全部 CLI 命令、选项、参数速查
 
 #### testing/ — 测试框架
 
@@ -287,5 +305,6 @@ docs/
 | **为插件编写测试** | [guide/testing/](guide/testing/) → [reference/testing/](reference/testing/) |
 | **参与贡献** | [contributing/](contributing/) |
 | **配置 Bot** | [guide/configuration/](guide/configuration/) |
+| **使用 CLI** | [guide/cli/](guide/cli/) → [reference/cli/](reference/cli/) |
 | **贡献代码** | [contributing/development_setup/](contributing/development_setup/) → [architecture.md](architecture.md) → [contributing/design_decisions/](contributing/design_decisions/) |
 | **理解内部实现** | [architecture.md](architecture.md) → [contributing/module_internals/](contributing/module_internals/) |
