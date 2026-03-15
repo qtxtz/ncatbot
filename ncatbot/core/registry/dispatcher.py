@@ -18,6 +18,7 @@ from ncatbot.utils import get_log
 from .hook import HookAction, HookContext, HookStage, get_hooks
 
 if TYPE_CHECKING:
+    from ncatbot.api.interface import IBotAPI
     from ncatbot.core.dispatcher import AsyncEventDispatcher, Event
     from ncatbot.core.dispatcher.stream import EventStream
     from ncatbot.service import ServiceManager
@@ -48,9 +49,11 @@ class HandlerDispatcher:
 
     def __init__(
         self,
+        api: Optional["IBotAPI"] = None,
         service_manager: Optional["ServiceManager"] = None,
     ):
         self._handlers: Dict[str, List[HandlerEntry]] = {}
+        self._api = api
         self._service_manager = service_manager
         self._stream: Optional["EventStream"] = None
         self._task: Optional[asyncio.Task] = None
@@ -163,7 +166,12 @@ class HandlerDispatcher:
 
     async def _dispatch(self, event: "Event") -> None:
         """接收 Event 并分发到匹配的 handlers。"""
+        from ncatbot.event.factory import create_entity
+
         event_type = event.type
+
+        # 将数据模型包装为事件实体（如 GroupMessageEvent），供 handler 使用
+        entity = create_entity(event.data, self._api) if self._api else event
 
         # snapshot 防止并发修改
         handlers = self._collect_handlers(event_type)
@@ -202,7 +210,7 @@ class HandlerDispatcher:
 
             # --- 执行 handler ---
             try:
-                result = await self._execute(entry, event, **ctx.kwargs)
+                result = await self._execute(entry, entity, **ctx.kwargs)
                 ctx.result = result
 
                 # --- AFTER_CALL hooks ---
@@ -252,15 +260,15 @@ class HandlerDispatcher:
         return result
 
     @staticmethod
-    async def _execute(entry: HandlerEntry, event: "Event", **kwargs: Any) -> Any:
+    async def _execute(entry: HandlerEntry, entity: Any, **kwargs: Any) -> Any:
         """执行 handler，注入 plugin 实例 (如果是方法) + kwargs"""
         func = entry.func
         plugin = entry.metadata.get("plugin_instance")
 
         if plugin:
-            return await func(plugin, event, **kwargs)
+            return await func(plugin, entity, **kwargs)
         else:
-            return await func(event, **kwargs)
+            return await func(entity, **kwargs)
 
     # ==================== 查询 ====================
 

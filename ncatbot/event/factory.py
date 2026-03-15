@@ -8,8 +8,6 @@ from ncatbot.types import (
     GroupIncreaseNoticeEventData,
     GroupMessageEventData,
     GroupRequestEventData,
-    MetaEventData,
-    NoticeEventData,
     PrivateMessageEventData,
     PostType,
 )
@@ -21,7 +19,7 @@ from .request import FriendRequestEvent, GroupRequestEvent, RequestEvent
 from .meta import MetaEvent
 
 if TYPE_CHECKING:
-    from ncatbot.core.api.interface import IBotAPI
+    from ncatbot.api import IBotAPI
 
 __all__ = [
     "create_entity",
@@ -46,7 +44,7 @@ _FALLBACK_MAP: Dict[str, Type[BaseEvent]] = {
 }
 
 
-def create_entity(data: BaseEventData, api: IBotAPI) -> BaseEvent:
+def create_entity(data: BaseEventData, api: "IBotAPI") -> BaseEvent:
     """数据模型 → 实体（精确映射优先，降级至 post_type 基类）"""
     entity_cls = _ENTITY_MAP.get(type(data))
     if entity_cls is None:

@@ -197,6 +197,7 @@ class BotClient:
     def _setup_handler_dispatcher(self) -> None:
         """创建 HandlerDispatcher 并订阅事件流。"""
         self._handler_dispatcher = HandlerDispatcher(
+            api=self._api,
             service_manager=self._service_manager,
         )
         self._handler_dispatcher.start(self.dispatcher)
