@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Optional
 
 from ncatbot.types import (
     FriendRequestEventData,
@@ -22,6 +22,26 @@ class RequestEvent(BaseEvent):
     """请求事件实体"""
 
     _data: RequestEventData
+
+    # ---- RequestEventData 字段 ----
+
+    @property
+    def request_type(self) -> RequestType:
+        return self._data.request_type
+
+    @property
+    def user_id(self) -> str:
+        return self._data.user_id
+
+    @property
+    def comment(self) -> Optional[str]:
+        return self._data.comment
+
+    @property
+    def flag(self) -> str:
+        return self._data.flag
+
+    # ---- 行为方法 ----
 
     async def approve(self, remark: str = "", reason: str = "") -> Any:
         if self._data.request_type is RequestType.FRIEND:
@@ -60,3 +80,13 @@ class GroupRequestEvent(RequestEvent):
     """群请求事件"""
 
     _data: GroupRequestEventData
+
+    # ---- GroupRequestEventData 字段 ----
+
+    @property
+    def sub_type(self) -> str:
+        return self._data.sub_type
+
+    @property
+    def group_id(self) -> str:
+        return self._data.group_id

@@ -1,18 +1,22 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 from ncatbot.types import (
+    BaseSender,
     GroupMessageEventData,
+    GroupSender,
+    MessageArray,
     MessageEventData,
     MessageType,
+    Anonymous,
     PrivateMessageEventData,
 )
 
 from .base import BaseEvent
 
 if TYPE_CHECKING:
-    from ncatbot.api.interface import IBotAPI
+    pass
 
 __all__ = [
     "MessageEvent",
@@ -26,8 +30,46 @@ class MessageEvent(BaseEvent):
 
     _data: MessageEventData
 
+    # ---- MessageEventData 字段 ----
+
+    @property
+    def message_type(self) -> MessageType:
+        return self._data.message_type
+
+    @property
+    def sub_type(self) -> str:
+        return self._data.sub_type
+
+    @property
+    def message_id(self) -> str:
+        return self._data.message_id
+
+    @property
+    def user_id(self) -> str:
+        return self._data.user_id
+
+    @property
+    def message(self) -> MessageArray:
+        return self._data.message
+
+    @property
+    def raw_message(self) -> str:
+        return self._data.raw_message
+
+    @property
+    def sender(self) -> BaseSender:
+        return self._data.sender
+
+    @property
+    def font(self) -> int:
+        return self._data.font
+
+    # ---- 便捷方法 ----
+
+    def is_group_msg(self) -> bool:
+        return self._data.message_type is MessageType.GROUP
+
     async def reply(self, text: Any, **kwargs: Any) -> Any:
-        # str(Enum) 使用 .value；MessageType 继承 str，is 比较安全
         if self._data.message_type is MessageType.GROUP:
             return await self._api.send_group_msg(
                 group_id=self._data.group_id,  # type: ignore[attr-defined]
@@ -52,6 +94,22 @@ class GroupMessageEvent(MessageEvent):
     """群消息事件"""
 
     _data: GroupMessageEventData
+
+    # ---- GroupMessageEventData 字段 ----
+
+    @property
+    def group_id(self) -> str:
+        return self._data.group_id
+
+    @property
+    def anonymous(self) -> Optional[Anonymous]:
+        return self._data.anonymous
+
+    @property
+    def sender(self) -> GroupSender:  # type: ignore[override]
+        return self._data.sender
+
+    # ---- 行为方法 ----
 
     async def kick(self, reject_add_request: bool = False) -> Any:
         return await self._api.set_group_kick(
