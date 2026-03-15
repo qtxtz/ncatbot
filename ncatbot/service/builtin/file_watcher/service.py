@@ -56,6 +56,11 @@ class FileWatcherService(BaseService):
         # 回调槽：文件变化时调用，参数为插件目录名
         self.on_file_changed: Optional[Callable[[str], None]] = None
 
+        # 回调槽：全局配置文件变化时调用
+        self.on_config_changed: Optional[Callable[[], None]] = None
+        self._config_file_path: Optional[str] = None
+        self._config_file_mtime: float = 0
+
     # ------------------------------------------------------------------
     # 生命周期
     # ------------------------------------------------------------------
@@ -69,6 +74,9 @@ class FileWatcherService(BaseService):
         self._debounce_delay = (
             self.FAST_DEBOUNCE_DELAY if is_test_mode else self.DEFAULT_DEBOUNCE_DELAY
         )
+
+        # 自动监听全局配置文件
+        self._setup_config_watch()
 
         self._stop_event.clear()
         self._watcher_thread = threading.Thread(
@@ -122,6 +130,42 @@ class FileWatcherService(BaseService):
         LOG.debug("文件监视处理已恢复")
 
     # ------------------------------------------------------------------
+    # 全局配置文件监听
+    # ------------------------------------------------------------------
+
+    def _setup_config_watch(self) -> None:
+        """读取全局配置文件路径并初始化 mtime 缓存。"""
+        try:
+            from ncatbot.utils.config import CONFIG_PATH
+
+            config_path = os.path.abspath(CONFIG_PATH)
+            if os.path.exists(config_path):
+                self._config_file_path = config_path
+                self._config_file_mtime = os.path.getmtime(config_path)
+                LOG.info("已自动监听全局配置文件: %s", config_path)
+        except Exception as e:
+            LOG.debug("未能设置全局配置文件监听: %s", e)
+
+    def _check_config_file(self) -> None:
+        """检测全局配置文件变化并触发回调。"""
+        if self._config_file_path is None:
+            return
+        try:
+            if not os.path.exists(self._config_file_path):
+                return
+            mtime = os.path.getmtime(self._config_file_path)
+            if mtime != self._config_file_mtime:
+                self._config_file_mtime = mtime
+                LOG.info("检测到全局配置文件变化: %s", self._config_file_path)
+                if self.on_config_changed is not None:
+                    try:
+                        self.on_config_changed()
+                    except Exception as e:
+                        LOG.error("on_config_changed 回调执行失败: %s", e)
+        except OSError:
+            pass
+
+    # ------------------------------------------------------------------
     # 内部实现
     # ------------------------------------------------------------------
 
@@ -134,6 +178,7 @@ class FileWatcherService(BaseService):
                 for watch_dir in list(self._watch_dirs):
                     if os.path.exists(watch_dir):
                         self._scan_files(watch_dir)
+                self._check_config_file()
                 self._process_pending()
                 self._stop_event.wait(self._watch_interval)
             except Exception as e:
