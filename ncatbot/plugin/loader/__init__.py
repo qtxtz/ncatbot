@@ -9,6 +9,7 @@ from .resolver import (
     PluginVersionError,
 )
 from .importer import ModuleImporter
+from .pip_helper import check_requirements, install_packages
 
 __all__ = [
     "PluginLoader",
@@ -18,4 +19,6 @@ __all__ = [
     "PluginCircularDependencyError",
     "PluginMissingDependencyError",
     "PluginVersionError",
+    "check_requirements",
+    "install_packages",
 ]

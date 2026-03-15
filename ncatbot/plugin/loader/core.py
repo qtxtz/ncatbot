@@ -16,6 +16,7 @@ from ..manifest import PluginManifest
 from .indexer import PluginIndexer
 from .resolver import DependencyResolver
 from .importer import ModuleImporter
+from .pip_helper import check_requirements, install_packages, format_missing_report
 
 if TYPE_CHECKING:
     from ncatbot.core.registry.dispatcher import HandlerDispatcher
@@ -76,9 +77,15 @@ class PluginLoader:
         load_order = self._resolver.resolve(manifests)
         self._resolver.validate_versions(manifests)
 
+        # pip 依赖检查
+        skip_plugins = await self._check_pip_deps_batch(manifests)
+
         # 按序加载
         loaded = []
         for name in load_order:
+            if name in skip_plugins:
+                LOG.warning("跳过插件 %s（pip 依赖未满足）", name)
+                continue
             plugin = await self.load_plugin(name)
             if plugin is not None:
                 loaded.append(name)
@@ -106,6 +113,11 @@ class PluginLoader:
         if manifest is None:
             LOG.error("插件 %s 未索引，无法加载", name)
             return None
+
+        # 单插件加载时也检查 pip 依赖
+        if manifest.pip_dependencies:
+            if not await self._ensure_pip_deps(manifest):
+                return None
 
         try:
             # ContextVar 包裹模块加载，确保装饰器能读取到当前插件名
@@ -302,6 +314,117 @@ class PluginLoader:
     # ------------------------------------------------------------------
     # 内部方法
     # ------------------------------------------------------------------
+
+    async def _check_pip_deps_batch(
+        self, manifests: Dict[str, PluginManifest]
+    ) -> set:
+        """批量检查所有插件的 pip 依赖，返回应跳过的插件名集合。"""
+        from ncatbot.utils.prompt import async_confirm
+        from ncatbot.utils import get_config_manager
+
+        config = get_config_manager()
+        if not config.plugin.auto_install_pip_deps:
+            # 配置禁用自动安装，仅输出警告
+            skip = set()
+            for name, manifest in manifests.items():
+                if manifest.pip_dependencies:
+                    _, missing = check_requirements(manifest.pip_dependencies)
+                    if missing:
+                        LOG.warning("%s", format_missing_report(name, missing))
+                        skip.add(name)
+            return skip
+
+        # 合并所有插件的 pip 依赖（去重，同名取第一个出现的约束）
+        all_deps: Dict[str, str] = {}
+        dep_to_plugins: Dict[str, List[str]] = {}
+        for name, manifest in manifests.items():
+            for pkg, constraint in manifest.pip_dependencies.items():
+                if pkg not in all_deps:
+                    all_deps[pkg] = constraint
+                dep_to_plugins.setdefault(pkg, []).append(name)
+
+        if not all_deps:
+            return set()
+
+        _, missing = check_requirements(all_deps)
+        if not missing:
+            return set()
+
+        # 构建报告
+        report_lines = ["以下插件需要额外安装 pip 依赖:"]
+        for req in missing:
+            pkg_name = req.split(">")[0].split("<")[0].split("=")[0].split("!")[0].split("~")[0].strip()
+            plugins = dep_to_plugins.get(pkg_name, ["?"])
+            report_lines.append(f"  - {req} (被 {', '.join(plugins)} 使用)")
+        report = "\n".join(report_lines)
+        LOG.info("%s", report)
+
+        # 询问用户
+        approved = await async_confirm(
+            f"是否安装以上 {len(missing)} 个依赖?", default=True
+        )
+        if not approved:
+            # 找出哪些插件受影响
+            missing_names = {
+                req.split(">")[0].split("<")[0].split("=")[0].split("!")[0].split("~")[0].strip()
+                for req in missing
+            }
+            skip = set()
+            for name, manifest in manifests.items():
+                if missing_names & set(manifest.pip_dependencies.keys()):
+                    skip.add(name)
+            LOG.info("用户拒绝安装，跳过插件: %s", skip)
+            return skip
+
+        # 执行安装
+        if install_packages(missing):
+            return set()
+
+        # 安装失败，重新检查哪些还缺
+        _, still_missing = check_requirements(all_deps)
+        if not still_missing:
+            return set()
+
+        still_missing_names = {
+            req.split(">")[0].split("<")[0].split("=")[0].split("!")[0].split("~")[0].strip()
+            for req in still_missing
+        }
+        skip = set()
+        for name, manifest in manifests.items():
+            if still_missing_names & set(manifest.pip_dependencies.keys()):
+                skip.add(name)
+        LOG.warning("部分依赖安装失败，跳过插件: %s", skip)
+        return skip
+
+    async def _ensure_pip_deps(self, manifest: PluginManifest) -> bool:
+        """检查并安装单个插件的 pip 依赖。返回 True 表示满足/已安装。"""
+        from ncatbot.utils.prompt import async_confirm
+        from ncatbot.utils import get_config_manager
+
+        _, missing = check_requirements(manifest.pip_dependencies)
+        if not missing:
+            return True
+
+        LOG.info("%s", format_missing_report(manifest.name, missing))
+
+        config = get_config_manager()
+        if not config.plugin.auto_install_pip_deps:
+            LOG.warning("auto_install_pip_deps 已禁用，跳过插件 %s", manifest.name)
+            return False
+
+        approved = await async_confirm(
+            f"插件 {manifest.name} 需要安装 {len(missing)} 个 pip 依赖，是否安装?",
+            default=True,
+        )
+        if not approved:
+            LOG.info("用户拒绝安装，跳过插件 %s", manifest.name)
+            return False
+
+        if not install_packages(missing):
+            LOG.error("依赖安装失败，跳过插件 %s", manifest.name)
+            return False
+
+        return True
 
     def _instantiate(
         self, plugin_class: Type[BasePlugin], manifest: PluginManifest

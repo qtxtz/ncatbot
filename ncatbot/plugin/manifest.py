@@ -41,6 +41,17 @@ class PluginManifest:
     # 工厂方法
     # ------------------------------------------------------------------
 
+    @staticmethod
+    def _normalize_deps(value) -> Dict[str, str]:
+        """将 pip_dependencies 统一为 Dict[str, str]，兼容 list 写法。"""
+        if not value:
+            return {}
+        if isinstance(value, dict):
+            return value
+        if isinstance(value, list):
+            return {str(item): "" for item in value}
+        return {}
+
     @classmethod
     def from_toml(cls, manifest_path: Path) -> "PluginManifest":
         """从 manifest.toml 文件解析清单。
@@ -95,7 +106,7 @@ class PluginManifest:
             author=raw.get("author", "Unknown"),
             description=raw.get("description", ""),
             dependencies=raw.get("dependencies") or {},
-            pip_dependencies=raw.get("pip_dependencies") or {},
+            pip_dependencies=cls._normalize_deps(raw.get("pip_dependencies")),
             plugin_dir=plugin_dir,
             folder_name=plugin_dir.name,
             _raw=raw,
