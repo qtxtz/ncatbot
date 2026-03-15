@@ -43,8 +43,9 @@ class ConfigMixin:
     # ------------------------------------------------------------------
 
     def _mixin_load(self) -> None:
-        """从 YAML 加载配置。"""
+        """从 YAML 加载配置，然后合并全局配置覆盖（全局优先）。"""
         self.config = self._load_config()
+        self._apply_global_overrides()
 
     def _mixin_unload(self) -> None:
         """将配置保存到 YAML。"""
@@ -79,6 +80,26 @@ class ConfigMixin:
                 )
         except Exception as e:
             LOG.error("保存插件 %s 配置失败: %s", self.name, e)
+
+    # ------------------------------------------------------------------
+    # 全局配置覆盖
+    # ------------------------------------------------------------------
+
+    def _apply_global_overrides(self) -> None:
+        """如果全局配置 plugin.plugin_configs 中存在本插件的条目，用它覆盖当前 config。"""
+        try:
+            from ncatbot.utils.config import get_config_manager
+
+            overrides = get_config_manager().config.plugin.plugin_configs.get(self.name)
+            if overrides:
+                self.config.update(overrides)
+                LOG.debug(
+                    "插件 %s: 已应用全局配置覆盖 %s",
+                    self.name,
+                    list(overrides.keys()),
+                )
+        except Exception as e:
+            LOG.debug("插件 %s: 读取全局配置覆盖失败: %s", self.name, e)
 
     # ------------------------------------------------------------------
     # 便捷接口

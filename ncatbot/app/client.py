@@ -216,8 +216,10 @@ class BotClient:
             plugin.services = self._service_manager
             plugin.api = self._api
             plugin._dispatcher = self._dispatcher
+            plugin._plugin_loader = self._plugin_loader
 
         self._plugin_loader._on_plugin_init = _inject_plugin_deps
+        await self._plugin_loader.load_builtin_plugins()
         await self._plugin_loader.load_all(self._plugin_dir)
 
         if self._debug and self._service_manager.has("file_watcher"):

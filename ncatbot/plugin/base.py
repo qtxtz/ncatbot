@@ -8,7 +8,7 @@ BasePlugin 按 MRO 顺序自动发现并执行。
 
 import asyncio
 from pathlib import Path
-from typing import Any, Dict, Optional, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from ncatbot.utils import get_log
 
@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from ncatbot.core.dispatcher import AsyncEventDispatcher
     from ncatbot.plugin.manifest import PluginManifest
     from ncatbot.service import ServiceManager
+    from ncatbot.plugin.loader.core import PluginLoader
 
 LOG = get_log("BasePlugin")
 
@@ -47,6 +48,7 @@ class BasePlugin:
     services: "ServiceManager"
     api: "BotAPIClient"
     _dispatcher: "AsyncEventDispatcher"
+    _plugin_loader: "PluginLoader"
     _manifest: Optional["PluginManifest"] = None
     _debug: bool = False
 
@@ -135,3 +137,15 @@ class BasePlugin:
             "description": getattr(self, "description", ""),
             "dependencies": getattr(self, "dependencies", {}),
         }
+
+    # ------------------------------------------------------------------
+    # 插件访问接口
+    # ------------------------------------------------------------------
+
+    def list_plugins(self) -> List[str]:
+        """获取所有已加载插件的名称列表。"""
+        return self._plugin_loader.list_plugins()
+
+    def get_plugin(self, name: str) -> Optional["BasePlugin"]:
+        """根据名称获取已加载的插件实例。"""
+        return self._plugin_loader.get_plugin(name)

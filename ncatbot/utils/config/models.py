@@ -1,7 +1,7 @@
 """配置数据模型 - 纯 Pydantic 结构定义，不含业务逻辑。"""
 
 import os
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -44,6 +44,8 @@ class PluginConfig(BaseConfig):
     plugin_whitelist: List[str] = Field(default_factory=list)
     plugin_blacklist: List[str] = Field(default_factory=list)
     load_plugin: bool = False
+    plugin_configs: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+    """全局配置文件中的插件配置覆盖。键为插件名，值为配置字典。"""
 
     @field_validator("plugins_dir")
     @classmethod

@@ -268,12 +268,36 @@ class PluginLoader:
                 LOG.error("热重载失败 [%s]: %s", plugin_name, e)
 
     # ------------------------------------------------------------------
-    # 内置插件（预留，延后实现）
+    # 内置插件
     # ------------------------------------------------------------------
 
     async def load_builtin_plugins(self) -> None:
-        """加载内置插件（延后实现）。"""
-        pass
+        """加载内置插件。"""
+        from ncatbot.plugin.builtin import BUILTIN_PLUGINS
+
+        for plugin_class in BUILTIN_PLUGINS:
+            name = plugin_class.name
+            if name in self.plugins:
+                LOG.warning("内置插件 %s 已加载，跳过", name)
+                continue
+
+            manifest = PluginManifest(
+                name=name,
+                version=plugin_class.version,
+                main="__builtin__",
+                author=getattr(plugin_class, "author", "NcatBot"),
+                description=getattr(plugin_class, "description", ""),
+                plugin_dir=Path("data") / name,
+                folder_name=name,
+            )
+
+            try:
+                plugin = self._instantiate(plugin_class, manifest)
+                await plugin.__onload__()
+                self.plugins[name] = plugin
+                LOG.info("内置插件加载成功: %s v%s", name, manifest.version)
+            except Exception as e:
+                LOG.error("加载内置插件 %s 失败: %s", name, e)
 
     # ------------------------------------------------------------------
     # 内部方法
