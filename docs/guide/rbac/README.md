@@ -11,7 +11,7 @@
 ### 1. 在插件中注册权限并检查
 
 ```python
-from ncatbot.core.registry import registrar
+from ncatbot.core import registrar
 from ncatbot.event import GroupMessageEvent
 from ncatbot.plugin import NcatBotPlugin
 

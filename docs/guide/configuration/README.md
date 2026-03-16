@@ -25,7 +25,7 @@ plugin:
 ### 读写全局配置
 
 ```python
-from ncatbot.utils.config import get_config_manager
+from ncatbot.utils import get_config_manager
 
 manager = get_config_manager()
 

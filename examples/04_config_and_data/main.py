@@ -14,7 +14,7 @@
   群里发 "重置统计"      → 清空统计数据
 """
 
-from ncatbot.core.registry import registrar
+from ncatbot.core import registrar
 from ncatbot.event import GroupMessageEvent
 from ncatbot.plugin import NcatBotPlugin
 from ncatbot.utils import get_log

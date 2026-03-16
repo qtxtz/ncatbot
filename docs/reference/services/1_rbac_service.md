@@ -1,7 +1,7 @@
 # RBACService — 角色权限控制
 
-> 源码：`ncatbot/service/builtin/rbac/service.py`  
-> 服务名称：`"rbac"`  
+> 源码：`ncatbot/service/builtin/rbac/service.py`
+> 服务名称：`"rbac"`
 > 数据文件：`data/rbac.json`
 
 提供用户、角色、权限的管理功能，支持通配符路径匹配、角色继承、黑白名单机制。
@@ -181,7 +181,7 @@ def save(self, path: Optional[Path] = None) -> None:
 
 ```python
 from ncatbot.service import ServiceManager
-from ncatbot.service.builtin import RBACService
+from ncatbot.service import RBACService
 
 manager = ServiceManager()
 manager.register(RBACService, storage_path="data/rbac.json", default_role="user")

@@ -113,7 +113,7 @@ for item in tqdm(range(100), desc="处理中", colour="CYAN"):
 `download_file` 内部使用此 tqdm 包装显示下载进度：
 
 ```python
-from ncatbot.utils.network import download_file
+from ncatbot.utils import download_file
 
 download_file("https://example.com/large.zip", "large.zip")
 # 处理中:  45%|████████████                | 45/100 [00:03<00:04, 12.50it/s]
@@ -128,7 +128,7 @@ download_file("https://example.com/large.zip", "large.zip")
 用于在国内网络环境下加速 GitHub 资源访问。
 
 ```python
-from ncatbot.utils.network import get_proxy_url, gen_url_with_proxy
+from ncatbot.utils import get_proxy_url, gen_url_with_proxy
 ```
 
 ### get_proxy_url

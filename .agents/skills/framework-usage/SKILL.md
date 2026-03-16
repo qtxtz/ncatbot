@@ -39,7 +39,7 @@ license: MIT
 
 ```bash
 pip install ncatbot5
-ncatbot init                        # 交互式创建 config.yaml + plugins/
+ncatbot init                        # 交互式创建 config.yaml + plugins/ + 模板插件（以计算机用户名命名）
 ```
 
 - **非插件模式**：直接编写 `main.py`，`python main.py` 或 `ncatbot run` 启动
@@ -84,7 +84,7 @@ ncatbot init                        # 交互式创建 config.yaml + plugins/
 
 ```python
 from ncatbot.plugin import NcatBotPlugin
-from ncatbot.core.registry import registrar
+from ncatbot.core import registrar
 from ncatbot.event import GroupMessageEvent
 
 class MyPlugin(NcatBotPlugin):
@@ -100,7 +100,7 @@ class MyPlugin(NcatBotPlugin):
 
 ```python
 from ncatbot.app import BotClient
-from ncatbot.core.registry import registrar
+from ncatbot.core import registrar
 from ncatbot.event import GroupMessageEvent
 
 bot = BotClient()
@@ -150,7 +150,7 @@ if __name__ == "__main__":
 
 | 命令 | 说明 |
 |------|------|
-| `ncatbot init` | 交互式创建项目 |
+| `ncatbot init` | 交互式创建项目（config.yaml + plugins/ + 模板插件） |
 | `ncatbot run` / `ncatbot dev` | 启动（dev = debug + 热重载） |
 | `ncatbot` | 交互式 REPL |
 | `ncatbot plugin create/list/enable/disable` | 插件管理 |
@@ -163,7 +163,7 @@ if __name__ == "__main__":
 
 | 命令 | 非交互写法 |
 |------|-----------|
-| `ncatbot init` | 直接手动创建 `config.yaml` + `plugins/` 目录 |
+| `ncatbot init` | 直接手动创建 `config.yaml` + `plugins/` 目录 + 模板插件目录 |
 | `ncatbot plugin remove {name}` | `echo "y" \| ncatbot plugin remove {name}` |
 
 **config.yaml 默认模板**：

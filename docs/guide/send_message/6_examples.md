@@ -28,7 +28,7 @@
 > 参考 `examples/01_hello_world/main.py`
 
 ```python
-from ncatbot.core.registry import registrar
+from ncatbot.core import registrar
 from ncatbot.event import GroupMessageEvent
 
 @registrar.on_group_command("hello", ignore_case=True)
@@ -248,7 +248,7 @@ async def on_notify(self, event: GroupMessageEvent):
 ## 发送音乐卡片
 
 ```python
-from ncatbot.types.segment import Music, MessageArray
+from ncatbot.types import Music, MessageArray
 
 @registrar.on_group_command("点歌")
 async def on_music(self, event: GroupMessageEvent):

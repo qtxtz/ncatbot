@@ -15,7 +15,7 @@
   "权限信息"       → 查看当前 RBAC 系统配置
 """
 
-from ncatbot.core.registry import registrar
+from ncatbot.core import registrar
 from ncatbot.event import GroupMessageEvent
 from ncatbot.plugin import NcatBotPlugin
 from ncatbot.types import At

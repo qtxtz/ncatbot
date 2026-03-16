@@ -197,7 +197,7 @@ async def post_group_forward_msg(
 **返回值**：`dict`
 
 ```python
-from ncatbot.types.segment import Forward
+from ncatbot.types import Forward
 
 fwd = Forward()
 fwd.add_node(uin=123, name="Alice", content=[{"type": "text", "data": {"text": "hi"}}])

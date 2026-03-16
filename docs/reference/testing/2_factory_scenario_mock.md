@@ -189,7 +189,7 @@ class APICall:
 ## MockBotAPI
 
 ```python
-from ncatbot.adapter.mock import MockBotAPI
+from ncatbot.adapter import MockBotAPI
 ```
 
 `IBotAPI` 的完整 Mock 实现。记录所有调用，返回可配置响应。
@@ -229,7 +229,7 @@ set_response(action: str, response: Any) -> None
 ## MockAdapter
 
 ```python
-from ncatbot.adapter.mock import MockAdapter
+from ncatbot.adapter import MockAdapter
 ```
 
 `BaseAdapter` 的内存实现，无网络通信。

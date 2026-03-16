@@ -166,7 +166,7 @@ flowchart TD
 完整插件示例——注册权限、创建角色、运行时授权与检查：
 
 ```python
-from ncatbot.core.registry import registrar
+from ncatbot.core import registrar
 from ncatbot.event import GroupMessageEvent
 from ncatbot.plugin import NcatBotPlugin
 from ncatbot.types import At

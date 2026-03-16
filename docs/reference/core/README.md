@@ -10,8 +10,8 @@
 
 ```python
 import asyncio
-from ncatbot.core.dispatcher import AsyncEventDispatcher, EventType
-from ncatbot.core.registry import HandlerDispatcher
+from ncatbot.core import AsyncEventDispatcher, EventType
+from ncatbot.core import HandlerDispatcher
 
 async def main():
     # 1. 创建事件分发器

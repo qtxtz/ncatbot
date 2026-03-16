@@ -27,7 +27,7 @@
 `content` 字段支持传入 OB11 字典列表，会自动解析为 `MessageSegment` 对象。
 
 ```python
-from ncatbot.types.segment import ForwardNode, PlainText, Image
+from ncatbot.types import ForwardNode, PlainText, Image
 
 node = ForwardNode(
     user_id="123456",
@@ -58,7 +58,7 @@ node = ForwardNode(
 ### 方式一：引用已有的合并转发（通过 `id`）
 
 ```python
-from ncatbot.types.segment import Forward
+from ncatbot.types import Forward
 
 fwd = Forward(id="abc123")
 ```
@@ -66,7 +66,7 @@ fwd = Forward(id="abc123")
 ### 方式二：构造新的合并转发（通过 `content`）
 
 ```python
-from ncatbot.types.segment import Forward, ForwardNode, PlainText, Image
+from ncatbot.types import Forward, ForwardNode, PlainText, Image
 
 fwd = Forward(content=[
     ForwardNode(

@@ -157,7 +157,7 @@ plugin:
 启动前可通过代码验证配置：
 
 ```python
-from ncatbot.utils.config import get_config_manager
+from ncatbot.utils import get_config_manager
 
 manager = get_config_manager()
 issues = manager.get_issues()

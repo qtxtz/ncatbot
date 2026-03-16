@@ -48,7 +48,7 @@ skip_setup: false          # true = 跳过安装，直接连接已有 NapCat 服
 ### 测试环境 — MockAdapter
 
 ```python
-from ncatbot.adapter.mock import MockAdapter
+from ncatbot.adapter import MockAdapter
 from ncatbot.app import BotClient
 
 adapter = MockAdapter()
@@ -195,8 +195,8 @@ class APICall:
 **最小示例骨架**:
 
 ```python
-from ncatbot.adapter.base import BaseAdapter
-from ncatbot.api.interface import IBotAPI
+from ncatbot.adapter import BaseAdapter
+from ncatbot.api import IBotAPI
 
 
 class MyBotAPI(IBotAPI):

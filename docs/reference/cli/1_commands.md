@@ -21,7 +21,7 @@ ncatbot [OPTIONS] [COMMAND]
 ncatbot init [OPTIONS]
 ```
 
-初始化项目，创建 `config.yaml` 和 `plugins/` 目录。
+初始化项目，创建 `config.yaml`、`plugins/` 目录，以及一个以当前计算机用户名命名的模板插件。
 
 | 选项 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
@@ -35,6 +35,8 @@ ncatbot init [OPTIONS]
 | 请输入管理员 QQ 号 | 写入 `root` |
 
 若 `config.yaml` 已存在，提示是否覆盖。
+
+生成的模板插件位于 `plugins/{username}/`，包含 `manifest.toml` 和 `plugin.py`，实现群聊/私聊发送 `hello` 回复 `hi`。若模板插件目录已存在则跳过。
 
 ## run
 

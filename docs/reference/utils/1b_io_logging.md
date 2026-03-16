@@ -26,7 +26,7 @@ graph TD
 获取 `BoundLogger` 实例的工厂函数。
 
 ```python
-from ncatbot.utils.logger import get_log
+from ncatbot.utils import get_log
 
 log = get_log("plugin.my_plugin")
 log.info("启动完成")
@@ -196,7 +196,7 @@ formatter = FileFormatter(datefmt="%Y-%m-%d %H:%M:%S")
 源码位置：`ncatbot/utils/network.py`
 
 ```python
-from ncatbot.utils.network import post_json, get_json, download_file
+from ncatbot.utils import post_json, get_json, download_file
 ```
 
 ### 2.1 post_json
@@ -259,7 +259,7 @@ def download_file(url: str, file_name: str) -> None
 用于在国内网络环境下加速 GitHub 资源访问。
 
 ```python
-from ncatbot.utils.network import get_proxy_url, gen_url_with_proxy
+from ncatbot.utils import get_proxy_url, gen_url_with_proxy
 ```
 
 | 函数 | 签名 | 说明 |

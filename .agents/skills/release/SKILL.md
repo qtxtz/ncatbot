@@ -8,13 +8,26 @@ license: MIT
 
 你是 NcatBot 发布助手。帮助用户完成从 **工作区变更到版本发布** 的全链路流程。
 
+## 发布策略
+
+**主要方式：CI/CD 自动发布**（推荐）
+
+推送 `v*` 格式的 tag 到 GitHub 即自动触发 `.github/workflows/pypi-publish.yml`，完成 lint → test → 构建 → PyPI 发布 → user-ref 打包 → GitHub Release 创建的全流程。
+**只有 pytest 测试全部通过后才会执行发布步骤。**
+
+> CI 工作流也支持在 GitHub Actions 页面手动触发（`workflow_dispatch`）。
+
+**备用方式：本地人工发布**
+
+当 CI 不可用或需要调试发布流程时，可使用本文档后半部分的 [本地人工发布流程](#本地人工发布流程备用) 手动完成。
+
 ## 模式选择
 
 根据变更内容自动判断模式，或由用户指定：
 
 | 模式 | 触发条件 | 流程 |
 |------|---------|------|
-| **发布模式** | 变更涉及 `ncatbot/`、`pyproject.toml` 等核心代码 | 全链路：Commit → 版本号 → 构建 → PyPI → GitHub Release |
+| **发布模式** | 变更涉及 `ncatbot/`、`pyproject.toml` 等核心代码 | Commit → 版本号 → Tag → Push（CI 自动完成后续） |
 | **推送模式** | 仅涉及 docs、examples、skills、tests 等非核心文件 | Commit → Push → 可选更新 Release Asset |
 
 **自动判断规则**：检查工作区变更 + 待推送 commit 中是否包含以下路径：
@@ -27,14 +40,14 @@ license: MIT
 ## 前置条件
 
 - Python 虚拟环境已激活（`.venv\Scripts\activate.ps1`）
-- 已安装 `build` 和 `twine`（`uv pip install build twine`）
-- PyPI API Token 已配置为环境变量 `TWINE_PASSWORD`（见 `.vscode/settings.json`）
 - GitHub CLI（`gh`）已登录（`gh auth login --web`）
+- GitHub 仓库 Secrets 已配置 `PYPI_TOKEN`（CI 使用）
+- （仅本地备用发布）已安装 `build` 和 `twine`，`TWINE_PASSWORD` 环境变量已配置
 
-## 发布模式：全链路流程总览
+## 发布模式：CI/CD 全链路流程总览
 
 ```
-工作区变更审查 → Commit 编排 → 已有 Commit 审查 → 版本号确定 → Release Notes → 构建 → PyPI → 参考资料打包 → GitHub Release → 清理
+工作区变更审查 → Commit 编排 → 已有 Commit 审查 → 版本号确定 → Tag → Push（CI 自动: Lint → Test → Build → PyPI → user-ref 打包 → GitHub Release）
 ```
 
 ---
@@ -174,7 +187,50 @@ git log "$lastTag..HEAD" --oneline --no-merges
 
 ---
 
-### 阶段 5：构建发行包
+### 阶段 5：创建 Tag 并推送（触发 CI/CD 发布）
+
+```powershell
+$ver = "X.Y.Z"  # 替换为实际版本
+git tag "v$ver"
+git push origin main --tags
+```
+
+推送 tag 后 CI 自动执行:
+1. **Lint** — ruff check + format check
+2. **Test** — Python 3.12 / 3.13 双版本 pytest（不通过则中止发布）
+3. **Build** — `uv build` 生成 whl 和 tar.gz
+4. **Verify** — `twine check dist/*`
+5. **Publish to PyPI** — 使用 `PYPI_TOKEN` secret
+6. **Package user-reference** — 打包 examples / docs / skills 为 zip
+7. **Create GitHub Release** — 附带 whl、tar.gz、user-reference.zip 和自动生成的 release notes
+
+> CI 工作流定义见 `.github/workflows/pypi-publish.yml`。
+
+#### 阶段 5.1：验证发布结果
+
+等待 CI 完成后验证：
+
+```powershell
+# 查看 workflow 运行状态
+gh run list --workflow=pypi-publish.yml --limit=1
+
+# 查看最新 release
+gh release view "v$ver" --repo ncatbot/NcatBot
+```
+
+如果 CI 失败，检查 Actions 日志排查问题。必要时可回退到本地人工发布流程。
+
+---
+
+## 本地人工发布流程（备用）
+
+> **仅当 CI/CD 不可用时使用。** 正常情况下请使用上述 CI/CD 流程。
+
+额外前置条件：
+- 已安装 `build` 和 `twine`（`uv pip install build twine`）
+- PyPI API Token 已配置为环境变量 `TWINE_PASSWORD`（见 `.vscode/settings.json`）
+
+### 手动阶段 1：构建发行包
 
 ```powershell
 if (Test-Path dist) { Remove-Item dist -Recurse -Force }
@@ -185,9 +241,7 @@ python -m build
 - `dist/ncatbot5-{version}-py3-none-any.whl`
 - `dist/ncatbot5-{version}.tar.gz`
 
----
-
-### 阶段 6：发布到 PyPI
+### 手动阶段 2：发布到 PyPI
 
 ```powershell
 python -m twine upload dist/* -u __token__
@@ -195,9 +249,7 @@ python -m twine upload dist/* -u __token__
 
 `twine` 自动读取 `TWINE_PASSWORD` 环境变量中的 API Token。
 
----
-
-### 阶段 7：打包用户参考资料
+### 手动阶段 3：打包用户参考资料
 
 将 `examples/`、`.agents/skills/`、`docs/` 打包为 zip（排除 `__pycache__`）：
 
@@ -221,9 +273,7 @@ Compress-Archive -Path "$tempDir\*" -DestinationPath $zipPath
 Remove-Item $tempDir -Recurse -Force
 ```
 
----
-
-### 阶段 8：创建 GitHub Release
+### 手动阶段 4：创建 GitHub Release
 
 ```powershell
 $ver = "X.Y.Z"
@@ -236,9 +286,7 @@ gh release create "v$ver" `
     --repo ncatbot/NcatBot
 ```
 
----
-
-### 阶段 9：清理与收尾
+### 手动阶段 5：清理与收尾
 
 发布完成后执行：
 
@@ -348,7 +396,7 @@ if (Test-Path dist) { Remove-Item dist -Recurse -Force }
 | 1.3 / P1 | Commit 分组方案 | 提出分组建议让用户确认/调整 |
 | 2.3 | Commit 纳入范围 | 让用户确认哪些已有 commit 进 release notes（仅发布模式） |
 | 3 | 版本号（无法自动判断时） | 变更类型不明时询问；major 由人类主动发起，AI 不涉及 |
-| 4 | Release Notes 内容 | 展示生成的 notes 让用户审阅和修改（仅发布模式） |
+| 4 | Release Notes 内容 | 展示生成的 notes 让用户审阅和修改（仅本地备用发布） |
 
 以下场景 **自动执行**，不需要询问：
 
@@ -361,12 +409,14 @@ if (Test-Path dist) { Remove-Item dist -Recurse -Force }
 | 仅 1 个 fix | post 版本 |
 | 多个 fix 或小 feat | patch 版本 |
 | 大型 feat 或 BREAKING CHANGE | minor 版本 |
-| 构建、上传、打包 | 依次自动执行 |
+| 推送 tag 后 | CI 自动执行 lint → test → build → publish → release |
 
 ## 关键约束
 
+- **主要通过 CI/CD 发布**，本地发布仅作备用
+- CI 中 **pytest 测试必须全部通过**才会执行发布步骤
 - **先挑选 commit，再定版本号** — 版本号取决于本次包含的变更类型
 - 构建前必须清理旧 `dist/` 目录
 - 打包参考资料时排除 `__pycache__` 目录
-- PyPI Token **不要** 提交到版本控制
-- `release-notes.md` 是临时文件，发布完成后删除
+- PyPI Token **不要** 提交到版本控制（GitHub Secrets: `PYPI_TOKEN`）
+- `release-notes.md` 是临时文件，发布完成后删除（本地备用流程）；CI 流程自动生成

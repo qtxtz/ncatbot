@@ -20,7 +20,7 @@
   "授管理 @xxx"      → 授予管理权限
 """
 
-from ncatbot.core.registry import registrar
+from ncatbot.core import registrar
 from ncatbot.event import GroupMessageEvent, GroupIncreaseEvent
 from ncatbot.plugin import NcatBotPlugin
 from ncatbot.types import At, MessageArray

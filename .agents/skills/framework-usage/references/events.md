@@ -5,7 +5,7 @@
 ## 装饰器注册（最常用）
 
 ```python
-from ncatbot.core.registry import registrar
+from ncatbot.core import registrar
 from ncatbot.event import GroupMessageEvent, PrivateMessageEvent
 ```
 
@@ -61,24 +61,64 @@ async def _monitor(self):
 适用于多步对话。
 
 ```python
+from ncatbot.core import from_event, msg_equals
+
 @registrar.on_group_command("confirm")
 async def on_confirm(self, event: GroupMessageEvent):
     await event.reply("请输入确认密码：")
     try:
         reply = await self.wait_event(
-            predicate=lambda e: (
-                e.type == "message.group"
-                and e.data.user_id == event.user_id
-                and e.data.group_id == event.group_id
-            ),
+            predicate=from_event(event) * msg_equals("yes"),
             timeout=30.0,
         )
-        if reply.data.message.text.strip() == "yes":
-            await event.reply("已确认")
-        else:
-            await event.reply("已取消")
+        await event.reply("已确认")
     except asyncio.TimeoutError:
         await event.reply("超时，已取消")
+```
+
+### Predicate DSL
+
+`ncatbot.core` 提供可组合的 Predicate DSL，用运算符替代冗长的 lambda。
+
+**运算符**
+
+| 运算符 | 含义 |
+|--------|------|
+| `p1 * p2` 或 `p1 & p2` | AND |
+| `p1 + p2` 或 `p1 \| p2` | OR |
+| `~p` | NOT |
+
+**工厂函数**
+
+| 函数 | 说明 |
+|------|------|
+| `from_event(event)` | 核心语法糖：自动推导同 session（同 user + 群消息同群 / 私聊同私聊） |
+| `same_user(uid)` | 匹配 user_id |
+| `same_group(gid)` | 匹配 group_id |
+| `is_group()` / `is_private()` / `is_message()` | 匹配事件类型 |
+| `msg_equals(text)` | raw_message.strip() 完全匹配 |
+| `msg_in(*options)` | raw_message.strip() 匹配选项之一 |
+| `has_keyword(*words)` | raw_message 含任一关键词 |
+| `msg_matches(pattern)` | raw_message 正则匹配 |
+| `event_type(prefix)` | event.type 前缀匹配 |
+| `P.of(lambda)` | 将普通 callable 升级为可组合的 P |
+
+**组合示例**
+
+```python
+from ncatbot.core import from_event, msg_in, has_keyword, same_user, P
+
+# 等“确认”或“取消”
+pred = from_event(event) * msg_in("确认", "取消")
+
+# 含关键词
+pred = from_event(event) * has_keyword("帮助", "help")
+
+# 排除某用户
+pred = from_event(event) * ~same_user(bot_id)
+
+# 混用 lambda
+pred = from_event(event) * P.of(lambda e: int(e.data.raw_message) > 0)
 ```
 
 ## 事件类型字符串完整列表
@@ -140,30 +180,25 @@ event.sender         # → event.data.sender
 ## 多步对话模板
 
 ```python
+from ncatbot.core import from_event, msg_in
+
 @registrar.on_group_command("order")
 async def order_flow(self, event: GroupMessageEvent):
-    user = event.user_id
-    group = event.group_id
-
-    def same_user(e):
-        return (
-            e.type == "message.group"
-            and e.data.user_id == user
-            and e.data.group_id == group
-        )
-
     await event.reply("请选择: 1. 咖啡 2. 茶")
     try:
-        choice_event = await self.wait_event(predicate=same_user, timeout=30.0)
-        choice = choice_event.data.message.text.strip()
+        choice_event = await self.wait_event(predicate=from_event(event), timeout=30.0)
+        choice = choice_event.data.raw_message.strip()
         if choice not in ("1", "2"):
             await event.reply("无效选择，已取消")
             return
         item = "咖啡" if choice == "1" else "茶"
 
         await event.reply(f"确认点 {item} 吗？回复 yes/no")
-        confirm_event = await self.wait_event(predicate=same_user, timeout=30.0)
-        if confirm_event.data.message.text.strip().lower() == "yes":
+        confirm_event = await self.wait_event(
+            predicate=from_event(event) * msg_in("yes", "no"),
+            timeout=30.0,
+        )
+        if confirm_event.data.raw_message.strip().lower() == "yes":
             await event.reply(f"已下单: {item}")
         else:
             await event.reply("已取消")

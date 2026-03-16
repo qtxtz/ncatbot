@@ -26,7 +26,7 @@ ws_uri: "ws://localhost:3001"
 
 ```python
 from ncatbot.app import BotClient
-from ncatbot.core.registry import registrar
+from ncatbot.core import registrar
 from ncatbot.event import GroupMessageEvent
 
 bot = BotClient()
@@ -67,7 +67,7 @@ NcatBot 提供两种使用模式：**非插件模式** 和 **插件模式**。
 
 ```python
 from ncatbot.app import BotClient
-from ncatbot.core.registry import registrar
+from ncatbot.core import registrar
 from ncatbot.event import GroupMessageEvent, PrivateMessageEvent
 
 bot = BotClient()
@@ -200,7 +200,7 @@ entry_class = "HelloWorldPlugin"
 `__init__.py`：
 
 ```python
-from ncatbot.core.registry import registrar
+from ncatbot.core import registrar
 from ncatbot.event import GroupMessageEvent, PrivateMessageEvent
 from ncatbot.plugin import NcatBotPlugin
 

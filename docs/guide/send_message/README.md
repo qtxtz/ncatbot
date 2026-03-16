@@ -13,7 +13,7 @@
 自动引用原消息并 @发送者，一行搞定。
 
 ```python
-from ncatbot.core.registry import registrar
+from ncatbot.core import registrar
 from ncatbot.event import GroupMessageEvent
 
 @registrar.on_group_command("hello", ignore_case=True)
@@ -144,7 +144,7 @@ async def on_fancy(self, event: GroupMessageEvent):
 **创建**
 
 ```python
-from ncatbot.types.segment import MessageArray, PlainText, At
+from ncatbot.types import MessageArray, PlainText, At
 
 msg = MessageArray()                                    # 空数组
 msg = MessageArray([PlainText(text="Hi"), At(qq="123")]) # 传入列表

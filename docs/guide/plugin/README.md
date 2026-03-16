@@ -35,7 +35,7 @@ entry_class = "HelloWorldPlugin"
 ### 4. main.py
 
 ```python
-from ncatbot.core.registry import registrar
+from ncatbot.core import registrar
 from ncatbot.event import GroupMessageEvent, PrivateMessageEvent
 from ncatbot.plugin import NcatBotPlugin
 from ncatbot.utils import get_log

@@ -22,9 +22,14 @@ ncatbot init
 
 ```
 my-bot/
-├── config.yaml    # 配置文件
-└── plugins/       # 插件目录
+├── config.yaml          # 配置文件
+├── plugins/             # 插件目录
+└── plugins/{username}/  # 模板插件（以计算机用户名命名）
+    ├── manifest.toml
+    └── plugin.py
 ```
+
+模板插件功能：在群聊或私聊中发送 `hello`，机器人回复 `hi`。可直接在此基础上修改，开发自己的功能。
 
 生成的 `config.yaml` 示例：
 

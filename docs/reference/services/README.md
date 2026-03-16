@@ -10,7 +10,7 @@
 
 ```python
 from ncatbot.service import BaseService, ServiceManager
-from ncatbot.service.builtin import RBACService, TimeTaskService, FileWatcherService
+from ncatbot.service import RBACService, TimeTaskService, FileWatcherService
 ```
 
 **获取服务实例并调用：**

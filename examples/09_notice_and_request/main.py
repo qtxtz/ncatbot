@@ -13,7 +13,7 @@
 使用方式: 将本文件夹复制到 plugins/ 目录即可，事件自动触发。
 """
 
-from ncatbot.core.registry import registrar
+from ncatbot.core import registrar
 from ncatbot.event import (
     GroupIncreaseEvent,
     NoticeEvent,

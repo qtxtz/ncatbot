@@ -321,7 +321,7 @@ fwd = Forward(content=[
 | `build` | `build() -> Forward` | 构建 Forward 消息段 |
 
 ```python
-from ncatbot.types.helper import ForwardConstructor
+from ncatbot.types import ForwardConstructor
 from ncatbot.types import MessageArray, PlainText
 
 fc = ForwardConstructor(user_id="123456", nickname="Bot")

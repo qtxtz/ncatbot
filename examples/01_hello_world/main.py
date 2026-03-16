@@ -13,7 +13,7 @@
 群里发送 "hi" 即可收到引用回复 + @提及。
 """
 
-from ncatbot.core.registry import registrar
+from ncatbot.core import registrar
 from ncatbot.event import GroupMessageEvent, PrivateMessageEvent
 from ncatbot.plugin import NcatBotPlugin
 from ncatbot.types import MessageArray

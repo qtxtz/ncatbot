@@ -11,7 +11,7 @@
 ### 获取日志器
 
 ```python
-from ncatbot.utils.logger import get_log
+from ncatbot.utils import get_log
 
 log = get_log("my_module")
 log.info("启动完成")
@@ -34,7 +34,7 @@ cm.save()
 ### 发送网络请求
 
 ```python
-from ncatbot.utils.network import post_json, get_json, download_file
+from ncatbot.utils import post_json, get_json, download_file
 
 data = get_json("https://api.example.com/status")
 resp = post_json("https://api.example.com/action", payload={"key": "value"})

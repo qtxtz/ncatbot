@@ -159,6 +159,73 @@ fix / feat / refactor / docs
 
 ---
 
+## 导入规范
+
+NcatBot 框架按 **一级 layer** 划分模块边界。所有导入必须遵循以下三条规则：
+
+### 一级 Layer 列表
+
+`adapter` / `api` / `app` / `cli` / `core` / `event` / `plugin` / `service` / `testing` / `types` / `utils`
+
+### 规则 1：跨 layer — 绝对导入，只到一级
+
+不同 layer 之间互相引用时，使用 `from ncatbot.<layer> import ...`，**禁止**深入子模块。
+
+```python
+# ✅ 正确
+from ncatbot.core import registrar, AsyncEventDispatcher
+from ncatbot.utils import get_log
+from ncatbot.types import MessageArray, PlainText
+
+# ❌ 错误 — 深入了子模块
+from ncatbot.core.registry import registrar
+from ncatbot.utils.logger import get_log
+from ncatbot.types.segment import PlainText
+```
+
+### 规则 2：同 layer 内部 — 相对导入
+
+同一个一级 layer 内部的模块互相引用时，**必须**使用相对导入。
+
+```python
+# ✅ 正确（在 utils/config/manager.py 中）
+from ..logger import get_early_logger
+from .models import Config
+
+# ❌ 错误 — 同 layer 内用了绝对导入
+from ncatbot.utils.logger import get_early_logger
+```
+
+### 规则 3：外部示例 — 只从一级 layer 导入
+
+`examples/`、`docs/` 中的代码示例、`.agents/skills/` 中的示例代码，只允许从一级 layer 导入。
+
+```python
+# ✅ 用户代码 / 示例代码
+from ncatbot.core import registrar
+from ncatbot.plugin import NcatBotPlugin
+from ncatbot.types import MessageArray, PlainText, At
+
+# ❌ 不允许深入子模块
+from ncatbot.core.registry import registrar
+from ncatbot.types.segment import PlainText
+```
+
+### 唯一例外
+
+访问 layer 内部的 **私有实现** (以 `_` 开头)，允许框架内部代码使用深层绝对导入：
+
+```python
+# 允许：框架内部访问私有上下文变量
+from ncatbot.core.registry.context import _current_plugin_ctx
+```
+
+### 新增导出检查
+
+新增公共 API 导出时，必须在对应 layer 的 `__init__.py` 中注册。如果 `__init__.py` 中没有某个符号，说明它不是公共 API。
+
+---
+
 ## 环境与规范
 
 ### 环境搭建

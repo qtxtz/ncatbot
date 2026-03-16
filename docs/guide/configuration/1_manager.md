@@ -52,7 +52,7 @@ classDiagram
 `ConfigManager` 定义在 `ncatbot.utils.config.manager` 模块中。通过 `get_config_manager()` 获取全局单例：
 
 ```python
-from ncatbot.utils.config import get_config_manager
+from ncatbot.utils import get_config_manager
 
 # 使用默认路径（当前目录的 config.yaml）
 manager = get_config_manager()
@@ -64,7 +64,7 @@ manager = get_config_manager("/path/to/config.yaml")
 模块还导出了便捷别名 `ncatbot_config`：
 
 ```python
-from ncatbot.utils.config import ncatbot_config
+from ncatbot.utils import ncatbot_config
 
 # 等价于 get_config_manager()
 print(ncatbot_config.bot_uin)

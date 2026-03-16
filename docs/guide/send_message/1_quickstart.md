@@ -17,7 +17,7 @@
 在事件处理器中，`event.reply()` 是最便捷的回复方式：自动引用原消息并 @发送者。
 
 ```python
-from ncatbot.core.registry import registrar
+from ncatbot.core import registrar
 from ncatbot.event import GroupMessageEvent
 
 @registrar.on_group_command("hello", ignore_case=True)

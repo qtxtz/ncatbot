@@ -17,7 +17,7 @@
 ## 创建 MessageArray
 
 ```python
-from ncatbot.types.segment import MessageArray, PlainText, At
+from ncatbot.types import MessageArray, PlainText, At
 
 # 方式一：直接传入消息段列表
 msg = MessageArray([PlainText(text="Hello"), At(qq="123456")])
@@ -53,7 +53,7 @@ msg = MessageArray.from_any("[CQ:at,qq=123456]Hello")
 | `add_segments(data)` | `data: Any` | 添加任意数据（自动解析） |
 
 ```python
-from ncatbot.types.segment import MessageArray
+from ncatbot.types import MessageArray
 
 msg = (
     MessageArray()
@@ -85,7 +85,7 @@ msg = (
 | `is_forward_msg()` | `bool` | 是否包含合并转发 |
 
 ```python
-from ncatbot.types.segment import MessageArray, Image
+from ncatbot.types import MessageArray, Image
 
 msg = MessageArray.from_list([
     {"type": "at", "data": {"qq": "123456"}},
@@ -100,7 +100,7 @@ msg.is_at(123456)                # True
 msg.is_at(999999)                # False
 
 # 按类型泛型过滤
-from ncatbot.types.segment import Record
+from ncatbot.types import Record
 records = msg.filter(Record)     # []
 ```
 
@@ -109,7 +109,7 @@ records = msg.filter(Record)     # []
 ## 序列化与反序列化
 
 ```python
-from ncatbot.types.segment import MessageArray, PlainText, At
+from ncatbot.types import MessageArray, PlainText, At
 
 # 序列化为 OB11 字典列表
 msg = MessageArray([PlainText(text="Hello"), At(qq="123456")])

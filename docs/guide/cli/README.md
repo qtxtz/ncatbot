@@ -7,7 +7,7 @@
 安装 NcatBot 后即可使用 `ncatbot` 命令：
 
 ```bash
-# 初始化项目（生成 config.yaml + plugins/）
+# 初始化项目（生成 config.yaml + plugins/ + 模板插件）
 ncatbot init
 
 # 启动 Bot

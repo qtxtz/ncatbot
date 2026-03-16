@@ -15,14 +15,7 @@
   私聊发 "私聊测试"     → private_only 过滤器允许通过
 """
 
-from ncatbot.core.registry import registrar
-from ncatbot.core.registry.hook import (
-    Hook,
-    HookAction,
-    HookContext,
-    HookStage,
-    add_hooks,
-)
+from ncatbot.core import registrar, Hook, HookAction, HookContext, HookStage, add_hooks
 from ncatbot.event import GroupMessageEvent, PrivateMessageEvent
 from ncatbot.plugin import NcatBotPlugin
 from ncatbot.types import MessageArray

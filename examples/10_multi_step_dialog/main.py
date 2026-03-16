@@ -3,6 +3,7 @@
 
 演示功能:
   - wait_event 连续多次使用实现多步交互
+  - Predicate 语法糖（from_event 自动推导同 session 条件）
   - 超时自动取消
   - 中途输入 "取消" 退出对话
   - @registrar.on_group_command() 触发对话
@@ -15,7 +16,8 @@
 
 import asyncio
 
-from ncatbot.core.registry import registrar
+from ncatbot.core import from_event
+from ncatbot.core import registrar
 from ncatbot.event import GroupMessageEvent
 from ncatbot.plugin import NcatBotPlugin
 from ncatbot.utils import get_log
@@ -35,19 +37,13 @@ class MultiStepDialogPlugin(NcatBotPlugin):
         self.data.setdefault("users", {})
         LOG.info("MultiStepDialog 插件已加载，已注册用户: %d", len(self.data["users"]))
 
-    async def _wait_user_reply(self, group_id, user_id):
-        """等待指定用户在指定群的下一条消息"""
-        event = await self.wait_event(
-            predicate=lambda e: (
-                hasattr(e.data, "user_id")
-                and str(e.data.user_id) == str(user_id)
-                and hasattr(e.data, "group_id")
-                and str(e.data.group_id) == str(group_id)
-                and hasattr(e.data, "raw_message")
-            ),
+    async def _wait_user_reply(self, event: GroupMessageEvent):
+        """等待同 session（同用户同群）的下一条消息"""
+        reply = await self.wait_event(
+            predicate=from_event(event),
             timeout=TIMEOUT,
         )
-        return event.data.raw_message.strip()
+        return reply.data.raw_message.strip()
 
     @registrar.on_group_command("注册")
     async def on_register(self, event: GroupMessageEvent):
@@ -61,7 +57,7 @@ class MultiStepDialogPlugin(NcatBotPlugin):
         )
 
         try:
-            name = await self._wait_user_reply(gid, uid)
+            name = await self._wait_user_reply(event)
         except asyncio.TimeoutError:
             await self.api.post_group_msg(gid, text="⏰ 注册超时，已取消")
             return
@@ -74,7 +70,7 @@ class MultiStepDialogPlugin(NcatBotPlugin):
         await self.api.post_group_msg(gid, text=f"好的，{name}！请输入你的年龄：")
 
         try:
-            age_str = await self._wait_user_reply(gid, uid)
+            age_str = await self._wait_user_reply(event)
         except asyncio.TimeoutError:
             await self.api.post_group_msg(gid, text="⏰ 注册超时，已取消")
             return
@@ -96,7 +92,7 @@ class MultiStepDialogPlugin(NcatBotPlugin):
         )
 
         try:
-            confirm = await self._wait_user_reply(gid, uid)
+            confirm = await self._wait_user_reply(event)
         except asyncio.TimeoutError:
             await self.api.post_group_msg(gid, text="⏰ 确认超时，已取消")
             return

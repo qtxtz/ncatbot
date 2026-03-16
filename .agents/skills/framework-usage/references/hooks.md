@@ -15,8 +15,8 @@
 ## 内置 Hook 使用
 
 ```python
-from ncatbot.core.registry import registrar, add_hooks, group_only, private_only, non_self
-from ncatbot.core.registry import startswith, keyword, regex
+from ncatbot.core import registrar, add_hooks, group_only, private_only, non_self
+from ncatbot.core import startswith, keyword, regex
 
 # 预置单例
 @group_only                        # priority=100
@@ -93,7 +93,7 @@ async def on_kick(self, event, target: At):
 ## 自定义 Hook
 
 ```python
-from ncatbot.core.registry import Hook, HookStage, HookAction, HookContext
+from ncatbot.core import Hook, HookStage, HookAction, HookContext
 
 class CooldownHook(Hook):
     stage = HookStage.BEFORE_CALL

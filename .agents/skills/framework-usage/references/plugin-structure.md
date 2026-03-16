@@ -82,7 +82,7 @@ async def on_close(self):
 ### Handler
 - [ ] 所有 handler 是 `async def`
 - [ ] 第一个参数 `self`，第二个参数事件对象
-- [ ] import `registrar`：`from ncatbot.core.registry import registrar`
+- [ ] import `registrar`：`from ncatbot.core import registrar`
 - [ ] `@registrar.on_group_command()` 命令参数非空
 
 ### 生命周期

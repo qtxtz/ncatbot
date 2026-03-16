@@ -6,8 +6,8 @@
 
 ## TimeTaskService — 定时任务
 
-> 源码：`ncatbot/service/builtin/schedule/service.py`  
-> 服务名称：`"time_task"`  
+> 源码：`ncatbot/service/builtin/schedule/service.py`
+> 服务名称：`"time_task"`
 > 依赖：`schedule` 库
 
 基于 `schedule` 库的线程安全定时任务调度服务，通过回调槽通知任务触发。
@@ -92,7 +92,7 @@ flowchart LR
 
 ```python
 from ncatbot.service import ServiceManager
-from ncatbot.service.builtin import TimeTaskService
+from ncatbot.service import TimeTaskService
 
 manager = ServiceManager()
 manager.register(TimeTaskService)
@@ -134,7 +134,7 @@ tt.remove_job("heartbeat")
 
 ## FileWatcherService — 文件监控
 
-> 源码：`ncatbot/service/builtin/file_watcher/service.py`  
+> 源码：`ncatbot/service/builtin/file_watcher/service.py`
 > 服务名称：`"file_watcher"`
 
 监视插件目录中的 `.py` 文件变化，支持防抖、暂停/恢复、全局配置文件监控。
@@ -206,7 +206,7 @@ flowchart TD
 
 ```python
 from ncatbot.service import ServiceManager
-from ncatbot.service.builtin import FileWatcherService
+from ncatbot.service import FileWatcherService
 
 manager = ServiceManager()
 manager.register(FileWatcherService, debug_mode=True)
