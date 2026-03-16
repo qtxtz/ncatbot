@@ -187,6 +187,30 @@ git log "$lastTag..HEAD" --oneline --no-merges
 
 ---
 
+### 阶段 4.5：本地预检（推送前必做）
+
+在创建 tag 之前，在本地模拟 CI 的 lint + test 流程，确保不会因检查失败而浪费 CI 资源：
+
+```powershell
+# 激活虚拟环境
+. .venv\Scripts\activate.ps1
+
+# 1. Ruff lint 检查
+uv run ruff check .
+
+# 2. Ruff 格式检查
+uv run ruff format --check .
+
+# 3. 运行测试（无覆盖率，与 CI 一致）
+uv run pytest --no-cov
+```
+
+**全部通过（exit code 0）后**才能进行阶段 5。若有失败：
+- Ruff lint/format 问题：运行 `uv run ruff check --fix .` 和 `uv run ruff format .` 修复，再提交
+- 测试失败：修复测试或代码，再提交，重新运行预检
+
+---
+
 ### 阶段 5：创建 Tag 并推送（触发 CI/CD 发布）
 
 ```powershell
