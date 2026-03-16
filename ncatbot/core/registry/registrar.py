@@ -70,9 +70,18 @@ class Registrar:
                 **metadata,
             }
 
-            # ContextVar 隔离收集
+            # ContextVar 隔离收集（去重：同一函数只收集一次，后续装饰器只更新 meta/hooks）
             plugin_name = get_current_plugin() or "__global__"
-            _pending_handlers.setdefault(plugin_name, []).append(func)
+            pending_list = _pending_handlers.setdefault(plugin_name, [])
+            if func not in pending_list:
+                pending_list.append(func)
+            LOG.debug(
+                "on() 收集 handler: %s → %s (plugin=%s, pending_count=%d)",
+                func.__name__,
+                event_type,
+                plugin_name,
+                len(pending_list),
+            )
 
             return func
 
@@ -236,6 +245,12 @@ def flush_pending(
         注册的 handler 数量
     """
     handlers = _pending_handlers.pop(plugin_name, [])
+    LOG.debug(
+        "flush_pending(%s): 待注册 %d 个 handler (funcs: %s)",
+        plugin_name,
+        len(handlers),
+        [f.__name__ for f in handlers],
+    )
     count = 0
 
     for func in handlers:

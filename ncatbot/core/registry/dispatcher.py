@@ -175,6 +175,12 @@ class HandlerDispatcher:
 
         # snapshot 防止并发修改
         handlers = self._collect_handlers(event_type)
+        LOG.debug(
+            "_dispatch(%s): 收集到 %d 个 handler — %s",
+            event_type,
+            len(handlers),
+            [(e.func.__name__, e.event_type, e.plugin_name, id(e)) for e in handlers],
+        )
 
         for entry in handlers:
             if getattr(event.data, "_propagation_stopped", False):
@@ -207,9 +213,22 @@ class HandlerDispatcher:
                     skip = True
                     break
             if skip:
+                LOG.debug(
+                    "_dispatch: SKIP handler %s (plugin=%s, id=%d)",
+                    entry.func.__name__,
+                    entry.plugin_name,
+                    id(entry),
+                )
                 continue
 
             # --- 执行 handler ---
+            LOG.debug(
+                "_dispatch: 执行 handler %s (plugin=%s, event_type=%s, id=%d)",
+                entry.func.__name__,
+                entry.plugin_name,
+                entry.event_type,
+                id(entry),
+            )
             try:
                 result = await self._execute(entry, entity, **ctx.kwargs)
                 ctx.result = result

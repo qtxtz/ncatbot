@@ -91,6 +91,14 @@ class ModuleImporter:
                 created_pkg = True
 
             # 加载入口模块
+            # __init__.py 中的 ``from .main import ...`` 可能已经触发了入口模块的
+            # 导入并执行了装饰器。此时 sys.modules 中已有该模块，直接复用即可，
+            # 避免重新 exec 导致装饰器注册出重复的 handler 函数对象。
+            existing = sys.modules.get(module_name)
+            if existing is not None:
+                LOG.debug("入口模块 %s 已由包 __init__ 导入，复用现有模块", module_name)
+                return existing
+
             entry_file = str(manifest.entry_file)
             spec = importlib.util.spec_from_file_location(module_name, entry_file)
             if spec is None or spec.loader is None:
