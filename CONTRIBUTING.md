@@ -47,6 +47,13 @@ uv run pre-commit install
 
 ## 开发
 
+本项目推荐并内置了基于 AI Agent 的 **领域技能（Skills）**。如果你使用 VS Code 与 GitHub Copilot，可以直接利用 Agent 极大提升开发与调试效率：
+
+- **`codebase-nav`（代码定位）**：当你需要定位 Bug 或想知道某个功能在哪里实现时，可以询问 Agent。它会通过该技能，优先查阅文档再精准定位代码，而不是盲目搜索。
+- **`framework-dev`（框架开发）**：涉及日常修 Bug、新功能开发、重构或代码审查时，Agent 会加载此技能，确保生成的代码符合 NcatBot 的架构规范。
+- **`testing`（测试支持）**：你可以让 Agent“帮我给这个插件写个测试”或者“帮我排查测试失败的原因”，它会利用此技能调用 pytest 和相应的 Mock/TestHarness 工具编写专业的测试代码。
+
+> **💡 提示**：在 VS Code 的 Copilot Chat 中，你可以直接对 Agent 说：“请根据 `framework-dev` 技能帮我编写一段消息重发机制的代码”，或者让它调用 `codebase-nav` 探索当前架构。
 
 - 新建分支进行开发：
 

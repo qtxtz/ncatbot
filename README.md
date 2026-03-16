@@ -17,18 +17,30 @@
 
 [文档](https://docs.ncatbot.xyz) | [许可证](LICENSE) | [QQ群](https://qm.qq.com/q/AmdNUkSxFY) | [插件社区](https://www.ityzs.com/)
 
-NcatBot 是基于 OneBot11 协议的 Python SDK，它提供了一套方便易用的 Python 接口，用于开发 QQ 机器人。
+NcatBot 是基于 OneBot11 协议的 Python SDK，它提供了一套方便易用的 Python 接口，让你拥有**开箱即用**的 QQ 机器人开发体验。
 
 </div>
 
 
 ## 如何使用
 
+### 1. 快速体验与部署
 
-- 认真阅读本项目[文档](https://docs.ncatbot.xyz)
-- 使用 Docker [部署](https://github.com/ncatbot/NcatBot-Docker)。
+NcatBot 提供了一套方便易用的 Python 接口，你可以通过以下方式快速开始：
+- **查阅文档**：认真阅读项目[官方文档](https://docs.ncatbot.xyz)，了解详细的 API 返回和插件结构。
+- **容器化部署**：推荐使用 Docker 快速[部署环境](https://github.com/ncatbot/NcatBot-Docker)。
+- **查看示例**：可以查阅 `examples/` 文件夹内丰富的实战案例，包括事件处理、定时任务、多轮对话等。
 
-## 欢迎来玩
+### 2. 基于 Skills 的智能化 Agent 开发
+
+为了降低开发门槛并提升开发体验，NcatBot 深度集成了基于 AI Agent（特别是 GitHub Copilot）的开发辅助系统。
+工作区中已经预置了丰富的领域专有技能（Skills），无论你是开发插件还是参与框架维护，都可以利用 AI Agent 获得极大便利：
+- **开发 Bot/插件**：在提问时，Agent 会利用 `framework-usage` 技能，为你提供关于发送消息、注册事件、编写 Hook 与过滤器的精准建议。
+- **参与框架开发**：内置 `codebase-nav`（代码定位）、`framework-dev`（框架开发）、`testing`（测试环境调试）以及 `release`（版本发布）等专属技能。你可以直接向 Agent 描述需要实现的功能或遇到的 Bug，它将按规范自主探索代码库、编写代码以及运行测试。
+
+> **提示**：只需在 VS Code 中使用 Copilot Chat 与 Agent 交互，即可体验顺畅的定制化 AI 辅助开发！
+
+## 交流群体
 
 [是 QQ 群哦喵~](https://qm.qq.com/q/L6XGXYqL86)
 

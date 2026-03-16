@@ -2,25 +2,43 @@
 
 ## 完整发布清单
 
-### 阶段 0：Commit 审查与挑选
+### 阶段 0：工作区变更编排
+
+如果工作区有未提交的变更（`git status` 非空）：
+
+1. 展示变更文件列表，**ASK** 用户哪些纳入本次发布
+2. 建议 commit 分组方案，**ASK** 用户确认/调整
+3. 按确认方案依次 `git add` + `git commit`
+4. 工作区无变更时自动跳过此阶段
+
+> 详见 [commit-picking.md](commit-picking.md) 前置部分
+
+### 阶段 1：Commit 审查与挑选
 
 > 详见 [commit-picking.md](commit-picking.md)
 
 1. 获取自上一个 tag 以来的所有 commits
 2. 按类型分组展示给用户
-3. 用户确认纳入/排除
+3. **ASK** 用户确认纳入/排除
 4. 生成 release notes 文件 `release-notes.md`
 
-### 阶段 1：准备
+### 阶段 2：准备
 
 1. 确认所有代码已合并到目标分支
-2. 确认测试通过（`python -m pytest`）
-3. 根据 commit 类型确定版本递增策略（major/minor/patch）
-4. 更新 `pyproject.toml` 中的 `version` 字段
-   - 正式版：`"5.0.0"`
-   - 预发布版：`"5.0.0rc1"`、`"5.0.0a1"`、`"5.0.0b1"`
+2. 根据 commit 类型确定版本递增策略（版本格式：`X.Y.Z[.postN]`）：
 
-### 阶段 2：构建
+   | 条件 | 版本递增 | 是否 ASK |
+   |------|---------|--------|
+   | 仅 1 个 `fix`（紧急热修复） | **post**（如 `5.1.0.post1`） | 自动 |
+   | 多个 `fix` 或小的 `feat` 增加 | **patch**（如 `5.1.1`） | 自动 |
+   | 大型 `feat` 或破坏性变更 | **minor**（如 `5.2.0`） | 自动 |
+   | 无法归类（仅 refactor/docs 等） | — | **ASK** 用户 |
+
+   > **major 不在 AI 决策范围内**，由人类主动发起，AI 不主动提及或建议。
+
+3. 更新 `pyproject.toml` 中的 `version` 字段
+
+### 阶段 3：构建
 
 ```powershell
 # 激活虚拟环境
@@ -40,7 +58,7 @@ python -m build
 - `dist/ncatbot5-{version}-py3-none-any.whl` — wheel 包
 - `dist/ncatbot5-{version}.tar.gz` — 源码包
 
-### 阶段 3：发布到 PyPI
+### 阶段 4：发布到 PyPI
 
 ```powershell
 # 使用 API Token 上传（Token 通过 TWINE_PASSWORD 环境变量提供）
@@ -49,9 +67,9 @@ python -m twine upload dist/* -u __token__
 
 验证发布：访问 https://pypi.org/project/ncatbot5/{version}/
 
-### 阶段 4：打包用户参考资料
+### 阶段 5：打包用户参考资料
 
-目标：将 `examples/`、`skills/`、`docs/` 打包为一个 zip 文件，供用户下载参考。
+目标：将 `examples/`、`.agents/skills/`、`docs/` 打包为一个 zip 文件，供用户下载参考。
 
 ```powershell
 $ver = "{version}"
@@ -59,7 +77,7 @@ $zipPath = "dist\ncatbot5-$ver-user-reference.zip"
 $tempDir = "dist\_pack_temp"
 
 # 收集文件（排除 __pycache__）
-$files = Get-ChildItem -Recurse examples, skills, docs -File |
+$files = Get-ChildItem -Recurse examples, .agents\skills, docs -File |
     Where-Object { $_.FullName -notmatch '__pycache__' }
 
 # 复制到临时目录（保持目录结构）
@@ -81,7 +99,7 @@ Compress-Archive -Path "$tempDir\*" -DestinationPath $zipPath
 Remove-Item $tempDir -Recurse -Force
 ```
 
-### 阶段 5：创建 GitHub Release
+### 阶段 6：创建 GitHub Release
 
 ```powershell
 $ver = "{version}"

@@ -2,6 +2,48 @@
 
 从工作区 git 历史中筛选 commits，生成结构化 release notes。
 
+## 前置：工作区变更编排（阶段 1）
+
+如果工作区有未提交的变更，先完成 commit 编排：
+
+### 步骤 0a：审查工作区状态
+
+```powershell
+git status --short
+git diff --stat
+```
+
+### 步骤 0b：ASK 用户确认纳入范围
+
+使用 `vscode_askQuestions` 展示变更文件列表，询问：
+- 哪些文件/改动需要纳入本次发布
+- 哪些改动暂不提交
+
+### 步骤 0c：ASK 用户确认 Commit 分组方案
+
+建议按模块/功能将变更拆分为多个 conventional-commits，使用 `vscode_askQuestions` 确认分组方案。
+
+建议格式示例：
+```
+分组 1: fix(adapter): 修复 WebSocket 连接中断
+  - ncatbot/adapter/ws.py
+  - ncatbot/adapter/connection.py
+
+分组 2: feat(plugin): 新增热重载支持
+  - ncatbot/plugin/loader.py
+  - ncatbot/plugin/watcher.py
+```
+
+### 步骤 0d：执行 Commit
+
+按确认的方案依次提交：
+```powershell
+git add <files>
+git commit -m "type(scope): description"
+```
+
+---
+
 ## 步骤 1：获取候选 Commits
 
 ```powershell
@@ -113,8 +155,11 @@ Commit message 遵循 Conventional Commits 格式：`type(scope): description`
 ```
 
 决策树：
-1. 有破坏性变更 → major
-2. 有 feat → minor
-3. 仅有 fix/refactor/perf → patch
+1. 有 feat（大型）或 BREAKING CHANGE → minor
+2. 有多个 fix 或小 feat → patch
+3. 仅 1 个 fix → post
+4. 无法判断 → ASK 用户
+
+> **major 不参与此决策**。major 版本由人类主动提出，AI 执行即可。
 
 将建议展示给用户，由用户最终确认。
