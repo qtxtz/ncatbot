@@ -16,7 +16,7 @@ mkdir my-bot && cd my-bot
 创建 `config.yaml`：
 
 ```yaml
-bt_uin: "你的QQ号"
+bot_uin: "你的QQ号"
 ws_uri: "ws://localhost:3001"
 ```
 

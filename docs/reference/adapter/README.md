@@ -39,7 +39,7 @@ bot.run()
 `config.yaml` 中的适配器相关配置：
 
 ```yaml
-bt_uin: 123456789          # QQ 号
+bot_uin: 123456789          # QQ 号
 ws_uri: "ws://localhost:3001"  # WebSocket 地址
 token: ""                  # 认证 Token（可选）
 skip_setup: false          # true = 跳过安装，直接连接已有 NapCat 服务
