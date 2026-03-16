@@ -85,6 +85,7 @@ class MessageEvent(BaseEvent):
         msg.add_reply(self._data.message_id)
         if self._data.message_type is MessageType.GROUP and at_sender:
             msg.add_at(self._data.user_id)
+            msg.add_text(" ")
         if text is not None:
             msg.add_text(text)
         if at is not None:

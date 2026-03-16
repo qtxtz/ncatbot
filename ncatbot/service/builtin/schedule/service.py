@@ -18,13 +18,10 @@ LOG = get_log("TimeTaskService")
 
 
 class TimeTaskService(BaseService):
-    """
-    定时任务服务
+    """定时任务调度服务
 
-    回调槽：
-        on_task_triggered: Optional[Callable[[str, Optional[str]], None]]
-            参数为 (task_name, plugin_name)。
-            在 scheduler 线程中调用，线程安全由调用方保证。
+    每个任务通过 ``add_job(callback=...)`` 绑定回调，
+    ``TaskExecutor`` 在调度线程中直接调用该回调。
     """
 
     name = "time_task"
@@ -43,9 +40,6 @@ class TimeTaskService(BaseService):
         self._stop_event = threading.Event()
 
         self._executor = None
-
-        # 回调槽：任务触发时调用
-        self.on_task_triggered: Optional[Callable[[str, Optional[str]], None]] = None
 
     @property
     def executor(self):
@@ -99,6 +93,7 @@ class TimeTaskService(BaseService):
         self,
         name: str,
         interval: Union[str, int, float],
+        callback: Callable[[], None],
         conditions: Optional[List[Callable[[], bool]]] = None,
         max_runs: Optional[int] = None,
         plugin_name: Optional[str] = None,
@@ -109,6 +104,7 @@ class TimeTaskService(BaseService):
         Args:
             name: 任务唯一标识名称
             interval: 调度时间参数
+            callback: 任务触发时调用的回调函数（在调度线程中执行）
             conditions: 执行条件列表
             max_runs: 最大执行次数
             plugin_name: 插件名称
@@ -125,6 +121,7 @@ class TimeTaskService(BaseService):
                 return self._create_job(
                     name=name,
                     interval=interval,
+                    callback=callback,
                     conditions=conditions,
                     max_runs=max_runs,
                     plugin_name=plugin_name,
@@ -183,6 +180,7 @@ class TimeTaskService(BaseService):
         self,
         name: str,
         interval: Union[str, int, float],
+        callback: Callable[[], None],
         conditions: Optional[List[Callable[[], bool]]],
         max_runs: Optional[int],
         plugin_name: Optional[str],
@@ -198,6 +196,7 @@ class TimeTaskService(BaseService):
         job_info: Dict[str, Any] = {
             "name": name,
             "plugin_name": plugin_name,
+            "callback": callback,
             "max_runs": max_runs,
             "run_count": 0,
             "conditions": conditions or [],

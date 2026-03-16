@@ -15,6 +15,7 @@ from ._sugar import MessageSugarMixin
 from .extensions.manage import ManageExtension
 from .extensions.info import InfoExtension
 from .extensions.support import SupportExtension
+from ncatbot.types.napcat import SendMessageResult, MessageHistory
 from ncatbot.utils import get_log
 
 LOG = get_log("BotAPIClient")
@@ -95,7 +96,7 @@ class BotAPIClient(MessageSugarMixin):
         group_id: Union[str, int],
         message: list,
         **kwargs: Any,
-    ) -> dict:
+    ) -> SendMessageResult:
         return await self._base.send_group_msg(group_id, message, **kwargs)
 
     async def send_private_msg(
@@ -103,7 +104,7 @@ class BotAPIClient(MessageSugarMixin):
         user_id: Union[str, int],
         message: list,
         **kwargs: Any,
-    ) -> dict:
+    ) -> SendMessageResult:
         return await self._base.send_private_msg(user_id, message, **kwargs)
 
     async def delete_msg(self, message_id: Union[str, int]) -> None:
@@ -115,7 +116,7 @@ class BotAPIClient(MessageSugarMixin):
         target_id: Union[str, int],
         messages: list,
         **kwargs: Any,
-    ) -> dict:
+    ) -> SendMessageResult:
         return await self._base.send_forward_msg(
             message_type,
             target_id,
@@ -129,6 +130,54 @@ class BotAPIClient(MessageSugarMixin):
         user_id: Union[str, int],
     ) -> None:
         await self._base.send_poke(group_id, user_id)
+
+    # ---- 高频消息扩展 API（平铺到顶层）----
+
+    async def get_group_msg_history(
+        self,
+        group_id: Union[str, int],
+        message_seq: Union[str, int, None] = None,
+        count: int = 20,
+    ) -> MessageHistory:
+        return await self._base.get_group_msg_history(group_id, message_seq, count)
+
+    async def get_friend_msg_history(
+        self,
+        user_id: Union[str, int],
+        message_seq: Union[str, int, None] = None,
+        count: int = 20,
+    ) -> MessageHistory:
+        return await self._base.get_friend_msg_history(user_id, message_seq, count)
+
+    async def set_msg_emoji_like(
+        self,
+        message_id: Union[str, int],
+        emoji_id: str,
+        set: bool = True,
+    ) -> None:
+        await self._base.set_msg_emoji_like(message_id, emoji_id, set)
+
+    async def mark_group_msg_as_read(self, group_id: Union[str, int]) -> None:
+        await self._base.mark_group_msg_as_read(group_id)
+
+    async def mark_private_msg_as_read(self, user_id: Union[str, int]) -> None:
+        await self._base.mark_private_msg_as_read(user_id)
+
+    async def mark_all_as_read(self) -> None:
+        await self._base.mark_all_as_read()
+
+    async def forward_friend_single_msg(
+        self, user_id: Union[str, int], message_id: Union[str, int]
+    ) -> None:
+        await self._base.forward_friend_single_msg(user_id, message_id)
+
+    async def forward_group_single_msg(
+        self, group_id: Union[str, int], message_id: Union[str, int]
+    ) -> None:
+        await self._base.forward_group_single_msg(group_id, message_id)
+
+    async def friend_poke(self, user_id: Union[str, int]) -> None:
+        await self._base.friend_poke(user_id)
 
     # ---- 兜底：未显式定义的方法代理到底层 ----
 

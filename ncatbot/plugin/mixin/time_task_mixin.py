@@ -4,6 +4,7 @@
 代理 TimeTaskService 的高频接口，简化插件中定时任务的使用。
 """
 
+import asyncio
 from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING, final
 
 from ncatbot.utils import get_log
@@ -46,6 +47,7 @@ class TimeTaskMixin:
         interval: Union[str, int, float],
         conditions: Optional[List[Callable[[], bool]]] = None,
         max_runs: Optional[int] = None,
+        callback: Optional[Callable] = None,
     ) -> bool:
         """添加定时任务。
 
@@ -58,6 +60,7 @@ class TimeTaskMixin:
                 - 一次性: 'YYYY-MM-DD HH:MM:SS'
             conditions: 执行条件列表，全部为 True 时才执行
             max_runs: 最大执行次数
+            callback: 任务触发时调用的回调函数（可选，默认查找 self.{name} 方法）
 
         Returns:
             是否添加成功
@@ -70,10 +73,24 @@ class TimeTaskMixin:
         if not hasattr(self, "_scheduled_task_names"):
             self._scheduled_task_names: List[str] = []
 
+        # 构造回调：显式传入 > 同名方法查找
+        if callback is None:
+            method = getattr(self, name, None)
+            if method is None or not callable(method):
+                raise AttributeError(
+                    f"插件 {getattr(self, 'name', '?')} 没有方法 '{name}'，"
+                    f"请定义 async def {name}(self) 或显式传入 callback 参数"
+                )
+            callback = method
+
+        # 包装为线程安全的同步回调（scheduler 线程中调用）
+        wrapped = self._wrap_task_callback(callback)
+
         plugin_name = getattr(self, "name", "unknown")
         result = service.add_job(
             name=name,
             interval=interval,
+            callback=wrapped,
             conditions=conditions,
             max_runs=max_runs,
             plugin_name=plugin_name,
@@ -83,6 +100,24 @@ class TimeTaskMixin:
             self._scheduled_task_names.append(name)
 
         return result
+
+    @staticmethod
+    def _wrap_task_callback(callback: Callable) -> Callable[[], None]:
+        """将同步/异步回调包装为可在调度线程中安全调用的同步函数。"""
+        if asyncio.iscoroutinefunction(callback):
+
+            def _sync_wrapper():
+                try:
+                    loop = asyncio.get_running_loop()
+                except RuntimeError:
+                    loop = None
+                if loop and loop.is_running():
+                    asyncio.run_coroutine_threadsafe(callback(), loop)
+                else:
+                    asyncio.run(callback())
+
+            return _sync_wrapper
+        return callback
 
     @final
     def remove_scheduled_task(self, name: str) -> bool:

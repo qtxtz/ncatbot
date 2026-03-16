@@ -13,6 +13,7 @@ from ncatbot.types import (
     PlainText,
     Video,
 )
+from ncatbot.types.napcat import SendMessageResult
 
 if TYPE_CHECKING:
     from .interface import IBotAPI
@@ -37,7 +38,7 @@ class MessageSugarMixin:
         image: Optional[Union[str, Image]] = None,
         video: Optional[Union[str, Video]] = None,
         rtf: Optional[MessageArray] = None,
-    ) -> dict:
+    ) -> SendMessageResult:
         """便捷群消息 — 关键字参数自动组装 MessageArray"""
         msg = _build_message_array(
             text=text, at=at, reply=reply, image=image, video=video, rtf=rtf
@@ -52,7 +53,7 @@ class MessageSugarMixin:
         image: Optional[Union[str, Image]] = None,
         video: Optional[Union[str, Video]] = None,
         rtf: Optional[MessageArray] = None,
-    ) -> dict:
+    ) -> SendMessageResult:
         """便捷私聊消息"""
         msg = _build_message_array(
             text=text, reply=reply, image=image, video=video, rtf=rtf
@@ -63,31 +64,37 @@ class MessageSugarMixin:
         self,
         group_id: Union[str, int],
         msg: MessageArray,
-    ) -> dict:
+    ) -> SendMessageResult:
         return await self._base.send_group_msg(group_id, msg.to_list())
 
     async def post_private_array_msg(
         self,
         user_id: Union[str, int],
         msg: MessageArray,
-    ) -> dict:
+    ) -> SendMessageResult:
         return await self._base.send_private_msg(user_id, msg.to_list())
 
     # ---- 群消息 sugar ----
 
-    async def send_group_text(self, group_id: Union[str, int], text: str) -> dict:
+    async def send_group_text(
+        self, group_id: Union[str, int], text: str
+    ) -> SendMessageResult:
         return await self.post_group_msg(group_id, text=text)
 
-    async def send_group_plain_text(self, group_id: Union[str, int], text: str) -> dict:
+    async def send_group_plain_text(
+        self, group_id: Union[str, int], text: str
+    ) -> SendMessageResult:
         msg = MessageArray([PlainText(text=text)])
         return await self._base.send_group_msg(group_id, msg.to_list())
 
     async def send_group_image(
         self, group_id: Union[str, int], image: Union[str, Image]
-    ) -> dict:
+    ) -> SendMessageResult:
         return await self.post_group_msg(group_id, image=image)
 
-    async def send_group_record(self, group_id: Union[str, int], file: str) -> dict:
+    async def send_group_record(
+        self, group_id: Union[str, int], file: str
+    ) -> SendMessageResult:
         msg = MessageArray([Record(file=file)])
         return await self._base.send_group_msg(group_id, msg.to_list())
 
@@ -96,19 +103,19 @@ class MessageSugarMixin:
         group_id: Union[str, int],
         file: str,
         name: Optional[str] = None,
-    ) -> dict:
+    ) -> SendMessageResult:
         msg = MessageArray([File(file=file, file_name=name)])
         return await self._base.send_group_msg(group_id, msg.to_list())
 
     async def send_group_video(
         self, group_id: Union[str, int], video: Union[str, Video]
-    ) -> dict:
+    ) -> SendMessageResult:
         msg = MessageArray().add_video(video)
         return await self._base.send_group_msg(group_id, msg.to_list())
 
     async def send_group_sticker(
         self, group_id: Union[str, int], image: Union[str, Image]
-    ) -> dict:
+    ) -> SendMessageResult:
         """发送群动画表情（sub_type=1 的图片）"""
         img = _to_sticker(image)
         msg = MessageArray().add_image(img)
@@ -116,21 +123,25 @@ class MessageSugarMixin:
 
     # ---- 私聊消息 sugar ----
 
-    async def send_private_text(self, user_id: Union[str, int], text: str) -> dict:
+    async def send_private_text(
+        self, user_id: Union[str, int], text: str
+    ) -> SendMessageResult:
         return await self.post_private_msg(user_id, text=text)
 
     async def send_private_plain_text(
         self, user_id: Union[str, int], text: str
-    ) -> dict:
+    ) -> SendMessageResult:
         msg = MessageArray([PlainText(text=text)])
         return await self._base.send_private_msg(user_id, msg.to_list())
 
     async def send_private_image(
         self, user_id: Union[str, int], image: Union[str, Image]
-    ) -> dict:
+    ) -> SendMessageResult:
         return await self.post_private_msg(user_id, image=image)
 
-    async def send_private_record(self, user_id: Union[str, int], file: str) -> dict:
+    async def send_private_record(
+        self, user_id: Union[str, int], file: str
+    ) -> SendMessageResult:
         msg = MessageArray([Record(file=file)])
         return await self._base.send_private_msg(user_id, msg.to_list())
 
@@ -139,31 +150,35 @@ class MessageSugarMixin:
         user_id: Union[str, int],
         file: str,
         name: Optional[str] = None,
-    ) -> dict:
+    ) -> SendMessageResult:
         msg = MessageArray([File(file=file, file_name=name)])
         return await self._base.send_private_msg(user_id, msg.to_list())
 
     async def send_private_video(
         self, user_id: Union[str, int], video: Union[str, Video]
-    ) -> dict:
+    ) -> SendMessageResult:
         msg = MessageArray().add_video(video)
         return await self._base.send_private_msg(user_id, msg.to_list())
 
     async def send_private_sticker(
         self, user_id: Union[str, int], image: Union[str, Image]
-    ) -> dict:
+    ) -> SendMessageResult:
         """发送私聊动画表情（sub_type=1 的图片）"""
         img = _to_sticker(image)
         msg = MessageArray().add_image(img)
         return await self._base.send_private_msg(user_id, msg.to_list())
 
-    async def send_private_dice(self, user_id: Union[str, int], value: int = 1) -> dict:
+    async def send_private_dice(
+        self, user_id: Union[str, int], value: int = 1
+    ) -> SendMessageResult:
         return await self._base.send_private_msg(
             user_id,
             [{"type": "dice", "data": {"value": value}}],
         )
 
-    async def send_private_rps(self, user_id: Union[str, int], value: int = 1) -> dict:
+    async def send_private_rps(
+        self, user_id: Union[str, int], value: int = 1
+    ) -> SendMessageResult:
         return await self._base.send_private_msg(
             user_id,
             [{"type": "rps", "data": {"value": value}}],
@@ -175,7 +190,7 @@ class MessageSugarMixin:
         self,
         group_id: Union[str, int],
         forward: Forward,
-    ) -> dict:
+    ) -> SendMessageResult:
         return await self._base.send_forward_msg(
             "group",
             group_id,
@@ -186,7 +201,7 @@ class MessageSugarMixin:
         self,
         user_id: Union[str, int],
         forward: Forward,
-    ) -> dict:
+    ) -> SendMessageResult:
         return await self._base.send_forward_msg(
             "private",
             user_id,
@@ -197,13 +212,13 @@ class MessageSugarMixin:
         self,
         group_id: Union[str, int],
         message_ids: List[Union[str, int]],
-    ) -> dict:
+    ) -> SendMessageResult:
         """通过消息 ID 列表转发群消息
 
         逐条调用 get_msg 获取消息内容，直接通过 send_group_msg 发送。
         返回最后一条发送的结果。
         """
-        result: dict = {}
+        result = SendMessageResult(message_id="")
         for mid in message_ids:
             msg_data = await self._base.get_msg(int(mid))
             if not msg_data:
@@ -216,13 +231,13 @@ class MessageSugarMixin:
         self,
         user_id: Union[str, int],
         message_ids: List[Union[str, int]],
-    ) -> dict:
+    ) -> SendMessageResult:
         """通过消息 ID 列表转发私聊消息
 
         逐条调用 get_msg 获取消息内容，直接通过 send_private_msg 发送。
         返回最后一条发送的结果。
         """
-        result: dict = {}
+        result = SendMessageResult(message_id="")
         for mid in message_ids:
             msg_data = await self._base.get_msg(int(mid))
             if not msg_data:

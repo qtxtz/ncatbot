@@ -9,6 +9,8 @@ from __future__ import annotations
 from typing import Any, Optional, Union, TYPE_CHECKING
 
 from ncatbot.api import IBotAPI
+from ncatbot.api.errors import raise_for_retcode
+from ncatbot.types.napcat import SendMessageResult
 from ncatbot.utils import get_log
 
 from .message import MessageAPIMixin
@@ -40,7 +42,9 @@ class NapCatBotAPI(
         self._preupload = PreUploadService(protocol)
 
     async def _call(self, action: str, params: Optional[dict] = None) -> dict:
-        return await self._protocol.call(action, params)
+        resp = await self._protocol.call(action, params)
+        raise_for_retcode(resp, action=action)
+        return resp
 
     async def _call_data(self, action: str, params: Optional[dict] = None) -> Any:
         resp = await self._call(action, params)
@@ -62,7 +66,7 @@ class NapCatBotAPI(
         group_id: Union[str, int],
         message: list,
         **kwargs: Any,
-    ) -> dict:
+    ) -> SendMessageResult:
         message = await self._preupload_message(message)
         return await super().send_group_msg(group_id, message, **kwargs)
 
@@ -71,7 +75,7 @@ class NapCatBotAPI(
         user_id: Union[str, int],
         message: list,
         **kwargs: Any,
-    ) -> dict:
+    ) -> SendMessageResult:
         message = await self._preupload_message(message)
         return await super().send_private_msg(user_id, message, **kwargs)
 
@@ -81,7 +85,7 @@ class NapCatBotAPI(
         target_id: Union[str, int],
         messages: list,
         **kwargs: Any,
-    ) -> dict:
+    ) -> SendMessageResult:
         result = await self._preupload.process_message_array(messages)
         if result.uploaded_count > 0:
             LOG.info(f"转发消息预上传完成: 共上传 {result.uploaded_count} 个文件")
