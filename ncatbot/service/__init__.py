@@ -6,9 +6,21 @@
 
 from .base import BaseService, EventCallback
 from .manager import ServiceManager
+from .builtin import (
+    RBACService,
+    PermissionPath,
+    PermissionTrie,
+    FileWatcherService,
+    TimeTaskService,
+)
 
 __all__ = [
     "BaseService",
     "EventCallback",
     "ServiceManager",
+    "RBACService",
+    "PermissionPath",
+    "PermissionTrie",
+    "FileWatcherService",
+    "TimeTaskService",
 ]
