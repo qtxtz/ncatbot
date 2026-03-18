@@ -1,6 +1,0 @@
-name = "scheduled_reporter"
-version = "1.0.0"
-main = "main.py"
-entry_class = "ScheduledReporterPlugin"
-author = "NcatBot"
-description = "定时报告与统计 — 消息活跃度统计、合并转发报告"

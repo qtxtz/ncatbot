@@ -1,6 +1,0 @@
-name = "message_types"
-version = "1.0.0"
-main = "main.py"
-entry_class = "MessageTypesPlugin"
-author = "NcatBot"
-description = "消息构造与解析 — MessageArray、图文混排、合并转发"

@@ -1,6 +1,0 @@
-name = "full_featured_bot"
-version = "1.0.0"
-main = "main.py"
-entry_class = "FullFeaturedBotPlugin"
-author = "NcatBot"
-description = "全功能群助手 — 综合演示所有框架特性"

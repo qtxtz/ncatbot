@@ -1,6 +1,0 @@
-name = "hello_world"
-version = "1.0.0"
-main = "main.py"
-entry_class = "HelloWorldPlugin"
-author = "NcatBot"
-description = "最小可运行插件 — 演示基础生命周期与消息回复"
