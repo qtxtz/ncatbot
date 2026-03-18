@@ -12,7 +12,7 @@
 | [core/](core/) | `ncatbot.core` | D-01 ~ D-09, K-01 ~ K-22, H-01 ~ H-12, R-01 ~ R-09 |
 | [service/](service/) | `ncatbot.service` | SM-01 ~ SM-08 |
 | [plugin/](plugin/) | `ncatbot.plugin.mixin` | M-01 ~ M-41, ID-01 ~ ID-02 |
-| [adapter/](adapter/) | `ncatbot.adapter.napcat` | P-01 ~ P-07, RD-01 ~ RD-03, AR-01 ~ AR-05 |
+| [adapter/](adapter/) | `ncatbot.adapter.napcat` | P-01 ~ P-07, RF-01 ~ RF-08, AR-01 ~ AR-05, GM-01 ~ GM-05, BL-01 ~ BL-14, GH-01 ~ GH-11 |
 | [config/](config/) | `ncatbot.utils.config` | CF-01 ~ CF-06 |
 
 ## 公共 Fixtures (`conftest.py`)

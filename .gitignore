@@ -65,3 +65,6 @@ dev/
 *.log
 *.sqlite3
 *.sqlite3-journal
+
+# === Large test fixtures (generated locally) ===
+tests/fixtures/real_group_messages.json

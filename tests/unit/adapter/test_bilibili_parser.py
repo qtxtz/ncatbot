@@ -1,0 +1,289 @@
+"""
+Bilibili 事件解析器测试
+
+数据来源: tests/fixtures/bilibili_events.json (构造数据, 符合 BiliEventParser 输入格式)
+
+规范:
+  BL-01: 直播弹幕 (DANMU_MSG) 解析
+  BL-02: 直播礼物 (SEND_GIFT) 解析
+  BL-03: 醒目留言 (SUPER_CHAT_MESSAGE) 解析
+  BL-04: 大航海 (GUARD_BUY) 解析
+  BL-05: 进入/关注 (INTERACT_WORD_V2) 解析
+  BL-06: 点赞 (LIKE_INFO_V3_CLICK) 解析
+  BL-07: 人气 (VIEW) 解析
+  BL-08: 开播/下播 (LIVE/PREPARING) 解析
+  BL-09: 直播间变更 + 禁言/解禁 + 观看人数变更
+  BL-10: 弹幕聚合 + 进场特效 + 系统连接事件
+  BL-11: 私信解析
+  BL-12: 私信撤回解析
+  BL-13: 评论解析
+  BL-14: 全量夹具一致性 — 全部事件可解析且非 None
+"""
+
+import json
+from pathlib import Path
+from typing import Any, Dict, List
+
+import pytest
+
+from ncatbot.adapter.bilibili.parser import BiliEventParser
+from ncatbot.types.bilibili.events import (
+    BiliCommentEventData,
+    BiliConnectionEventData,
+    BiliPrivateMessageEventData,
+    BiliPrivateMessageWithdrawEventData,
+    DanmuAggregationEventData,
+    DanmuMsgEventData,
+    EntryEffectEventData,
+    GiftEventData,
+    GuardBuyEventData,
+    InteractEventData,
+    LikeEventData,
+    LiveStatusEventData,
+    RoomBlockEventData,
+    RoomChangeEventData,
+    RoomSilentEventData,
+    SuperChatEventData,
+    ViewEventData,
+    WatchedChangeEventData,
+)
+
+FIXTURE_PATH = (
+    Path(__file__).resolve().parent.parent.parent / "fixtures" / "bilibili_events.json"
+)
+
+
+@pytest.fixture(scope="module")
+def fixtures() -> List[Dict[str, Any]]:
+    with open(FIXTURE_PATH, encoding="utf-8") as f:
+        return json.load(f)
+
+
+@pytest.fixture(scope="module")
+def parser() -> BiliEventParser:
+    return BiliEventParser(self_id="test_bili")
+
+
+def _get(fixtures, source_type, cmd=None, **extra):
+    """按 source_type + cmd 查找夹具"""
+    for fix in fixtures:
+        if fix["source_type"] != source_type:
+            continue
+        raw = fix["raw_data"]
+        if cmd and raw.get("type") != cmd:
+            continue
+        match = True
+        for k, v in extra.items():
+            if raw.get(k) != v:
+                match = False
+                break
+        if match:
+            return fix
+    pytest.skip(f"夹具中不存在 source_type={source_type}, cmd={cmd}")
+
+
+class TestDanmu:
+    """BL-01: 直播弹幕"""
+
+    def test_bl01_danmu_msg(self, parser, fixtures):
+        fix = _get(fixtures, "live", "DANMU_MSG")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, DanmuMsgEventData)
+        assert result.user_id == "10001"
+        assert result.user_name == "TestUser1"
+        assert result.message.text == "测试弹幕消息"
+        assert result.sender.medal_name == "TestMedal"
+
+
+class TestGift:
+    """BL-02: 直播礼物"""
+
+    def test_bl02_send_gift(self, parser, fixtures):
+        fix = _get(fixtures, "live", "SEND_GIFT")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, GiftEventData)
+        assert result.gift_name == "辣条"
+        assert result.num == 5
+        assert result.price == 100
+
+
+class TestSuperChat:
+    """BL-03: 醒目留言"""
+
+    def test_bl03_super_chat(self, parser, fixtures):
+        fix = _get(fixtures, "live", "SUPER_CHAT_MESSAGE")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, SuperChatEventData)
+        assert result.content == "SC 测试消息"
+        assert result.price == 30
+        assert result.duration == 60
+
+
+class TestGuardBuy:
+    """BL-04: 大航海"""
+
+    def test_bl04_guard_buy(self, parser, fixtures):
+        fix = _get(fixtures, "live", "GUARD_BUY")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, GuardBuyEventData)
+        assert result.guard_level == 3
+        assert result.price == 198000
+
+
+class TestInteract:
+    """BL-05: 进入/关注"""
+
+    def test_bl05_interact(self, parser, fixtures):
+        fix = _get(fixtures, "live", "INTERACT_WORD_V2")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, InteractEventData)
+        assert result.interact_type == 1
+
+
+class TestLike:
+    """BL-06: 点赞"""
+
+    def test_bl06_like(self, parser, fixtures):
+        fix = _get(fixtures, "live", "LIKE_INFO_V3_CLICK")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, LikeEventData)
+        assert result.like_count == 42
+
+
+class TestView:
+    """BL-07: 人气"""
+
+    def test_bl07_view(self, parser, fixtures):
+        fix = _get(fixtures, "live", "VIEW")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, ViewEventData)
+        assert result.view == 12345
+
+
+class TestLiveStatus:
+    """BL-08: 开播/下播"""
+
+    def test_bl08_live(self, parser, fixtures):
+        fix = _get(fixtures, "live", "LIVE")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, LiveStatusEventData)
+        assert result.status == "live"
+
+    def test_bl08_preparing(self, parser, fixtures):
+        fix = _get(fixtures, "live", "PREPARING")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, LiveStatusEventData)
+        assert result.status == "preparing"
+
+
+class TestRoomEvents:
+    """BL-09: 直播间变更 + 禁言 + 观看人数"""
+
+    def test_bl09_room_change(self, parser, fixtures):
+        fix = _get(fixtures, "live", "ROOM_CHANGE")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, RoomChangeEventData)
+        assert result.title == "测试直播间标题"
+        assert result.area_name == "虚拟主播"
+
+    def test_bl09_room_block(self, parser, fixtures):
+        fix = _get(fixtures, "live", "ROOM_BLOCK_MSG")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, RoomBlockEventData)
+        assert result.user_name == "BadUser"
+
+    def test_bl09_silent_on(self, parser, fixtures):
+        fix = _get(fixtures, "live", "ROOM_SILENT_ON")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, RoomSilentEventData)
+        assert result.level == 1
+
+    def test_bl09_silent_off(self, parser, fixtures):
+        fix = _get(fixtures, "live", "ROOM_SILENT_OFF")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, RoomSilentEventData)
+        assert result.second == 0
+
+    def test_bl09_watched_change(self, parser, fixtures):
+        fix = _get(fixtures, "live", "WATCHED_CHANGE")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, WatchedChangeEventData)
+        assert result.num == 1234
+
+
+class TestMiscLive:
+    """BL-10: 弹幕聚合 + 进场特效 + 系统连接"""
+
+    def test_bl10_danmu_aggregation(self, parser, fixtures):
+        fix = _get(fixtures, "live", "DANMU_AGGREGATION")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, DanmuAggregationEventData)
+        assert result.aggregation_num == 88
+
+    def test_bl10_entry_effect(self, parser, fixtures):
+        fix = _get(fixtures, "live", "ENTRY_EFFECT")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, EntryEffectEventData)
+        assert result.user_name == "TestUser8"
+
+    def test_bl10_connection(self, parser, fixtures):
+        fix = _get(fixtures, "live", "VERIFICATION_SUCCESSFUL")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, BiliConnectionEventData)
+        assert result.event_type == "verification_successful"
+
+
+class TestPrivateMessage:
+    """BL-11: 私信"""
+
+    def test_bl11_private_message(self, parser, fixtures):
+        fix = _get(fixtures, "session")
+        # 取第一个 session fixture (非撤回)
+        for f in fixtures:
+            if f["source_type"] == "session" and f["raw_data"].get("msg_type") != "5":
+                fix = f
+                break
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, BiliPrivateMessageEventData)
+        assert result.message.text == "你好，这是一条测试私信"
+
+
+class TestPrivateMessageWithdraw:
+    """BL-12: 私信撤回"""
+
+    def test_bl12_withdraw(self, parser, fixtures):
+        for f in fixtures:
+            if f["source_type"] == "session" and f["raw_data"].get("msg_type") == "5":
+                fix = f
+                break
+        else:
+            pytest.skip("无撤回夹具")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, BiliPrivateMessageWithdrawEventData)
+        assert result.msg_key == "key_12345"
+
+
+class TestComment:
+    """BL-13: 评论"""
+
+    def test_bl13_comment(self, parser, fixtures):
+        fix = _get(fixtures, "comment")
+        result = parser.parse(fix["source_type"], fix["raw_data"])
+        assert isinstance(result, BiliCommentEventData)
+        assert result.content == "测试评论内容"
+        assert result.like_count == 15
+        assert result.user_name == "CommentUser"
+
+
+class TestBulkConsistency:
+    """BL-14: 全量一致性"""
+
+    def test_bl14_all_fixtures_parse(self, parser, fixtures):
+        """全部夹具事件可解析且非 None"""
+        failed = []
+        for i, fix in enumerate(fixtures):
+            result = parser.parse(fix["source_type"], fix["raw_data"])
+            if result is None:
+                cmd = fix["raw_data"].get("type", fix["source_type"])
+                failed.append((i, cmd))
+        assert not failed, f"解析返回 None: {failed}"
