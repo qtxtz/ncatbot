@@ -18,8 +18,8 @@
 
 | 操作 | 调用方式 |
 |------|---------|
-| QQ 平台 API | `self.api.qq.messaging.*` / `self.api.qq.manage.*` 等 |
-| 按名称访问 | `self.api.platform("telegram").*` |
+| QQ 平台 API | `self.api.qq.messaging.*` / `self.api.qq.manage.*` 等 || Bilibili 平台 API | `self.api.bilibili.send_danmu()` 等 |
+| GitHub 平台 API | `self.api.github.create_issue()` / `self.api.github.merge_pr()` 等 || 按名称访问 | `self.api.platform("telegram").*` |
 | 查看已注册平台 | `self.api.platforms` → `Dict[str, IAPIClient]` |
 
 ### 平台过滤
@@ -76,9 +76,11 @@
 ```python
 from ncatbot.app import BotClient
 from ncatbot.adapter import NapCatAdapter
+from ncatbot.adapter.github import GitHubAdapter
 
 bot = BotClient(adapters=[
     NapCatAdapter(),           # platform="qq"
+    GitHubAdapter(),           # platform="github"
     # TelegramAdapter(),       # platform="telegram" (未来)
 ])
 bot.run()
@@ -112,13 +114,14 @@ bot.run()
 # 方式 1: 直接属性访问（推荐，有类型提示）
 await self.api.qq.messaging.send_group_msg(group_id, message)
 await self.api.bilibili.send_danmu(room_id, text)
+await self.api.github.create_issue_comment(repo, issue_number, body)
 
 # 方式 2: 动态平台访问（按名称获取）
 client = self.api.platform("qq")        # → IQQAPIClient
 await client.messaging.send_group_msg(group_id, message)
 
 # 方式 3: 查看已注册的平台
-print(self.api.platforms)  # {"qq": <IQQAPIClient>, "bilibili": <IBiliAPIClient>, ...}
+print(self.api.platforms)  # {"qq": <IQQAPIClient>, "bilibili": ..., "github": ...}
 ```
 
 **选择建议**：
@@ -180,3 +183,24 @@ async def cross_platform(event):
 - [架构文档](../../architecture.md) — 整体设计
 - [ADR-005: 多平台架构](../../contributing/design_decisions/1_architecture.md#adr-005多平台架构--组合优于继承) — 设计决策
 - [ADR-006: 多适配器运行时](../../contributing/design_decisions/1_architecture.md#adr-006多适配器运行时) — 运行时设计
+- **示例**：[examples/cross_platform/](../../../examples/cross_platform/) — 跨平台开发示例
+
+---
+
+## 实战案例
+
+### GitHub ↔ QQ 双向桥接
+
+[examples/cross_platform/03_github_qq_bridge/](../../../examples/cross_platform/03_github_qq_bridge/) 展示了一个完整的跨平台双向桥接机器人：
+
+- **GitHub → QQ**：Issue/PR/Push/Comment 事件自动转发到指定 QQ 群
+- **QQ → GitHub**：在 QQ 群中引用(reply)通知消息，回复内容自动作为 GitHub Issue Comment 发送
+- **消息映射追踪**：维护 QQ 消息 ID ↔ GitHub Issue 的映射表，支持 reply 反向关联
+
+核心技术点：
+- 同时使用 `registrar.github.*` 和 `registrar.qq.*` 平台子注册器
+- 通过 `self.api.qq.*` 和 `self.api.github.*` 访问多平台 API
+- `ConfigMixin` 读取桥接群号和仓库名，避免硬编码
+- `HasSender` Trait 统一获取 GitHub/QQ 事件的发送者信息
+
+> ⚠️ 本示例依赖开发中的 GitHub Adapter，API 可能变动。

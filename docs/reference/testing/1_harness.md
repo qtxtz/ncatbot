@@ -133,7 +133,7 @@ PluginTestHarness(
 ```python
 async with PluginTestHarness(
     plugin_names=["hello_world"],
-    plugin_dir=Path("examples/01_hello_world"),
+    plugin_dir=Path("examples/qq/01_hello_world"),
 ) as h:
     # 验证加载
     assert "hello_world" in h.loaded_plugins

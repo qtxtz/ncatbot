@@ -78,6 +78,12 @@ ncatbot/
 │   │   ├── config.py     #     Bilibili 配置模型
 │   │   ├── api/          #     BiliBotAPI + Mixin（comment / danmu / query / session / room / source）
 │   │   └── source/       #     数据源管理器
+│   ├── github/           #   GitHub 适配器（platform="github"，实验性）
+│   │   ├── adapter.py    #     GitHubAdapter 主编排器
+│   │   ├── parser.py     #     GitHub Webhook 事件解析
+│   │   ├── config.py     #     GitHub 配置模型
+│   │   ├── api/          #     GitHub API 操作
+│   │   └── source/       #     数据源管理
 │   └── mock/             #   测试用 Mock 适配器（platform 可配置）
 ├── api/                  # Bot API 封装
 │   ├── base.py           #   IAPIClient 抽象接口
@@ -160,7 +166,7 @@ graph TB
     Service["服务层<br/><small>ServiceManager · RBAC · Schedule</small>"]
     API["API 层<br/><small>BotAPIClient（多平台门面）· QQAPIClient</small>"]
     Event["事件层<br/><small>BaseEvent · Trait · 平台工厂</small>"]
-    Adapter["适配层<br/><small>AdapterRegistry · NapCat · Bilibili · Mock</small>"]
+    Adapter["适配层<br/><small>AdapterRegistry · NapCat · Bilibili · GitHub · Mock</small>"]
 
     Plugin --> Core
     Core --> Service
@@ -245,7 +251,7 @@ graph LR
 graph LR
     Config["Config<br/><small>adapters: List[AdapterEntry]</small>"]
     Registry["AdapterRegistry"]
-    Builtin["内置适配器<br/><small>napcat · mock · bilibili</small>"]
+    Builtin["内置适配器<br/><small>napcat · bilibili · github · mock</small>"]
     EP["entry_points<br/><small>第三方适配器</small>"]
     Instance["Adapter 实例"]
 
@@ -290,6 +296,7 @@ graph LR
 |---|---|---|---|
 | `napcat` | `NapCatAdapter` | `"qq"` | QQ / OneBot v11（WebSocket + OB11Protocol） |
 | `bilibili` | `BilibiliAdapter` | `"bilibili"` | Bilibili 直播 / 私信 / 评论 |
+| `github` | `GitHubAdapter` | `"github"` | GitHub Webhook（实验性） |
 | `mock` | `MockAdapter` | 可配置 | 测试用，支持 `inject_event()` 注入事件 |
 
 ### 4.2 Types 类型模型
@@ -578,7 +585,7 @@ adapters:
 
 | 字段 | 类型 | 说明 |
 |---|---|---|
-| `type` | `str` | 适配器注册表中的 key（`"napcat"` / `"bilibili"` / `"mock"`） |
+| `type` | `str` | 适配器注册表中的 key（`"napcat"` / `"bilibili"` / `"github"` / `"mock"`） |
 | `platform` | `str = ""` | 平台标识，留空则使用适配器默认值 |
 | `enabled` | `bool = True` | 是否启用 |
 | `config` | `Dict[str, Any] = {}` | 适配器专属配置，透传给构造函数 |
@@ -885,7 +892,7 @@ graph LR
 |---|---|---|
 | **注册表模式** | `adapter/registry.py` | `AdapterRegistry` 管理适配器的注册、发现和工厂创建 |
 | **门面模式** | `api/client.py` | `BotAPIClient` 作为多平台 API 的统一入口，路由到各平台专用客户端 |
-| **适配器模式** | `adapter/` | `BaseAdapter` 抽象协议差异，支持 NapCat / Bilibili / Mock 等多种实现 |
+| **适配器模式** | `adapter/` | `BaseAdapter` 抽象协议差异，支持 NapCat / Bilibili / GitHub / Mock 等多种实现 |
 | **观察者模式** | `core/dispatcher/` | `AsyncEventDispatcher` 广播事件到多个 `EventStream` 订阅者 |
 | **责任链模式** | `core/registry/` | Hook 链按优先级依次执行，可中断或跳过 |
 | **工厂模式** | `event/common/factory.py` | `create_entity()` 根据 `data.platform` 路由到平台工厂创建对应事件实体 |

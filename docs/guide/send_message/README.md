@@ -36,6 +36,19 @@ await self.api.bilibili.send_private_msg(user_id, "你好！")
 await self.api.bilibili.send_comment(resource_id, "video", "好视频！")
 ```
 
+### GitHub 平台
+
+```python
+# Issue 评论（通过事件回复）
+await event.reply("感谢你的反馈！")
+
+# Issue 评论（通过 API）
+await self.api.github.create_issue_comment("owner/repo", 42, "已处理")
+
+# PR 评论
+await self.api.github.create_pr_comment("owner/repo", 10, "LGTM!")
+```
+
 ---
 
 ## 本目录索引
@@ -63,3 +76,10 @@ await self.api.bilibili.send_comment(resource_id, "video", "好视频！")
 |------|------|
 | [Bilibili 消息发送](bilibili/README.md) | 弹幕、私信、评论发送概览 |
 | [消息发送详解](bilibili/1_messaging.md) | 弹幕、私信、评论的发送方式与示例 |
+
+### GitHub 平台
+
+| 文档 | 内容 |
+|------|------|
+| [GitHub 消息发送](github/README.md) | Issue / PR 评论发送概览 |
+| [消息发送详解](github/1_messaging.md) | Issue / PR / Review Comment 发送与示例 |

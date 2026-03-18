@@ -103,4 +103,4 @@ class LiveManager(NcatBotPlugin):
 
 ---
 
-> **返回**：[Bilibili API 指南](README.md) · **下一篇**：[私信操作](2_private_msg.md)
+> **返回**：[Bilibili API 指南](README.md) · **下一篇**：[私信操作](2_private_msg.md) · **示例**：[examples/bilibili/02_live_room/](../../../../examples/bilibili/02_live_room/)

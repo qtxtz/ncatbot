@@ -65,7 +65,7 @@ await self.api.qq.manage.set_group_whole_ban(group_id, False)  # 关闭
 
 - [群管理 API 参考](../../../reference/api/qq/2_manage_api.md) — 完整参数表与返回值
 - [RBAC 权限控制](../../rbac/) — 限制谁可以执行管理操作
-- [示例：群管理机器人](../../../../examples/11_group_manager/) — 完整实现
+- [示例：群管理机器人](../../../../examples/qq/06_group_manager/) — 完整实现
 
 ```python
 # 需要群主权限

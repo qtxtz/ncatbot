@@ -62,4 +62,4 @@ async def on_bili_pm(self, event):
 
 ---
 
-> **返回**：[Bilibili API 指南](README.md) · **上一篇**：[直播间操作](1_live_room.md) · **下一篇**：[评论操作](3_comment.md)
+> **返回**：[Bilibili API 指南](README.md) · **上一篇**：[直播间操作](1_live_room.md) · **下一篇**：[评论操作](3_comment.md) · **示例**：[examples/bilibili/03_private_message/](../../../../examples/bilibili/03_private_message/)

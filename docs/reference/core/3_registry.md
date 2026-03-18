@@ -58,9 +58,9 @@ class HandlerDispatcher:
 
 | 装饰器 | 等价于 | 说明 |
 |--------|--------|------|
-| `on_command(cmd, ...)` | `on_message()` + `CommandHook` | 命令匹配 |
-| `on_group_command(cmd, ...)` | `on_group_message()` + `CommandHook` | 群命令 |
-| `on_private_command(cmd, ...)` | `on_private_message()` + `CommandHook` | 私聊命令 |
+| `on_command(*names, ignore_case=False, ...)` | `on_message()` + `CommandHook` | 命令匹配 |
+| `on_group_command(*names, ignore_case=False, ...)` | `on_group_message()` + `CommandHook` | 群命令 |
+| `on_private_command(*names, ignore_case=False, ...)` | `on_private_message()` + `CommandHook` | 私聊命令 |
 | `on_group_increase()` | `on_notice()` + `NoticeTypeFilter("group_increase")` | 入群 |
 | `on_group_decrease()` | `on_notice()` + `NoticeTypeFilter("group_decrease")` | 退群 |
 | `on_friend_request()` | `on_request()` + `RequestTypeFilter("friend")` | 加好友 |
@@ -133,7 +133,7 @@ class HookContext:
 | `StartsWithHook(prefix)` | `prefix: str` | 消息以指定前缀开头 |
 | `KeywordHook(*keywords)` | `*keywords: str` | 消息包含任一关键词 |
 | `RegexHook(pattern)` | `pattern: str` | 消息匹配正则表达式 |
-| `CommandHook(cmd, ...)` | `cmd: str, aliases=[], prefix="/"` | 命令匹配（含别名、前缀） |
+| `CommandHook(*names, ...)` | `*names: str, ignore_case: bool = False, priority: int = 95` | 命令匹配 + 参数绑定 |
 
 ### 类型过滤
 

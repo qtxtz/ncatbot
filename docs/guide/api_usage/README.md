@@ -20,6 +20,10 @@ await self.api.qq.manage.set_group_ban(group_id, user_id, 600)
 # Bilibili 平台
 await self.api.bilibili.send_danmu(room_id, "弹幕内容")
 await self.api.bilibili.send_private_msg(user_id, "私信内容")
+
+# GitHub 平台
+await self.api.github.create_issue_comment("owner/repo", 42, "已处理")
+await self.api.github.merge_pr("owner/repo", 10, merge_method="squash")
 ```
 
 ### API 架构总览
@@ -37,6 +41,11 @@ BotAPIClient                        ← 多平台路由（纯门面）
 │   ├── send_private_msg()          ← 私信
 │   ├── send_comment()              ← 评论
 │   └── ban_user() ...              ← 直播间管理
+├── .github : GitHubBotAPI          ← GitHub 平台 API
+│   ├── create_issue()              ← Issue 管理
+│   ├── create_issue_comment()      ← 评论
+│   ├── merge_pr()                  ← PR 管理
+│   └── get_repo() ...              ← 信息查询
 ├── .platform("xxx")                ← 按名称获取平台 API
 └── .platforms                      ← 所有已注册平台
 ```
@@ -88,3 +97,11 @@ class DemoPlugin(NcatBotPlugin):
 | [私信操作](bilibili/2_private_msg.md) | 私信文字/图片、历史记录 |
 | [评论操作](bilibili/3_comment.md) | 发送/回复/删除/点赞评论 |
 | [数据源与查询](bilibili/4_source_query.md) | 监听管理、用户信息查询 |
+
+### GitHub 平台
+
+| 文档 | 内容 |
+|------|------|
+| [GitHub API 概览](github/README.md) | GitHub 平台 API 功能分类与速查 |
+| [Issue 与评论](github/1_issue_comment.md) | Issue CRUD、标签、指派、评论操作 |
+| [PR 与查询](github/2_pr_query.md) | PR 评论 / 合并 / 审查 + 信息查询 |

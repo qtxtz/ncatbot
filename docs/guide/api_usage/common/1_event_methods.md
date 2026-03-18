@@ -145,7 +145,7 @@ async def reject(self, **kwargs) -> Any
 ```python
 from ncatbot.event import Approvable
 
-@registrar.on_friend_request()
+@registrar.qq.on_friend_request()
 async def on_request(self, event):
     if isinstance(event, Approvable):
         await event.approve()

@@ -96,12 +96,12 @@ await self.api.qq.file.delete_group_file(group_id, file_id)
 ```python
 from ncatbot.event.qq import FriendRequestEvent, GroupRequestEvent
 
-@registrar.on_friend_request()
+@registrar.qq.on_friend_request()
 async def on_friend_request(self, event: FriendRequestEvent):
     # 自动同意好友请求
     await event.approve()
 
-@registrar.on_group_request()
+@registrar.qq.on_group_request()
 async def on_group_request(self, event: GroupRequestEvent):
     if event.sub_type == "invite":
         await self.api.qq.manage.set_group_add_request(

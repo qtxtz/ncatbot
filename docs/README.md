@@ -59,6 +59,9 @@ docs/
 │   │   └── bilibili/                #     Bilibili 平台
 │   │       ├── README.md
 │   │       └── 1_messaging.md       #       Bilibili 消息发送
+│   │   └── github/                  #     GitHub 平台
+│   │       ├── README.md
+│   │       └── 1_messaging.md       #       GitHub 消息发送
 │   ├── api_usage/                   #   Bot API 使用（按平台组织）
 │   │   ├── README.md                #     API 使用首页 & Quick Start
 │   │   ├── common/                  #     跨平台通用
@@ -76,6 +79,10 @@ docs/
 │   │       ├── 2_private_msg.md     #       私信 API
 │   │       ├── 3_comment.md         #       评论 API
 │   │       └── 4_source_query.md    #       数据源查询 API
+│   │   └── github/                  #     GitHub 平台
+│   │       ├── README.md
+│   │       ├── 1_issue_comment.md   #       Issue 与评论 API
+│   │       └── 2_pr_query.md        #       PR 与查询 API
 │   ├── configuration/               #   配置管理（1 篇）
 │   │   ├── README.md                #     配置管理首页 & Quick Start
 │   │   └── 1.config-security.md     #     配置管理与安全校验
@@ -107,18 +114,22 @@ docs/
 │   │   │   └── 3_info_support_api.md#       信息查询与支持 API
 │   │   └── bilibili/                #     Bilibili 平台
 │   │       └── 1_api.md             #       Bilibili API 参考
+│   │   └── github/                  #     GitHub 平台
+│   │       └── 1_api.md             #       GitHub API 参考
 │   ├── events/                      #   事件类型（1 篇）
 │   │   ├── README.md                #     事件参考首页 & Quick Start
 │   │   ├── 1_common.md              #     通用事件基础（BaseEvent / Mixin / 工厂）
 │   │   ├── 2_qq_events.md           #     QQ 事件实体
-│   │   └── 3_bilibili_events.md     #     Bilibili 事件实体
+│   │   ├── 3_bilibili_events.md     #     Bilibili 事件实体
+│   │   └── 4_github_events.md       #     GitHub 事件实体
 │   ├── types/                       #   数据类型（4 篇）
 │   │   ├── README.md                #     类型参考首页 & Quick Start
 │   │   ├── 1_common_segments.md     #     通用消息段（跨平台）
 │   │   ├── 2_message_array.md       #     MessageArray 容器
 │   │   ├── 3_qq_segments.md         #     QQ 专属消息段
 │   │   ├── 4_qq_responses.md        #     QQ/NapCat 响应类型
-│   │   └── 5_bilibili_types.md      #     Bilibili 平台类型
+│   │   ├── 5_bilibili_types.md      #     Bilibili 平台类型
+│   │   └── 6_github_types.md        #     GitHub 平台类型
 │   ├── core/                        #   核心模块（3 篇）
 │   │   ├── README.md                #     核心模块首页 & Quick Start
 │   │   ├── 1_internals.md           #     Dispatcher / Event / EventStream 详解
@@ -184,9 +195,9 @@ docs/
 
 - **[guide/plugin/](guide/plugin/)** — 插件开发完整指南（11 篇）。从 5 分钟快速入门出发，逐步深入：插件结构（manifest.toml 声明 / 目录约定 / 基类选择）、生命周期（on_load / on_unload / 热重载）、事件注册（装饰器 / 手动注册 / Predicate DSL 声明式过滤）、Mixin 能力（ConfigMixin 配置持久化 / DataMixin 数据存储 / RBACMixin 权限控制 / TimeTaskMixin 定时任务 / EventMixin 事件流与多步对话）、Hook 拦截链（权限检查 / 参数预处理 / 文本匹配 / 错误通知）、到实战模式与案例。
 
-- **[guide/send_message/](guide/send_message/)** — 消息发送指南（5 篇）。介绍 3 种日常发送方式：`event.reply(text=)` 最快回复、`api.qq.post_group_msg(group_id, text=, image=)` 语法糖、`MessageArray` 链式构造复杂消息。覆盖所有消息段类型（文本 / 图片 / @/ 引用 / 表情 / 语音 / 视频）、MessageArray 容器与查询过滤、合并转发构造、便捷接口速查，并附常见场景实战示例。
+- **[guide/send_message/](guide/send_message/)** — 消息发送指南（5 篇）。介绍 3 种日常发送方式：`event.reply(text=)` 最快回复、`api.qq.post_group_msg(group_id, text=, image=)` 语法糖、`MessageArray` 链式构造复杂消息。覆盖所有消息段类型（文本 / 图片 / @/ 引用 / 表情 / 语音 / 视频）、MessageArray 容器与查询过滤、合并转发构造、便捷接口速查，并附常见场景实战示例。含 QQ / Bilibili / GitHub 三平台消息发送指南。
 
-- **[guide/api_usage/](guide/api_usage/)** — Bot API 使用指南（3 篇）。按功能域组织：消息收发（发送群/私聊消息、撤回、获取历史消息）、群管理（禁言 / 踢人 / 设管理员 / 群设置）、信息查询（群列表 / 成员信息 / 好友列表 / 登录信息）。每个 API 附完整签名和使用示例，覆盖语法糖、原子 API、Trait 接口三种调用方式。
+- **[guide/api_usage/](guide/api_usage/)** — Bot API 使用指南。按功能域组织：QQ 平台（消息收发、群管理、信息查询）、Bilibili 平台（直播间、私信、评论、数据源）、GitHub 平台（Issue / Comment / PR / Query）。每个 API 附完整签名和使用示例。
 
 - **[guide/configuration/](guide/configuration/)** — 配置管理指南（1 篇）。config.yaml 完整结构说明（bot_uin / 适配器列表 / 插件开关）、多适配器配置方式、旧格式自动迁移机制、安全校验（敏感字段脱敏、类型检查）。
 

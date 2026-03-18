@@ -60,16 +60,16 @@
 
 **用途**：
 - 隔离平台差异 — 插件代码无需关心底层协议细节
-- 多平台并行 — 单个 BotClient 可同时运行 NapCat + Bilibili 等多个适配器
+- 多平台并行 — 单个 BotClient 可同时运行 NapCat + Bilibili + GitHub 等多个适配器
 - 可扩展 — 新增平台只需实现 BaseAdapter 接口，零修改已有代码
 
-**内置适配器**：NapCatAdapter（QQ，OneBot v11）、MockAdapter（测试用模拟）
+**内置适配器**：NapCatAdapter（QQ，OneBot v11）、BilibiliAdapter（Bilibili 直播/私信/评论）、GitHubAdapter（GitHub Webhook/Polling）、MockAdapter（测试用模拟）
 
 **关键类**：`BaseAdapter`、`AdapterRegistry`、`NapCatAdapter`、`MockAdapter`
 
 ### Platform — 平台标识
 
-字符串标识符（`"qq"` / `"bilibili"` / `"mock"`），决定事件路由到哪个适配器、API 调用走哪条通道。
+字符串标识符（`"qq"` / `"bilibili"` / `"github"` / `"mock"`），决定事件路由到哪个适配器、API 调用走哪条通道。
 
 **用途**：在多适配器模式下区分事件来源和 API 目标。
 

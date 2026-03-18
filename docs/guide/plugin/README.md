@@ -52,11 +52,15 @@ class HelloPlugin(NcatBotPlugin):
 | `@registrar.on_message()` | 所有消息 |
 | `@registrar.on_notice()` | 通知事件 |
 | `@registrar.on_request()` | 请求事件 |
-| `@registrar.on_poke()` | 戳一戳 |
-| `@registrar.on_group_increase()` | 群成员增加 |
-| `@registrar.on_group_decrease()` | 群成员减少 |
-| `@registrar.on_friend_request()` | 好友请求 |
-| `@registrar.on_group_request()` | 群请求 |
+| `@registrar.qq.on_poke()` | QQ 戳一戳 |
+| `@registrar.qq.on_group_increase()` | QQ 群成员增加 |
+| `@registrar.qq.on_group_decrease()` | QQ 群成员减少 |
+| `@registrar.qq.on_friend_request()` | QQ 好友请求 |
+| `@registrar.qq.on_group_request()` | QQ 群请求 |
+| `@registrar.bilibili.on_danmu()` | B站弹幕 |
+| `@registrar.bilibili.on_gift()` | B站礼物 |
+| `@registrar.github.on_push()` | GitHub Push |
+| `@registrar.github.on_issue()` | GitHub Issue |
 | `@registrar.on(event_type, ...)` | 通用注册 |
 
 > 所有装饰器支持 `priority=`（优先级）和 `platform=`（平台过滤）参数。命令装饰器额外支持 `ignore_case=`。

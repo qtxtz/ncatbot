@@ -14,7 +14,8 @@
 ncatbot.event                     # 通用层导出
 ├── ncatbot.event.common          #   BaseEvent, Mixin traits, create_entity 工厂
 ├── ncatbot.event.qq              # QQ 事件实体
-└── ncatbot.event.bilibili        # Bilibili 事件实体
+├── ncatbot.event.bilibili        # Bilibili 事件实体
+└── ncatbot.event.github          # GitHub 事件实体（实验性）
 ```
 
 ### Mixin Trait 速查
@@ -62,6 +63,25 @@ from ncatbot.event.bilibili import DanmuMsgEvent, BiliPrivateMessageEvent, BiliC
 | `BiliPrivateMessageEvent` | Replyable, HasSender | `user_id`, `sender` |
 | `BiliCommentEvent` | Replyable, HasSender, Deletable | `user_id`, `sender` |
 
+### GitHub 事件速查
+
+```python
+from ncatbot.event.github import GitHubIssueEvent, GitHubPREvent, GitHubPushEvent
+```
+
+> **实验性**：GitHub 适配器处于活跃开发中。
+
+| 事件类 | Trait 组合 | 关键属性 |
+|--------|-----------|----------|
+| `GitHubIssueEvent` | HasSender, Replyable | `issue_number`, `issue_title`, `action`, `repo` |
+| `GitHubIssueCommentEvent` | HasSender, Replyable, Deletable | `comment_body`, `issue_number`, `repo` |
+| `GitHubPREvent` | HasSender, Replyable | `pr_number`, `pr_title`, `action`, `merged`, `repo` |
+| `GitHubPRReviewCommentEvent` | HasSender, Replyable, Deletable | `comment_body`, `pr_number`, `path`, `repo` |
+| `GitHubPushEvent` | HasSender | `ref`, `before`, `after`, `commits`, `repo` |
+| `GitHubStarEvent` | HasSender | `repo`, `starred_at` |
+| `GitHubForkEvent` | HasSender | `repo`, `forkee_full_name` |
+| `GitHubReleaseEvent` | HasSender | `release_tag`, `release_name`, `repo` |
+
 ---
 
 ## 本目录索引
@@ -71,6 +91,7 @@ from ncatbot.event.bilibili import DanmuMsgEvent, BiliPrivateMessageEvent, BiliC
 | [1_common.md](1_common.md) | 通用 | BaseEvent 基类、Mixin Traits、工厂函数 |
 | [2_qq_events.md](2_qq_events.md) | QQ | QQ 事件实体完整参考 |
 | [3_bilibili_events.md](3_bilibili_events.md) | Bilibili | Bilibili 事件实体完整参考 |
+| [4_github_events.md](4_github_events.md) | GitHub | GitHub 事件实体完整参考（实验性） |
 
 ---
 

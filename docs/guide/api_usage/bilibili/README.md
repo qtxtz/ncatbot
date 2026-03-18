@@ -45,6 +45,41 @@ class BiliPlugin(NcatBotPlugin):
 
 ---
 
+## 认证方式
+
+### 方式 1：扫码登录（推荐）
+
+将 bilibili 适配器的 `sessdata` / `bili_jct` 留空，启动 Bot 时会自动在终端显示二维码：
+
+```yaml
+adapters:
+  - type: bilibili
+    platform: bilibili
+    enabled: true
+    config:
+      sessdata: ""         # 留空即可触发扫码
+      bili_jct: ""
+      live_rooms: [12345]
+```
+
+启动后终端会打印 ASCII 二维码，同时保存 PNG 到临时目录（路径会打印在终端）。使用 Bilibili APP 扫码确认后，凭据自动写入 config.yaml，下次启动不再需要扫码。
+
+凭据过期后再次启动会自动检测并重新触发扫码流程。
+
+### 方式 2：手动填入 Cookie
+
+从浏览器 DevTools → Application → Cookies → bilibili.com 获取以下字段并填入 config.yaml：
+
+```yaml
+config:
+  sessdata: "从浏览器获取"
+  bili_jct: "从浏览器获取"
+  buvid3: "可选"
+  dedeuserid: "可选"
+```
+
+---
+
 ## 本目录索引
 
 | 文档 | 内容 |
@@ -56,4 +91,4 @@ class BiliPlugin(NcatBotPlugin):
 
 ---
 
-> **返回**：[Bot API 使用指南](../README.md) · **相关**：[Bilibili 消息发送](../../send_message/bilibili/README.md) · [Bilibili API 参考](../../../reference/api/bilibili/1_api.md)
+> **返回**：[Bot API 使用指南](../README.md) · **相关**：[Bilibili 消息发送](../../send_message/bilibili/README.md) · [Bilibili API 参考](../../../reference/api/bilibili/1_api.md) · **示例**：[examples/bilibili/](../../../../examples/bilibili/)
