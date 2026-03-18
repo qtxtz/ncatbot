@@ -12,20 +12,20 @@ Types 类型模型规范测试
 import pytest
 from pydantic import ValidationError
 
-from ncatbot.types import (
-    BaseEventData,
+from ncatbot.types import BaseEventData
+from ncatbot.types.qq import (
     GroupMessageEventData,
     PrivateMessageEventData,
     PostType,
     MessageType,
 )
-from ncatbot.types.notice import (
+from ncatbot.types.qq.notice import (
     GroupIncreaseNoticeEventData,
     GroupBanNoticeEventData,
     GroupDecreaseNoticeEventData,
     NoticeType,
 )
-from ncatbot.types.request import (
+from ncatbot.types.qq.request import (
     FriendRequestEventData,
     GroupRequestEventData,
     RequestType,

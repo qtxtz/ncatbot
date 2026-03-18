@@ -1,6 +1,0 @@
-name = "group_manager"
-version = "1.0.0"
-main = "main.py"
-entry_class = "GroupManagerPlugin"
-author = "NcatBot"
-description = "群管理机器人 — 踢人/禁言/欢迎/RBAC 权限控制"

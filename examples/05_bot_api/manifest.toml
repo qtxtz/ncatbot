@@ -1,6 +1,0 @@
-name = "bot_api"
-version = "1.0.0"
-main = "main.py"
-entry_class = "BotAPIPlugin"
-author = "NcatBot"
-description = "Bot API 使用大全 — 消息发送、群管理、信息查询"

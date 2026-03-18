@@ -2,14 +2,14 @@
 ServiceManager 规范测试
 
 规范:
-  S-01: register() 注册服务类
-  S-02: load() 加载并返回服务实例
-  S-03: load_all() 按拓扑排序加载
-  S-04: 循环依赖抛 ValueError
-  S-05: close_all() 关闭所有已加载服务
-  S-06: get() 返回已加载服务实例
-  S-07: has() 判断服务是否已加载
-  S-08: register_builtin() 注册内置服务
+  SM-01: register() 注册服务类
+  SM-02: load() 加载并返回服务实例
+  SM-03: load_all() 按拓扑排序加载
+  SM-04: 循环依赖抛 ValueError
+  SM-05: close_all() 关闭所有已加载服务
+  SM-06: get() 返回已加载服务实例
+  SM-07: has() 判断服务是否已加载
+  SM-08: register_builtin() 注册内置服务
 """
 
 import pytest
@@ -78,21 +78,21 @@ class CycleB(BaseService):
         pass
 
 
-# ---- S-01: register ----
+# ---- SM-01: register ----
 
 
 def test_register_service():
-    """S-01: register() 记录服务类"""
+    """SM-01: register() 记录服务类"""
     mgr = ServiceManager()
     mgr.register(DummyServiceA)
     assert "service_a" in mgr._service_classes
 
 
-# ---- S-02: load ----
+# ---- SM-02: load ----
 
 
 async def test_load_service():
-    """S-02: load() 加载并返回服务实例"""
+    """SM-02: load() 加载并返回服务实例"""
     mgr = ServiceManager()
     mgr.register(DummyServiceA)
     svc = await mgr.load("service_a")
@@ -101,14 +101,14 @@ async def test_load_service():
 
 
 async def test_load_nonexistent_raises():
-    """S-02 补充: 未注册的服务 → KeyError"""
+    """SM-02 补充: 未注册的服务 → KeyError"""
     mgr = ServiceManager()
     with pytest.raises(KeyError, match="未注册"):
         await mgr.load("nonexistent")
 
 
 async def test_load_idempotent():
-    """S-02 补充: 已加载的服务 → 直接返回"""
+    """SM-02 补充: 已加载的服务 → 直接返回"""
     mgr = ServiceManager()
     mgr.register(DummyServiceA)
     svc1 = await mgr.load("service_a")
@@ -116,11 +116,11 @@ async def test_load_idempotent():
     assert svc1 is svc2
 
 
-# ---- S-03: load_all 拓扑排序 ----
+# ---- SM-03: load_all 拓扑排序 ----
 
 
 async def test_load_all_topological():
-    """S-03: load_all() 按拓扑排序加载 (A → B → C)"""
+    """SM-03: load_all() 按拓扑排序加载 (A → B → C)"""
     mgr = ServiceManager()
     # 注册顺序故意倒序
     mgr.register(DummyServiceC)
@@ -134,11 +134,11 @@ async def test_load_all_topological():
     assert mgr.has("service_c")
 
 
-# ---- S-04: 循环依赖 ----
+# ---- SM-04: 循环依赖 ----
 
 
 async def test_circular_dependency_raises():
-    """S-04: 循环依赖 → ValueError"""
+    """SM-04: 循环依赖 → ValueError"""
     mgr = ServiceManager()
     mgr.register(CycleA)
     mgr.register(CycleB)
@@ -147,11 +147,11 @@ async def test_circular_dependency_raises():
         await mgr.load_all()
 
 
-# ---- S-05: close_all ----
+# ---- SM-05: close_all ----
 
 
 async def test_close_all():
-    """S-05: close_all() 关闭所有已加载服务"""
+    """SM-05: close_all() 关闭所有已加载服务"""
     mgr = ServiceManager()
     mgr.register(DummyServiceA)
     await mgr.load("service_a")
@@ -161,11 +161,11 @@ async def test_close_all():
     assert not mgr.has("service_a")
 
 
-# ---- S-06: get ----
+# ---- SM-06: get ----
 
 
 async def test_get_loaded_service():
-    """S-06: get() 返回已加载的服务实例"""
+    """SM-06: get() 返回已加载的服务实例"""
     mgr = ServiceManager()
     mgr.register(DummyServiceA)
     await mgr.load("service_a")
@@ -176,16 +176,16 @@ async def test_get_loaded_service():
 
 
 def test_get_unloaded_returns_none():
-    """S-06 补充: 未加载的服务 → None"""
+    """SM-06 补充: 未加载的服务 → None"""
     mgr = ServiceManager()
     assert mgr.get("nonexistent") is None
 
 
-# ---- S-07: has ----
+# ---- SM-07: has ----
 
 
 async def test_has():
-    """S-07: has() 判断服务是否已加载"""
+    """SM-07: has() 判断服务是否已加载"""
     mgr = ServiceManager()
     mgr.register(DummyServiceA)
 
@@ -194,11 +194,11 @@ async def test_has():
     assert mgr.has("service_a")
 
 
-# ---- S-08: register_builtin ----
+# ---- SM-08: register_builtin ----
 
 
 def test_register_builtin():
-    """S-08: register_builtin() 注册 rbac, file_watcher, time_task"""
+    """SM-08: register_builtin() 注册 rbac, file_watcher, time_task"""
     mgr = ServiceManager()
     mgr.register_builtin()
 

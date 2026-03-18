@@ -14,7 +14,7 @@ import asyncio
 import pytest
 
 from ncatbot.testing.harness import TestHarness
-from ncatbot.event.message import GroupMessageEvent
+from ncatbot.event.qq.message import GroupMessageEvent
 from ncatbot.testing import factory
 
 pytestmark = pytest.mark.asyncio

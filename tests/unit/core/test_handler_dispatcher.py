@@ -24,7 +24,7 @@ from ncatbot.adapter.mock.api import MockBotAPI
 from ncatbot.core.dispatcher import AsyncEventDispatcher
 from ncatbot.core.registry.dispatcher import HandlerDispatcher
 from ncatbot.core.registry.hook import Hook, HookAction, HookContext, HookStage
-from ncatbot.event.base import BaseEvent
+from ncatbot.event.common.base import BaseEvent
 from ncatbot.testing import factory
 
 pytestmark = pytest.mark.asyncio

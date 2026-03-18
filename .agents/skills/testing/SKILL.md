@@ -163,7 +163,7 @@ async def test_plugin_responds_to_command():
     """命令测试：插件正确响应指令"""
     async with PluginTestHarness(
         plugin_names=["hello_world"],
-        plugin_dir=Path("examples/01_hello_world"),
+        plugin_dir=Path("examples/qq/01_hello_world"),
     ) as h:
         await h.inject(group_message("hello", group_id="100"))
         await h.settle()
@@ -246,6 +246,24 @@ python tests/e2e/napcat/run.py
 | `插件加载失败` | plugin_dir 路径错误 / 插件结构不对 | 检查 `plugin_dir` 和插件的 `__init__.py` |
 | `flaky test（时而通过时而失败）` | 异步竞态 / settle 时间不足 | 增加 settle delay 或用 `wait_event()` |
 | `Mock 返回值不对` | 未配置 response | 用 `mock_api.set_response("action", {...})` 预设返回 |
+| `platform 过滤不生效` | MockAdapter 默认 `platform="qq"` | 确认事件数据的 `platform` 字段与适配器 platform 一致 |
+| `'BotAPIClient' has no attr 'post_group_msg'` | 插件用了 `self.api.xxx` 而非 `self.api.qq.xxx` | `BotAPIClient` 是多平台路由器，QQ sugar 方法在 `self.api.qq` 上 |
+| `'BaseEvent' has no attr 'reply'` | 事件数据缺少 `platform="qq"` 导致工厂回退到 BaseEvent | 确保 QQ 数据模型有 `platform: str = "qq"` 默认值 |
+
+### 多平台测试
+
+MockAdapter 默认 `platform="mock"`，如测试 `platform="qq"` 相关逻辑需显式配置：
+
+```python
+from ncatbot.adapter.mock import MockAdapter
+
+adapter = MockAdapter(platform="qq")
+async with TestHarness(adapter=adapter) as h:
+    await h.inject(group_message("hello"))
+    ...
+```
+
+> 详见 [references/testing-api.md](./references/testing-api.md) 中「MockAdapter 平台参数」一节。
 
 ### 调试技巧
 

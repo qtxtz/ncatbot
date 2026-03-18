@@ -1,148 +1,35 @@
-from .enums import (
-    EventType,
-    MessageType,
-    MetaEventType,
-    NoticeType,
-    NotifySubType,
-    PostType,
-    RequestType,
-)
-from .base import BaseEventData
-from .message import (
-    GroupMessageEventData,
-    MessageEventData,
-    PrivateMessageEventData,
-)
-from .notice import (
-    FriendAddNoticeEventData,
-    FriendRecallNoticeEventData,
-    GroupAdminNoticeEventData,
-    GroupBanNoticeEventData,
-    GroupDecreaseNoticeEventData,
-    GroupIncreaseNoticeEventData,
-    GroupRecallNoticeEventData,
-    GroupUploadNoticeEventData,
-    HonorNotifyEventData,
-    LuckyKingNotifyEventData,
-    NoticeEventData,
-    NotifyEventData,
-    PokeNotifyEventData,
-)
-from .request import (
-    FriendRequestEventData,
-    GroupRequestEventData,
-    RequestEventData,
-)
-from .meta import (
-    HeartbeatMetaEventData,
-    HeartbeatTimeoutMetaEventData,
-    LifecycleMetaEventData,
-    MetaEventData,
-)
-from .sender import BaseSender, GroupSender
-from .misc import Anonymous, FileInfo, Status
-from .helper import ForwardConstructor
-from .napcat import (
-    NapCatModel,
-    SendMessageResult,
-    MessageData,
-    MessageHistory,
-    ForwardMessageData,
-    GroupInfo,
-    GroupMemberInfo,
-    GroupNotice,
-    EssenceMessage,
-    GroupHonorInfo,
-    GroupAtAllRemain,
-    GroupShutInfo,
-    GroupSystemMsg,
-    GroupInfoEx,
-    LoginInfo,
-    StrangerInfo,
-    FriendInfo,
-    GroupFileSystemInfo,
-    GroupFileList,
-    FileData,
-    DownloadResult,
-    VersionInfo,
-    BotStatus,
-    EmojiLikeInfo,
-    OcrResult,
-)
-from .segment import (
+"""跨平台通用类型
+
+仅导出 common/ 中的平台无关类型。
+QQ 平台类型请从 ncatbot.types.qq 导入。
+NapCat 响应类型请从 ncatbot.types.napcat 导入。
+"""
+
+from .common import (
     SEGMENT_MAP,
     At,
+    BaseEventData,
+    BaseSender,
     DownloadableSegment,
-    Face,
     File,
-    Forward,
-    ForwardNode,
     Image,
-    Json,
-    Location,
-    Markdown,
     MessageArray,
     MessageSegment,
-    Music,
     PlainText,
     Record,
     Reply,
-    Share,
     Video,
-    parse_cq_code_to_onebot11,
     parse_segment,
 )
 
 __all__ = [
-    # enums
-    "PostType",
-    "MessageType",
-    "NoticeType",
-    "NotifySubType",
-    "RequestType",
-    "MetaEventType",
-    "EventType",
-    # base
     "BaseEventData",
-    # message
-    "MessageEventData",
-    "PrivateMessageEventData",
-    "GroupMessageEventData",
-    # notice
-    "NoticeEventData",
-    "GroupUploadNoticeEventData",
-    "GroupAdminNoticeEventData",
-    "GroupDecreaseNoticeEventData",
-    "GroupIncreaseNoticeEventData",
-    "GroupBanNoticeEventData",
-    "FriendAddNoticeEventData",
-    "GroupRecallNoticeEventData",
-    "FriendRecallNoticeEventData",
-    "NotifyEventData",
-    "PokeNotifyEventData",
-    "LuckyKingNotifyEventData",
-    "HonorNotifyEventData",
-    # request
-    "RequestEventData",
-    "FriendRequestEventData",
-    "GroupRequestEventData",
-    # meta
-    "MetaEventData",
-    "LifecycleMetaEventData",
-    "HeartbeatMetaEventData",
-    "HeartbeatTimeoutMetaEventData",
-    # sender / misc
     "BaseSender",
-    "GroupSender",
-    "Anonymous",
-    "FileInfo",
-    "Status",
     # segments
     "SEGMENT_MAP",
     "MessageSegment",
     "parse_segment",
     "PlainText",
-    "Face",
     "At",
     "Reply",
     "DownloadableSegment",
@@ -150,41 +37,5 @@ __all__ = [
     "Record",
     "Video",
     "File",
-    "Share",
-    "Location",
-    "Music",
-    "Json",
-    "Markdown",
-    "ForwardNode",
-    "Forward",
     "MessageArray",
-    "parse_cq_code_to_onebot11",
-    # helper
-    "ForwardConstructor",
-    # napcat response types
-    "NapCatModel",
-    "SendMessageResult",
-    "MessageData",
-    "MessageHistory",
-    "ForwardMessageData",
-    "GroupInfo",
-    "GroupMemberInfo",
-    "GroupNotice",
-    "EssenceMessage",
-    "GroupHonorInfo",
-    "GroupAtAllRemain",
-    "GroupShutInfo",
-    "GroupSystemMsg",
-    "GroupInfoEx",
-    "LoginInfo",
-    "StrangerInfo",
-    "FriendInfo",
-    "GroupFileSystemInfo",
-    "GroupFileList",
-    "FileData",
-    "DownloadResult",
-    "VersionInfo",
-    "BotStatus",
-    "EmojiLikeInfo",
-    "OcrResult",
 ]

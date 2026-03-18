@@ -79,6 +79,7 @@ git diff --stat
 - 建议按模块/功能拆分为多个 commit
 - 每个 commit 建议 conventional-commits 格式的 message（`type(scope): description`）
 - 用户可以合并、拆分、或调整分组
+- Commit 标题和信息都写中文，但是约定式前缀、常用术语保持英文，例如 fix: 修复 xxx 导致的 yyy Bug。
 
 #### 1.4 执行 Commit
 
@@ -184,6 +185,8 @@ git log "$lastTag..HEAD" --oneline --no-merges
 - 破坏性变更始终排在最前
 
 生成后 **展示给用户审阅**，如有修改意见通过 `vscode_askQuestions` 收集。
+
+Relase-Note 使用中文描述，保持简洁明了，突出用户关心的变更点。
 
 ---
 

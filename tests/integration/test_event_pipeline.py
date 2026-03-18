@@ -16,7 +16,7 @@ from ncatbot.core.dispatcher import AsyncEventDispatcher
 from ncatbot.core.registry.dispatcher import HandlerDispatcher
 from ncatbot.core.registry.builtin_hooks import MessageTypeFilter
 from ncatbot.core.registry.hook import add_hooks
-from ncatbot.event.message import GroupMessageEvent
+from ncatbot.event.qq.message import GroupMessageEvent
 from ncatbot.testing import factory
 
 pytestmark = pytest.mark.asyncio
@@ -29,7 +29,7 @@ async def test_full_pipeline():
     """I-01: 事件 → Dispatcher → HandlerDispatcher → handler 收到 EventEntity"""
     api = MockBotAPI()
     ed = AsyncEventDispatcher()
-    hd = HandlerDispatcher(api=api)
+    hd = HandlerDispatcher(api=api, platform_apis={"qq": api})
     hd.start(ed)
 
     received = []
@@ -58,7 +58,7 @@ async def test_mixed_events_filtered():
     """I-02: 注册 'message.group' handler 只收群消息，不收私聊和通知"""
     api = MockBotAPI()
     ed = AsyncEventDispatcher()
-    hd = HandlerDispatcher(api=api)
+    hd = HandlerDispatcher(api=api, platform_apis={"qq": api})
     hd.start(ed)
 
     group_msgs = []
@@ -97,7 +97,7 @@ async def test_hook_filter_in_pipeline():
     """I-03: MessageTypeFilter(group) 在全链路中过滤私聊"""
     api = MockBotAPI()
     ed = AsyncEventDispatcher()
-    hd = HandlerDispatcher(api=api)
+    hd = HandlerDispatcher(api=api, platform_apis={"qq": api})
     hd.start(ed)
 
     received = []
@@ -129,7 +129,7 @@ async def test_handler_api_call():
     """I-01 补充: handler 中调用 event.reply() → MockAPI 记录调用"""
     api = MockBotAPI()
     ed = AsyncEventDispatcher()
-    hd = HandlerDispatcher(api=api)
+    hd = HandlerDispatcher(api=api, platform_apis={"qq": api})
     hd.start(ed)
 
     async def echo_handler(event):

@@ -2,8 +2,8 @@
 __init__.py 导入入口模块导致 handler 重复注册的回归测试
 
 规范:
-  R-10: __init__.py 中 ``from .main import X`` 不导致入口模块被 exec 两次
-  R-11: load_module 复用 __init__ 已导入的入口模块，pending 数量正确
+  ID-01: __init__.py 中 ``from .main import X`` 不导致入口模块被 exec 两次
+  ID-02: load_module 复用 __init__ 已导入的入口模块，pending 数量正确
 """
 
 import sys
@@ -72,11 +72,11 @@ def plugin_with_init(tmp_path: Path) -> PluginManifest:
     )
 
 
-# ---- R-10: __init__.py 导入不导致双重 exec ----
+# ---- ID-01: __init__.py 导入不导致双重 exec ----
 
 
 def test_init_import_no_double_exec(plugin_with_init: PluginManifest):
-    """R-10: __init__.py 中 from .main import X 不导致 handler 重复注册。
+    """ID-01: __init__.py 中 from .main import X 不导致 handler 重复注册。
 
     修复前: load_module 先 exec __init__.py（间接导入 main），
             再重新 exec main.py → 装饰器运行两次 → pending 中出现重复函数对象。
@@ -104,11 +104,11 @@ def test_init_import_no_double_exec(plugin_with_init: PluginManifest):
     assert len(pending) == 2
 
 
-# ---- R-11: 无 __init__ 导入时行为不变 ----
+# ---- ID-02: 无 __init__ 导入时行为不变 ----
 
 
 def test_no_init_import_still_works(tmp_path: Path):
-    """R-11: 无 __init__.py 导入入口模块时，load_module 仍正常加载。"""
+    """ID-02: 无 __init__.py 导入入口模块时，load_module 仍正常加载。"""
     plugin_dir = tmp_path / "_test_dedup_noinit"
     plugin_dir.mkdir()
 

@@ -21,7 +21,7 @@ PLUGIN_NAME = "rbac"
 def examples_dir():
     from pathlib import Path
 
-    return Path(__file__).resolve().parents[3] / "examples"
+    return Path(__file__).resolve().parents[3] / "examples" / "common"
 
 
 # ---- PL-30: 权限初始化 ----

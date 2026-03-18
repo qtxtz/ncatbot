@@ -14,14 +14,14 @@ from ncatbot.testing import PluginTestHarness, group_message, private_message
 
 pytestmark = pytest.mark.asyncio
 
-PLUGIN_NAME = "hello_world"
+PLUGIN_NAME = "hello_world_qq"
 
 
 @pytest.fixture
 def examples_dir():
     from pathlib import Path
 
-    return Path(__file__).resolve().parents[3] / "examples"
+    return Path(__file__).resolve().parents[3] / "examples" / "qq"
 
 
 # ---- PL-01: 加载 ----

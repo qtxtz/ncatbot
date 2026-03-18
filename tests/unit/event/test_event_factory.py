@@ -14,11 +14,11 @@
 import pytest
 
 from ncatbot.adapter.mock.api import MockBotAPI
-from ncatbot.event.factory import create_entity
-from ncatbot.event.base import BaseEvent
-from ncatbot.event.message import GroupMessageEvent, PrivateMessageEvent
-from ncatbot.event.notice import GroupIncreaseEvent
-from ncatbot.event.request import FriendRequestEvent, GroupRequestEvent
+from ncatbot.event.common.factory import create_entity
+from ncatbot.event.common.base import BaseEvent
+from ncatbot.event.qq.message import GroupMessageEvent, PrivateMessageEvent
+from ncatbot.event.qq.notice import GroupIncreaseEvent
+from ncatbot.event.qq.request import FriendRequestEvent, GroupRequestEvent
 from ncatbot.testing import factory
 
 pytestmark = pytest.mark.asyncio

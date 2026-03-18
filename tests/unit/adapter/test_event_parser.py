@@ -16,7 +16,7 @@ EventParser 规范测试
 import pytest
 
 from ncatbot.adapter.napcat.parser import EventParser, NapCatEventParser
-from ncatbot.types import (
+from ncatbot.types.qq import (
     FriendRequestEventData,
     GroupMessageEventData,
     HeartbeatMetaEventData,

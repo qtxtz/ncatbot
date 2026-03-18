@@ -25,7 +25,7 @@ async def event_dispatcher():
 
 @pytest_asyncio.fixture
 async def handler_dispatcher(mock_api):
-    hd = HandlerDispatcher(api=mock_api)
+    hd = HandlerDispatcher(api=mock_api, platform_apis={"qq": mock_api})
     yield hd
     await hd.stop()
 

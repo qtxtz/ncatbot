@@ -6,6 +6,15 @@ from typing import Any, Optional
 # 记录所有 early logger 创建的临时 handler，供 setup_logging() 清理
 _early_handlers: list[tuple[logging.Logger, logging.Handler]] = []
 
+# 全局 debug 标志，由 setup_logging() 设置
+_debug_mode: bool = False
+
+
+def set_debug_mode(enabled: bool) -> None:
+    """设置全局 debug 模式（由 setup_logging 调用）。"""
+    global _debug_mode
+    _debug_mode = enabled
+
 
 class BoundLogger:
     """包装标准 Logger，支持 bind 上下文和消息预处理。
@@ -100,7 +109,7 @@ def get_log(name: Optional[str] = None) -> BoundLogger:
     """
     logger = logging.getLogger(name)
     if name is not None:
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(logging.DEBUG if _debug_mode else logging.INFO)
     return BoundLogger(logger)
 
 

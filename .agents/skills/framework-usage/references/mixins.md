@@ -107,9 +107,9 @@ async def heartbeat(self):
     print("heartbeat")
 
 async def daily_report(self):
-    groups = await self.api.info.get_group_list()
+    groups = await self.api.qq.query.get_group_list()
     for g in groups:
-        await self.api.post_group_msg(g["group_id"], text="日报...")
+        await self.api.qq.post_group_msg(g["group_id"], text="日报...")
 ```
 
 **注意**：默认回调方法名须与 `add_scheduled_task(name)` 一致，找不到则报错。也可显式传入 `callback` 参数。任务在卸载时自动清理。
@@ -135,7 +135,7 @@ async def _monitor(self):
     async with self.events("message.group") as stream:
         async for event in stream:
             if "广告" in event.data.message.text:
-                await self.api.delete_msg(event.data.message_id)
+                await self.api.qq.messaging.delete_msg(event.data.message_id)
 ```
 
 **注意**：`events()` 流在插件卸载时自动关闭。后台 task 需在 `on_close()` 取消。

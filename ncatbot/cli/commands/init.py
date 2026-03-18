@@ -112,7 +112,7 @@ pip_dependencies = []
 
 from ncatbot.plugin import NcatBotPlugin
 from ncatbot.core import registrar
-from ncatbot.event import GroupMessageEvent, PrivateMessageEvent
+from ncatbot.event.qq import GroupMessageEvent, PrivateMessageEvent
 
 
 class {class_name}(NcatBotPlugin):

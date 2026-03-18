@@ -1,6 +1,0 @@
-name = "event_handling"
-version = "1.0.0"
-main = "main.py"
-entry_class = "EventHandlingPlugin"
-author = "NcatBot"
-description = "事件处理三模式 — 装饰器、事件流、wait_event"

@@ -42,7 +42,7 @@
 | K-18 | `CommandHook` 可选参数 | 有默认值的参数缺失时使用默认值 |
 | K-19 | `CommandHook` 必选参数缺失 | 必选参数缺失 → SKIP |
 | K-20 | `on_group_command` 等便捷方法 | 单装饰器封装 `MessageTypeFilter` + `CommandHook` |
-| K-21 | `on_group_increase` 等通知/请求方法 | 直接注册精确事件类型 |
+| K-21 | `registrar.qq.on_group_increase` 等 QQ 平台子注册器方法 | 通过子注册器注册精确事件类型 |
 | K-22 | 所有文本匹配使用 `message.text` | 统一使用 `MessageArray.text`，不使用 `raw_message` |
 
 ### HandlerDispatcher (`test_handler_dispatcher.py`)

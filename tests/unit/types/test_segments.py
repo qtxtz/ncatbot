@@ -10,11 +10,11 @@
 """
 
 import pytest
-from pydantic import ValidationError
 
-from ncatbot.types.segment.base import parse_segment, SEGMENT_MAP
-from ncatbot.types.segment.text import PlainText, Face, At, Reply
-from ncatbot.types.segment.media import Image, Record, Video
+from ncatbot.types.common.segment.base import parse_segment, SEGMENT_MAP
+from ncatbot.types.common.segment.text import PlainText, At, Reply
+from ncatbot.types.common.segment.media import Image, Record, Video
+from ncatbot.types.qq.segment import Face
 
 
 # ---- T-10: to_dict() 输出 OB11 格式 ----
@@ -29,7 +29,7 @@ def test_plaintext_to_dict():
 
 def test_at_to_dict():
     """T-10: At.to_dict() → {"type": "at", "data": {"qq": ...}}"""
-    seg = At(qq="12345")
+    seg = At(user_id="12345")
     d = seg.to_dict()
     assert d["type"] == "at"
     assert d["data"]["qq"] == "12345"
@@ -65,7 +65,7 @@ def test_parse_at_segment():
     """T-11: 从 dict 还原 At"""
     seg = parse_segment({"type": "at", "data": {"qq": "all"}})
     assert isinstance(seg, At)
-    assert seg.qq == "all"
+    assert seg.user_id == "all"
 
 
 def test_parse_reply_segment():
@@ -93,9 +93,9 @@ def test_segment_type_registration():
     assert "face" in SEGMENT_MAP
     assert SEGMENT_MAP["face"] is Face
     assert "image" in SEGMENT_MAP
-    assert SEGMENT_MAP["image"] is Image
+    assert issubclass(SEGMENT_MAP["image"], Image)
     assert "record" in SEGMENT_MAP
-    assert SEGMENT_MAP["record"] is Record
+    assert issubclass(SEGMENT_MAP["record"], Record)
     assert "video" in SEGMENT_MAP
     assert SEGMENT_MAP["video"] is Video
 
@@ -112,7 +112,7 @@ def test_parse_image_from_registered_type():
 
 def test_message_array_from_list():
     """T-13: MessageArray.from_list 从 OB11 列表构造"""
-    from ncatbot.types.segment.array import MessageArray
+    from ncatbot.types.common.segment.array import MessageArray
 
     arr = MessageArray.from_list(
         [
@@ -128,7 +128,7 @@ def test_message_array_from_list():
 
 def test_message_array_iter():
     """T-13 补充: MessageArray 支持迭代"""
-    from ncatbot.types.segment.array import MessageArray
+    from ncatbot.types.common.segment.array import MessageArray
 
     arr = MessageArray([PlainText(text="a"), PlainText(text="b")])
     texts = [seg.text for seg in arr]
@@ -139,21 +139,21 @@ def test_message_array_iter():
 
 
 def test_at_qq_all_valid():
-    """T-14: At(qq="all") 合法"""
-    seg = At(qq="all")
-    assert seg.qq == "all"
+    """T-14: At(user_id="all") 合法"""
+    seg = At(user_id="all")
+    assert seg.user_id == "all"
 
 
 def test_at_qq_digit_valid():
-    """T-14: At(qq="12345") 合法"""
-    seg = At(qq="12345")
-    assert seg.qq == "12345"
+    """T-14: At(user_id="12345") 合法"""
+    seg = At(user_id="12345")
+    assert seg.user_id == "12345"
 
 
-def test_at_qq_invalid_raises():
-    """T-14: At(qq="abc") 不合法"""
-    with pytest.raises(ValidationError):
-        At(qq="abc")
+def test_at_user_id_any_string_valid():
+    """T-14: At(user_id="abc") 合法（跨平台，接受任意字符串）"""
+    seg = At(user_id="abc")
+    assert seg.user_id == "abc"
 
 
 def test_face_id_coerces_int():

@@ -54,7 +54,7 @@ async def on_add(self, event, a: int, b: int):
 
 @registrar.on_group_command("kick")
 async def on_kick(self, event, target: At):
-    await self.api.manage.set_group_kick(event.group_id, target.qq)
+    await self.api.qq.manage.set_group_kick(event.group_id, target.qq)
 ```
 
 **参数绑定规则**：

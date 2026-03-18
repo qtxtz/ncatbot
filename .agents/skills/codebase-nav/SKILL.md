@@ -34,13 +34,20 @@ description: '导航 NcatBot 代码库：定位代码、理解模块、查阅文
 | 权限/RBAC 不工作 | service/builtin/rbac | `guide/rbac/1_model.md` |
 | 定时任务不执行 | plugin/mixin/time_task_mixin, service/builtin/schedule | `reference/services/2_config_task_service.md`。检查插件是否有与 task name 同名的方法，或是否显式传入了 callback |
 | 配置读取错误 | utils/config | `guide/configuration/1.config-security.md` |
-| 消息构造/消息段问题 | types/segment | `guide/send_message/2_segments.md` |
-| 合并转发失败 | types/helper, api | `guide/send_message/4_forward.md` |
-| 事件字段缺失/解析错误 | event, types | `reference/events/1_event_classes.md` |
+| 消息构造/消息段问题 | types/common/segment | `guide/send_message/common/1_segments.md` |
+| 合并转发失败 | types/helper, api | `guide/send_message/qq/2_forward.md` |
+| 事件字段缺失/解析错误 | event, types | `reference/events/1_common.md` |
 | CLI 命令报错 | cli | `reference/cli.md` |
 | 非插件模式不工作 | app/client, core/registry | `guide/README.md`（非插件模式章节） |
-| 日志/输出异常 | utils/logger | `reference/utils/1a_io_logging.md` |
+| 日志/输出异常 | utils/logger | `reference/utils/1a_config.md` |
 | 测试框架问题 | testing | `guide/testing/README.md` |
+| 平台适配器找不到/不工作 | adapter | `guide/adapter/README.md` → 对应平台指南 |
+| QQ 登录失败 / WebUI 连接不上 | adapter/napcat/setup | `guide/adapter/1_napcat_qq.md` |
+| Bilibili 扫码登录失败 / 凭据失效 | adapter/bilibili/auth | `guide/adapter/2_bilibili.md` |
+| GitHub Token 验证失败 / Webhook 不触发 | adapter/github | `guide/adapter/3_github.md` |
+| QQ 专用类型/段错误 | types/qq | `reference/types/README.md` |
+| 跨平台事件路由问题 | event/common/factory, core/registry | `guide/multi_platform/README.md` |
+| 多适配器/多平台配置 | app/client, api/client | `guide/multi_platform/README.md` |
 
 > **多症状并发时**：按事件处理链路（adapter → event → dispatcher → registry → handler）逐步排查，找到第一个偏离预期的环节。
 
@@ -101,14 +108,23 @@ description: '导航 NcatBot 代码库：定位代码、理解模块、查阅文
 | 插件基类 | `ncatbot/plugin/` | `NcatBotPlugin`, `BasePlugin` |
 | 插件加载 | `ncatbot/plugin/loader/` | `PluginLoader`, `PluginIndexer` |
 | Mixin 扩展 | `ncatbot/plugin/mixin/` | Event / TimeTask / RBAC / Config / Data |
-| Bot API | `ncatbot/api/` | `BotAPIClient`, `IBotAPI` |
-| API 语法糖 | `ncatbot/api/` | `_sugar.py` |
+| Bot API | `ncatbot/api/` | `BotAPIClient`, `IAPIClient` |
+| API 语法糖 | `ncatbot/api/qq/sugar.py` | `QQMessageSugarMixin` |
 | NapCat 适配 | `ncatbot/adapter/napcat/` | `NapCatAdapter` |
 | WebSocket | `ncatbot/adapter/napcat/connection/` | WebSocket + OB11Protocol |
 | 事件解析 | `ncatbot/adapter/napcat/` | `NapCatEventParser` |
 | 事件模型 | `ncatbot/event/` | `MessageEvent`, `NoticeEvent`, `RequestEvent` |
+| 事件通用层 | `ncatbot/event/common/` | `BaseEvent`, `create_entity()`, `register_platform_factory()` |
+| 事件 QQ 层 | `ncatbot/event/qq/` | `GroupMessageEvent`, `FriendRequestEvent` |
+| 事件 Trait | `ncatbot/event/common/mixins.py` | `Replyable`, `GroupScoped`, `Deletable` |
 | 类型定义 | `ncatbot/types/` | Pydantic 数据模型 |
-| 消息段 | `ncatbot/types/segment/` | text / media / rich / forward / array |
+| 类型通用层 | `ncatbot/types/common/` | `BaseEventData`, `BaseSender`, `MessageSegment` |
+| 类型 QQ 层 | `ncatbot/types/qq/` | `GroupSender`, `Face`, `Forward` |
+| API Trait | `ncatbot/api/traits/` | `IMessaging`, `IGroupManage`, `IQuery`, `IFileTransfer` |
+| 平台 API | `ncatbot/api/qq/`, `ncatbot/api/bilibili/` | `QQAPIClient`, `IQQAPIClient` |
+| Bilibili 认证 | `ncatbot/adapter/bilibili/auth.py` | `qrcode_login()` 扫码登录 |
+| Bilibili 凭据持久化 | `ncatbot/adapter/bilibili/credential_store.py` | `save_credential_to_config()` |
+| 消息段 | `ncatbot/types/common/segment/` | text / media / array |
 | API 响应类型 | `ncatbot/types/napcat/` | SendMessageResult, GroupInfo, LoginInfo 等 |
 | API 错误 | `ncatbot/api/errors.py` | APIError, APIRequestError 等 |
 | 服务管理 | `ncatbot/service/` | `ServiceManager` |
@@ -152,7 +168,7 @@ NapCatAdapter（WebSocket 收消息）
 
 ```text
 用户调用 BotAPIClient 方法
-  → IBotAPI 接口
+  → IAPIClient 接口
   → NapCatBotAPI 实现
   → WebSocket 发送请求
 ```

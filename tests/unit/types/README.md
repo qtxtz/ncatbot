@@ -55,3 +55,15 @@
 | CQ-06 | 无参数 | `[CQ:shake]` → data 为空 |
 | CQ-07 | 连续 CQ 码 | 中间无 text 段 |
 | CQ-08 | 空字符串 | → 空列表 |
+
+### NapCat 类型模型 (`test_napcat_types.py`)
+
+测试 NapCat 响应模型的字段强转、字典兼容访问和模型构造。
+
+| 规范 ID | 说明 | 验证点 |
+|---------|------|--------|
+| N-01 | `*_id` 字段强转 | `int` 类型 ID 自动转为 `str` |
+| N-02 | 字典兼容访问 | `__getitem__` / `get` / `__contains__` 支持 |
+| N-03 | 允许额外字段 | 未知字段不报错 |
+| N-04 | `SendMessageResult` | 正确解析 `message_id` |
+| N-05 | 各模型基本构造 | 20+ 种 NapCat 模型均可正常实例化 |

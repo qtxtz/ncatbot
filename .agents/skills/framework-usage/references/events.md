@@ -6,13 +6,13 @@
 
 ```python
 from ncatbot.core import registrar
-from ncatbot.event import GroupMessageEvent, PrivateMessageEvent
+from ncatbot.event.qq import GroupMessageEvent, PrivateMessageEvent
 ```
 
-### 完整装饰器列表
+### 跨平台装饰器
 
 | 装饰器 | 匹配事件 |
-|--------|---------|
+|--------|--------|
 | `@registrar.on(event_type, priority=0)` | 任意事件 |
 | `@registrar.on_message()` | 所有消息 |
 | `@registrar.on_group_message()` | 群消息 |
@@ -22,13 +22,54 @@ from ncatbot.event import GroupMessageEvent, PrivateMessageEvent
 | `@registrar.on_group_command(*names)` | 群命令 |
 | `@registrar.on_private_command(*names)` | 私聊命令 |
 | `@registrar.on_notice()` | 所有通知 |
-| `@registrar.on_group_increase()` | 群成员增加 |
-| `@registrar.on_group_decrease()` | 群成员减少 |
-| `@registrar.on_poke()` | 戳一戳 |
 | `@registrar.on_request()` | 所有请求 |
-| `@registrar.on_friend_request()` | 好友请求 |
-| `@registrar.on_group_request()` | 群请求 |
 | `@registrar.on_meta()` | 元事件 |
+
+### QQ 平台装饰器 (`registrar.qq`)
+
+| 装饰器 | 匹配事件 |
+|--------|--------|
+| `@registrar.qq.on_group_increase()` | 群成员增加 |
+| `@registrar.qq.on_group_decrease()` | 群成员减少 |
+| `@registrar.qq.on_group_recall()` | 群消息撤回 |
+| `@registrar.qq.on_group_admin()` | 群管理员变动 |
+| `@registrar.qq.on_group_ban()` | 群禁言 |
+| `@registrar.qq.on_poke()` | 戳一戳 |
+| `@registrar.qq.on_friend_request()` | 好友请求 |
+| `@registrar.qq.on_group_request()` | 群请求 |
+| `@registrar.qq.on_friend_add()` | 好友已添加 |
+
+### Bilibili 平台装饰器 (`registrar.bilibili`)
+
+| 装饰器 | 匹配事件 |
+|--------|--------|
+| `@registrar.bilibili.on_live()` | 所有直播间事件 |
+| `@registrar.bilibili.on_danmu()` | 弹幕消息 |
+| `@registrar.bilibili.on_superchat()` | 醒目留言 (SC) |
+| `@registrar.bilibili.on_gift()` | 礼物 |
+| `@registrar.bilibili.on_guard_buy()` | 大航海 |
+| `@registrar.bilibili.on_interact()` | 互动（进入/关注/分享） |
+| `@registrar.bilibili.on_like()` | 点赞 |
+| `@registrar.bilibili.on_comment()` | 评论 |
+
+### GitHub 平台装饰器 (`registrar.github`)
+
+| 装饰器 | 匹配事件 |
+|--------|--------|
+| `@registrar.github.on_push()` | Push |
+| `@registrar.github.on_issue()` | Issue |
+| `@registrar.github.on_pr()` | Pull Request |
+| `@registrar.github.on_star()` | Star |
+| `@registrar.github.on_fork()` | Fork |
+| `@registrar.github.on_release()` | Release |
+| `@registrar.github.on_comment()` | Comment |
+
+所有装饰器均支持 `platform` 参数，用于限定只接收特定平台的事件：
+
+```python
+@registrar.on_group_message(platform="qq")  # 仅 QQ 平台
+@registrar.on_message()                     # 所有平台
+```
 
 ## 事件流（EventStream）
 
@@ -48,7 +89,7 @@ async def _monitor(self):
     async with self.events("message.group") as stream:
         async for event in stream:
             if "敏感词" in event.data.message.text:
-                await self.api.delete_msg(event.data.message_id)
+                await self.api.qq.messaging.delete_msg(event.data.message_id)
 ```
 
 **events() 参数**：
@@ -156,6 +197,8 @@ pred = from_event(event) * P.of(lambda e: int(e.data.raw_message) > 0)
 
 ## 事件实体层
 
+### QQ 事件实体
+
 | 实体类 | 便捷方法 |
 |--------|---------|
 | `MessageEvent` | `reply()`, `delete()`, `is_group_msg()` |
@@ -166,6 +209,49 @@ pred = from_event(event) * P.of(lambda e: int(e.data.raw_message) > 0)
 | `RequestEvent` | `approve()`, `reject()` |
 | `FriendRequestEvent` | `approve()`, `reject()` |
 | `GroupRequestEvent` | `approve()`, `reject()` |
+
+### GitHub 事件实体
+
+```python
+from ncatbot.event.github import (
+    GitHubIssueEvent, GitHubIssueCommentEvent,
+    GitHubPREvent, GitHubPRReviewCommentEvent,
+    GitHubPushEvent, GitHubStarEvent, GitHubForkEvent, GitHubReleaseEvent,
+)
+```
+
+| 实体类 | Traits | 便捷方法 | 关键属性 |
+|--------|--------|---------|---------|
+| `GitHubIssueEvent` | HasSender, Replyable | `reply()` | `issue_number`, `issue_title`, `action`, `labels`, `repo` |
+| `GitHubIssueCommentEvent` | HasSender, Replyable, Deletable | `reply()`, `delete()` | `comment_body`, `issue_number`, `repo` |
+| `GitHubPREvent` | HasSender, Replyable | `reply()` | `pr_number`, `pr_title`, `action`, `merged`, `repo` |
+| `GitHubPRReviewCommentEvent` | HasSender, Replyable, Deletable | `reply()`, `delete()` | `comment_body`, `pr_number`, `path`, `repo` |
+| `GitHubPushEvent` | HasSender | — | `ref`, `before`, `after`, `commits`, `head_commit`, `repo` |
+| `GitHubStarEvent` | HasSender | — | `repo`, `starred_at` |
+| `GitHubForkEvent` | HasSender | — | `repo`, `forkee`, `forkee_full_name` |
+| `GitHubReleaseEvent` | HasSender | — | `release_tag`, `release_name`, `release_body`, `prerelease`, `repo` |
+
+### Trait 协议（5.2 新增）
+
+跨平台事件处理使用 `ncatbot.event.common.mixins` 中的 `runtime_checkable` 协议（通过 `ncatbot.event` 重新导出）：
+
+| Trait | 方法 |
+|---|---|
+| `Replyable` | `reply()`, `send()` |
+| `Deletable` | `delete()` |
+| `HasSender` | `sender` 属性 |
+| `GroupScoped` | `group_id` 属性 |
+| `Kickable` | `kick()` |
+| `Bannable` | `ban()` |
+
+```python
+from ncatbot.event import Replyable
+
+@bot.on("message")
+async def handler(event):
+    if isinstance(event, Replyable):
+        await event.reply("收到!")
+```
 
 **属性代理**（`__getattr__` 透传到 data）：
 
@@ -205,3 +291,70 @@ async def order_flow(self, event: GroupMessageEvent):
     except asyncio.TimeoutError:
         await event.reply("超时，已取消")
 ```
+
+## 非阻塞启动 + 事件编排
+
+`BotClient.run_async()` 完成 startup 后立即返回，`bot.api` / `bot.dispatcher` 可用于自定义的事件驱动工作流。
+
+### 基础模板
+
+```python
+import asyncio
+from ncatbot.app import BotClient
+
+bot = BotClient()
+
+async def main():
+    await bot.run_async()  # 非阻塞，立即返回
+
+    # 等待心跳确认连接就绪
+    await bot.dispatcher.wait_event(
+        predicate=lambda e: e.type == "meta_event.heartbeat",
+        timeout=30.0,
+    )
+    print("Bot 连接就绪")
+
+    # 持续消费事件流
+    async with bot.dispatcher.events("message.group") as stream:
+        async for event in stream:
+            print(f"群消息: {event.data.raw_message}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+### `run()` vs `run_async()`
+
+| 维度 | `run()` | `run_async()` |
+|------|---------|---------------|
+| 阻塞性 | 同步阻塞 | 异步返回 |
+| 调用 | `bot.run()` | `await bot.run_async()` |
+| 适用 | 简单 Bot | 自定义编排、与异步服务集成 |
+| dispatcher | handler 内可用 | 返回后立即可用 |
+
+### 并发 wait_event
+
+```python
+# 同时等待多个条件，先到先得
+tasks = [
+    asyncio.create_task(bot.dispatcher.wait_event(
+        predicate=lambda e: e.type == "notice.group_increase", timeout=60
+    )),
+    asyncio.create_task(bot.dispatcher.wait_event(
+        predicate=lambda e: e.type == "request.friend", timeout=60
+    )),
+]
+done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+for t in pending:
+    t.cancel()
+```
+
+### 常用生命周期事件
+
+| 事件类型 | 用途 |
+|---------|------|
+| `meta_event.heartbeat` | 确认连接就绪 |
+| `meta_event.heartbeat_timeout` | 断线检测 |
+| `meta_event.lifecycle` | 监控连接状态 |
+
+> 完整模式（插件并发编排、工作流清理）→ [事件驱动工作流编排](docs/guide/plugin/7a.patterns.md#事件驱动工作流编排)

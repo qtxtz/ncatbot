@@ -18,9 +18,10 @@
 
 import pytest
 
-from ncatbot.types.segment.base import SEGMENT_MAP, parse_segment
-from ncatbot.types.segment.text import At, Face, PlainText, Reply
-from ncatbot.types.segment.media import Image, Record, Video, File
+from ncatbot.types.common.segment.base import SEGMENT_MAP, parse_segment
+from ncatbot.types.common.segment.text import At, PlainText, Reply
+from ncatbot.types.common.segment.media import Image, Record, Video, File
+from ncatbot.types.qq.segment import Face
 
 
 # ===========================================================================
@@ -78,15 +79,15 @@ class TestParseSegmentBasicTypes:
     def test_parse_at_user(self):
         seg = parse_segment({"type": "at", "data": {"qq": "1234567"}})
         assert isinstance(seg, At)
-        assert seg.qq == "1234567"
+        assert seg.user_id == "1234567"
 
     def test_parse_at_all(self):
         seg = parse_segment({"type": "at", "data": {"qq": "all"}})
-        assert seg.qq == "all"
+        assert seg.user_id == "all"
 
     def test_parse_at_int_qq(self):
         seg = parse_segment({"type": "at", "data": {"qq": 1234567}})
-        assert seg.qq == "1234567"
+        assert seg.user_id == "1234567"
 
     def test_parse_reply(self):
         seg = parse_segment({"type": "reply", "data": {"id": 2009890763}})
@@ -180,8 +181,11 @@ class TestSegmentRoundTrip:
         assert dumped["type"] == raw["type"]
         restored = parse_segment(dumped)
         assert type(restored) is type(seg)
+        # At 的 wire key 是 "qq"，字段名是 "user_id"
+        alias_map = {"qq": "user_id"}
         for k, v in raw["data"].items():
-            assert getattr(restored, k) == v
+            attr = alias_map.get(k, k)
+            assert getattr(restored, attr) == v
 
 
 # ===========================================================================

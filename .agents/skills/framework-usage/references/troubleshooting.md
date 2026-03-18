@@ -1,6 +1,6 @@
 # 调试排错参考
 
-> 参考文档：[guide/configuration/](docs/guide/configuration/), [reference/utils/1a_io_logging.md](docs/reference/utils/1a_io_logging.md)
+> 参考文档：[guide/configuration/](docs/guide/configuration/), [reference/utils/1a_config.md](docs/reference/utils/1a_config.md)
 
 ## 快速诊断
 
@@ -110,7 +110,7 @@ plugin:
 1. WebSocket 断连：检查 NapCat 进程
 2. 参数类型：`message` 用 `msg.to_list()` 转换
 3. Bot 权限：非管理员无法踢人/禁言
-4. API 位置：管理方法在 `self.api.manage.*`
+4. API 位置：管理方法在 `self.api.qq.manage.*`
 
 ### 插件加载失败
 

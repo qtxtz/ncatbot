@@ -7,20 +7,20 @@
 ```
 tests/
 ├── unit/              # 单元测试 — 按模块组织
-│   ├── types/         # 类型系统 (T-01 ~ T-14, S-01 ~ S-10, CQ-01 ~ CQ-08)
+│   ├── types/         # 类型系统 (T-01 ~ T-14, S-01 ~ S-10, CQ-01 ~ CQ-08, N-01 ~ N-05, MA-01 ~ MA-04, FW-01 ~ FW-03)
 │   ├── event/         # 事件工厂 (E-01 ~ E-07)
-│   ├── api/           # API 客户端 (A-01 ~ A-04)
-│   ├── core/          # 核心分发与注册 (D-01 ~ D-09, K-01 ~ K-07, H-01 ~ H-12, R-01 ~ R-06)
-│   ├── service/       # 服务管理 (S-01 ~ S-08)
-│   ├── plugin/        # 插件 Mixin (M-01 ~ M-41)
-│   └── adapter/       # 适配器解析 (P-01 ~ P-07, RD-01 ~ RD-03)
+│   ├── api/           # API 客户端 + 错误层级 + Sugar (A-01 ~ A-04, AE-01 ~ AE-07, SG-01 ~ SG-06)
+│   ├── core/          # 核心分发与注册 + 谓词 (D-01 ~ D-09, K-01 ~ K-22, H-01 ~ H-12, R-01 ~ R-09, PR-01 ~ PR-06)
+│   ├── service/       # 服务管理 + RBAC + 调度 (SM-01 ~ SM-08, SC-01 ~ SC-12, TS-01 ~ TS-06)
+│   ├── plugin/        # 插件 Mixin + 导入去重 + Loader (M-01 ~ M-41, ID-01 ~ ID-02, LD-01 ~ LD-05)
+│   ├── adapter/       # 适配器解析 + 注册表 + 真实数据 (P-01 ~ P-07, RF-01 ~ RF-08, AR-01 ~ AR-05, GM-01 ~ GM-05, BL-01 ~ BL-14, GH-01 ~ GH-11)
+│   └── config/        # 配置迁移 + 安全 (CF-01 ~ CF-06, CS-01 ~ CS-05)
 ├── integration/       # 集成测试 (I-01 ~ I-21)
 ├── e2e/               # 端到端测试
 │   ├── test_bot_client.py  # BotClient E2E (B-01 ~ B-05)
+│   ├── plugin/        # 插件离线 E2E (PL-01 ~ PL-53)
 │   └── napcat/        # NapCat 真实连接 E2E (NC-01 ~ NC-21)
-├── test_factory.py    # 工厂函数基础验证
-├── test_api_calls.py  # API 调用记录验证
-└── test_event_dispatch.py  # 事件分发路由验证
+└── fixtures/          # 共享测试数据
 ```
 
 ## 运行测试
@@ -42,8 +42,6 @@ python -m pytest tests/unit/core/ -v
 # $env:NAPCAT_TEST_GROUP="123456"; $env:NAPCAT_TEST_USER="654321"
 python tests/e2e/napcat/run.py
 
-# 数据驱动测试 (需要 dev/data.txt 或设置 NCATBOT_TEST_DATA_FILE)
-python -m pytest tests/unit/adapter/test_real_data.py -v
 ```
 
 ## 测试基础设施
@@ -60,18 +58,35 @@ python -m pytest tests/unit/adapter/test_real_data.py -v
 | 前缀 | 模块 | 范围 |
 |------|------|------|
 | T | Types / Segments | T-01 ~ T-14 |
-| S (types) | Segment 解析 (parse_segment) | S-01 ~ S-10 |
+| S | Segment 解析 (parse_segment) | S-01 ~ S-10 |
 | CQ | CQ 码解析 | CQ-01 ~ CQ-08 |
+| N | NapCat 类型模型 | N-01 ~ N-05 |
 | E | Event Entity / Factory | E-01 ~ E-07 |
 | A | API Client | A-01 ~ A-04 |
+| AE | API Errors | AE-01 ~ AE-07 |
 | P | EventParser / NapCatEventParser | P-01 ~ P-07 |
-| RD | 真实数据驱动解析 | RD-01 ~ RD-03 |
+| AR | AdapterRegistry | AR-01 ~ AR-05 |
+| CF | Config Migration | CF-01 ~ CF-06 |
 | D | AsyncEventDispatcher | D-01 ~ D-09 |
-| K | Hook System | K-01 ~ K-07 |
+| K | Hook System | K-01 ~ K-22 |
 | H | HandlerDispatcher | H-01 ~ H-12 |
-| R | Registrar | R-01 ~ R-06 |
-| S (svc) | ServiceManager | S-01 ~ S-08 |
+| R | Registrar | R-01 ~ R-09 |
+| ID | Import Dedup (插件导入去重) | ID-01 ~ ID-02 |
+| SM | ServiceManager | SM-01 ~ SM-08 |
 | M | Plugin Mixin | M-01 ~ M-41 |
 | I | Integration | I-01 ~ I-21 |
 | B | BotClient E2E | B-01 ~ B-05 |
+| PL | Plugin E2E | PL-01 ~ PL-53 |
 | NC | NapCat E2E | NC-01 ~ NC-21 |
+| SC | RBAC 权限系统 | SC-01 ~ SC-12 |
+| PR | Predicate 谓词 DSL | PR-01 ~ PR-06 |
+| TS | TimeTaskParser 调度解析 | TS-01 ~ TS-06 |
+| LD | PluginLoader 生命周期 | LD-01 ~ LD-05 |
+| CS | Config 安全检查 | CS-01 ~ CS-05 |
+| SG | QQ Sugar 便捷方法 | SG-01 ~ SG-06 |
+| MA | MessageArray 容器 | MA-01 ~ MA-04 |
+| FW | Forward 转发消息 | FW-01 ~ FW-03 |
+| RF | 真实日志夹具事件解析 | RF-01 ~ RF-08 |
+| GM | 群消息批量真实数据 | GM-01 ~ GM-05 |
+| BL | Bilibili 事件解析 | BL-01 ~ BL-14 |
+| GH | GitHub 事件解析 | GH-01 ~ GH-11 |

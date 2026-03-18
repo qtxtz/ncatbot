@@ -103,7 +103,7 @@ license: MIT
 
 ### 不需要改的
 
-1. **`self.api.post_group_forward_msg()`** — API 名称未变
+1. **`self.api.qq.post_group_forward_msg()`** — 5.2 多平台架构下需通过 `api.qq` 访问
 2. **`ForwardConstructor` 的 `attach_image()`/`attach_text()`/`to_forward()`** — 接口未变，仅导入路径变更
 3. **`MessageArray` 的生成器构造** — `MessageArray(Image(file=x) for x in imgs)` 仍有效
 4. **`event.reply()` 方法** — 签名基本一致
@@ -118,3 +118,29 @@ license: MIT
 | [import-mapping.md](./references/import-mapping.md) | 完整的 4.4/4.5 → 5.0 导入路径映射 |
 | [api-mapping.md](./references/api-mapping.md) | 注册方式、Config、消息构造、BotAPI、事件类型的全面映射 |
 | [checklist.md](./references/checklist.md) | 迁移完成后的逐项验证清单 |
+
+---
+
+## 5.1 → 5.2 迁移
+
+5.2 引入多平台架构，**完全向后兼容**。无需强制迁移，但可选择性使用新特性。
+
+### 新增导入路径
+
+| 5.1 路径 | 5.2 新路径（可选） | 说明 |
+|---|---|---|
+| `ncatbot.types.MessageArray` | `ncatbot.types.common.segment.MessageArray` | 通用消息段 |
+| `ncatbot.event.GroupMessageEvent` | `ncatbot.event.qq.GroupMessageEvent` | QQ 专用事件 |
+| — | `ncatbot.api.traits.IMessaging` | API Trait 协议（新） |
+| — | `ncatbot.event.common.mixins.Replyable` | 事件 Trait 协议（新） |
+| — | `ncatbot.api.qq.IQQAPIClient` | QQ 平台 API 接口（新） |
+
+> 旧导入路径通过 re-export 保持兼容。
+
+### 新增功能
+
+1. **`platform` 装饰器参数**：`@registrar.on_group_message(platform="qq")` — 限定平台
+2. **`event.platform` 属性**：获取事件来源平台标识
+3. **`api.qq.xxx()`**：显式平台 API 访问
+4. **`api.platforms`**：查看所有已注册平台
+5. **Trait 协议**：使用 `isinstance(event, Replyable)` 编写跨平台逻辑

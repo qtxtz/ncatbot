@@ -46,3 +46,10 @@
 |---------|------|--------|
 | M-40 | 权限/角色操作 | `check_permission` / `add_permission` / `add_role` 等代理到 RBACService |
 | M-41 | 服务不可用 | 所有操作返回 `False` |
+
+### Import Dedup (`test_init_import_dedup.py`)
+
+| 规范 ID | 说明 | 验证点 |
+|---------|------|--------|
+| ID-01 | `__init__.py` 导入不导致双重 exec | `from .main import X` 不会导致 handler 重复注册 |
+| ID-02 | 无 `__init__` 导入时行为不变 | `load_module` 复用已导入模块，pending 数量正确 |

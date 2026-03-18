@@ -14,7 +14,7 @@ from ncatbot.testing import PluginTestHarness, group_message
 
 pytestmark = pytest.mark.asyncio
 
-PLUGIN_NAME = "full_featured_bot"
+PLUGIN_NAME = "full_featured_bot_qq"
 GROUP_ID = "600"
 USER_ID = "11111"
 
@@ -23,7 +23,7 @@ USER_ID = "11111"
 def examples_dir():
     from pathlib import Path
 
-    return Path(__file__).resolve().parents[3] / "examples"
+    return Path(__file__).resolve().parents[3] / "examples" / "qq"
 
 
 # ---- PL-50: 插件加载 ----

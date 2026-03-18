@@ -14,7 +14,7 @@ CQ 码解析规范测试
   CQ-08: 空字符串 → 空列表
 """
 
-from ncatbot.types.segment.array import parse_cq_code_to_onebot11
+from ncatbot.types.qq.segment.cq import parse_cq_code_to_onebot11
 
 
 class TestPureCQ:

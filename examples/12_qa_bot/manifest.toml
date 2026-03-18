@@ -1,6 +1,0 @@
-name = "qa_bot"
-version = "1.0.0"
-main = "main.py"
-entry_class = "QABotPlugin"
-author = "NcatBot"
-description = "问答机器人 — 多步对话添加QA、关键词自动匹配、数据持久化"
