@@ -1,6 +1,15 @@
 # 多平台使用参考
 
-> 参考文档：[guide/multi_platform/](docs/guide/multi_platform/), [reference/adapter/](docs/reference/adapter/), [reference/api/](docs/reference/api/)
+> 参考文档：[guide/multi_platform/](docs/guide/multi_platform/), [guide/adapter/](docs/guide/adapter/)（各平台登录与配置）, [reference/adapter/](docs/reference/adapter/), [reference/api/](docs/reference/api/)
+
+## 各平台登录与配置
+
+| 平台 | 认证方式 | 指南 |
+|------|---------|------|
+| QQ (NapCat) | WebUI 扫码 / 快速登录 | `docs/guide/adapter/1_napcat_qq.md` |
+| Bilibili | 终端扫码 (bilibili-api-python) | `docs/guide/adapter/2_bilibili.md` |
+| GitHub | Personal Access Token | `docs/guide/adapter/3_github.md` |
+| Mock | 无需认证 | `docs/guide/adapter/4_mock.md` |
 
 ## 多适配器启动
 

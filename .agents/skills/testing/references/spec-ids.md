@@ -14,7 +14,6 @@
 | A | API Client | A-01 ~ A-04 | `tests/unit/api/` |
 | AE | API Errors | AE-01 ~ AE-07 | `tests/unit/api/` |
 | P | EventParser / NapCatEventParser | P-01 ~ P-07 | `tests/unit/adapter/` |
-| RD | 真实数据驱动解析 | RD-01 ~ RD-03 | `tests/unit/adapter/` |
 | AR | AdapterRegistry | AR-01 ~ AR-05 | `tests/unit/adapter/` |
 | CF | Config Migration | CF-01 ~ CF-06 | `tests/unit/config/` |
 | D | AsyncEventDispatcher | D-01 ~ D-09 | `tests/unit/core/` |

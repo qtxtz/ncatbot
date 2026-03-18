@@ -41,7 +41,10 @@ description: '导航 NcatBot 代码库：定位代码、理解模块、查阅文
 | 非插件模式不工作 | app/client, core/registry | `guide/README.md`（非插件模式章节） |
 | 日志/输出异常 | utils/logger | `reference/utils/1a_config.md` |
 | 测试框架问题 | testing | `guide/testing/README.md` |
-| 平台适配器找不到/不工作 | adapter | `guide/multi_platform/README.md` |
+| 平台适配器找不到/不工作 | adapter | `guide/adapter/README.md` → 对应平台指南 |
+| QQ 登录失败 / WebUI 连接不上 | adapter/napcat/setup | `guide/adapter/1_napcat_qq.md` |
+| Bilibili 扫码登录失败 / 凭据失效 | adapter/bilibili/auth | `guide/adapter/2_bilibili.md` |
+| GitHub Token 验证失败 / Webhook 不触发 | adapter/github | `guide/adapter/3_github.md` |
 | QQ 专用类型/段错误 | types/qq | `reference/types/README.md` |
 | 跨平台事件路由问题 | event/common/factory, core/registry | `guide/multi_platform/README.md` |
 | 多适配器/多平台配置 | app/client, api/client | `guide/multi_platform/README.md` |
