@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 from typing import Optional, Union, TYPE_CHECKING
 
-from ncatbot.types import EventType
+from ncatbot.types.qq import EventType
 from ncatbot.utils import get_log
 
 from .event import Event

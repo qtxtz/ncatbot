@@ -20,6 +20,7 @@ _initialized = False
 
 def setup_logging(
     *,
+    debug: bool = False,
     console_level: str | None = None,
     file_level: str | None = None,
     log_dir: str | None = None,
@@ -29,7 +30,8 @@ def setup_logging(
     """初始化全局日志系统。应在应用启动时调用一次。
 
     Args:
-        console_level: 控制台日志级别，默认读 LOG_LEVEL 环境变量，兜底 DEBUG。
+        debug:         是否开启调试模式，为 True 时控制台/文件默认输出 DEBUG。
+        console_level: 控制台日志级别，默认读 LOG_LEVEL 环境变量，兜底由 debug 决定。
         file_level:    文件日志级别，默认读 FILE_LOG_LEVEL 环境变量，兜底 DEBUG。
         log_dir:       日志目录，默认读 LOG_FILE_PATH 环境变量，兜底 ./logs。
         backup_count:  日志保留天数，默认读 BACKUP_COUNT 环境变量，兜底 7。
@@ -43,7 +45,8 @@ def setup_logging(
     # 清理早期 handler，避免重复输出
     cleanup_early_handlers()
 
-    console_level = (console_level or os.getenv("LOG_LEVEL", "DEBUG")).upper()
+    default_console = "DEBUG" if debug else "INFO"
+    console_level = (console_level or os.getenv("LOG_LEVEL", default_console)).upper()
     file_level = (file_level or os.getenv("FILE_LOG_LEVEL", "DEBUG")).upper()
     log_dir = log_dir or os.getenv("LOG_FILE_PATH", "./logs")
     backup_count = backup_count or int(os.getenv("BACKUP_COUNT", "7"))
@@ -51,15 +54,22 @@ def setup_logging(
 
     os.makedirs(log_dir, exist_ok=True)
 
-    # root 设为 INFO：第三方库 logger 继承此级别，自动屏蔽 DEBUG
-    # 应用 logger 通过 get_log() 显式设为 DEBUG（见 core.py）
+    # 同步 debug 标志到 core 模块，供 get_log() 使用
+    from .core import set_debug_mode
+
+    set_debug_mode(debug)
+
+    # root 设为 DEBUG（若调试）或 INFO（第三方库继承此级别）
     root = logging.getLogger()
-    root.setLevel(logging.INFO)
+    root.setLevel(logging.DEBUG if debug else logging.INFO)
     root.handlers.clear()
 
-    # 控制台 handler — level 设为 DEBUG，允许应用 logger 的 DEBUG 通过
+    # 压制高频第三方库日志
+    logging.getLogger("apscheduler").setLevel(logging.WARNING)
+
+    # 控制台 handler — level 由 console_level 控制
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)
+    console_handler.setLevel(console_level)
     console_handler.setFormatter(ColoredFormatter())
     console_handler.addFilter(MessageFoldFilter())
     root.addHandler(console_handler)

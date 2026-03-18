@@ -95,6 +95,30 @@ class SelfFilter(Hook):
         return "<SelfFilter>"
 
 
+class PlatformFilter(Hook):
+    """过滤事件平台 (qq / telegram / ...)
+
+    通过 event.platform 或 event.data.platform 判断。
+    """
+
+    stage = HookStage.BEFORE_CALL
+
+    def __init__(self, platform: str, *, priority: int = 200):
+        self._platform = platform
+        self.priority = priority
+
+    async def execute(self, ctx: HookContext) -> HookAction:
+        p = getattr(ctx.event, "platform", None)
+        if p is None:
+            p = getattr(ctx.event.data, "platform", None)
+        if p != self._platform:
+            return HookAction.SKIP
+        return HookAction.CONTINUE
+
+    def __repr__(self) -> str:
+        return f"<PlatformFilter(platform={self._platform})>"
+
+
 # 预实例化常用 Hook
 group_only = MessageTypeFilter("group")
 private_only = MessageTypeFilter("private")

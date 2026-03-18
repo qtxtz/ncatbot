@@ -112,7 +112,7 @@ class SystemManagerPlugin(NcatBotPlugin):
 
     async def _emit_heartbeat_timeout(self, elapsed: float, timeout: int) -> None:
         """发出心跳超时事件。"""
-        from ncatbot.types import HeartbeatTimeoutMetaEventData
+        from ncatbot.types.qq import HeartbeatTimeoutMetaEventData
 
         event_data = HeartbeatTimeoutMetaEventData(
             time=int(time_mod.time()),

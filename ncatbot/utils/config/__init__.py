@@ -1,5 +1,5 @@
 from .manager import ConfigManager, get_config_manager, ConfigValueError
-from .models import Config, NapCatConfig, PluginConfig, BaseConfig
+from .models import Config, NapCatConfig, PluginConfig, BaseConfig, AdapterEntry
 from .storage import ConfigStorage, CONFIG_PATH
 from .security import strong_password_check, generate_strong_token
 
@@ -14,6 +14,7 @@ __all__ = [
     "NapCatConfig",
     "PluginConfig",
     "BaseConfig",
+    "AdapterEntry",
     "ConfigStorage",
     "CONFIG_PATH",
     "strong_password_check",

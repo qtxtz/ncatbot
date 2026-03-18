@@ -1,6 +1,7 @@
 """BotClient — Bot 统一入口（Composition Root）
 
 负责引导 Adapter 启动、组装 BotAPIClient、接通事件流、管理服务生命周期。
+支持单/多适配器，多平台共享同一事件分发器。
 作为应用编排层，允许依赖所有模块（core / plugin / service / api / adapter）。
 """
 
@@ -8,14 +9,15 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import Optional, TYPE_CHECKING
+from typing import List, Optional, Sequence, TYPE_CHECKING
 
-from ncatbot.adapter import BaseAdapter, NapCatAdapter
+from ncatbot.adapter import BaseAdapter, adapter_registry
 from ncatbot.api import BotAPIClient
+from ncatbot.api.qq import QQAPIClient
 from ncatbot.core import AsyncEventDispatcher, HandlerDispatcher, flush_pending
 from ncatbot.plugin import PluginLoader
 from ncatbot.service import ServiceManager
-from ncatbot.utils import get_log, setup_logging
+from ncatbot.utils import get_log, setup_logging, ncatbot_config
 
 if TYPE_CHECKING:
     pass
@@ -26,7 +28,7 @@ LOG = get_log("BotClient")
 class BotClient:
     """Bot 生命周期管理器
 
-    用法::
+    用法（零配置 — 从 config.yaml 自动加载适配器）::
 
         bot = BotClient()
 
@@ -35,17 +37,44 @@ class BotClient:
             await event.reply("hello")
 
         bot.run()
+
+    用法（编程式指定适配器）::
+
+        from ncatbot.adapter import NapCatAdapter
+        bot = BotClient(adapters=[NapCatAdapter(config={...})])
+        bot.run()
     """
 
     def __init__(
         self,
         adapter: Optional[BaseAdapter] = None,
         *,
+        adapters: Optional[Sequence[BaseAdapter]] = None,
         plugin_dir: str = "plugins",
         debug: bool = False,
     ) -> None:
-        setup_logging()
-        self._adapter = adapter or NapCatAdapter()
+        setup_logging(debug=ncatbot_config.debug)
+
+        # 构建适配器列表
+        if adapters is not None:
+            self._adapters: List[BaseAdapter] = list(adapters)
+        elif adapter is not None:
+            self._adapters = [adapter]
+        else:
+            # 从配置文件加载
+            self._adapters = self._create_adapters_from_config()
+
+        # 按 platform 去重检查
+        seen: dict[str, str] = {}
+        for a in self._adapters:
+            p = getattr(a, "platform", a.name)
+            if p in seen:
+                raise ValueError(f"重复的平台 '{p}'：{a.name} 与 {seen[p]} 冲突")
+            seen[p] = a.name
+
+        # 向后兼容：_adapter 指向第一个
+        self._adapter = self._adapters[0]
+
         self._api: Optional[BotAPIClient] = None
         self._dispatcher: Optional[AsyncEventDispatcher] = None
         self._handler_dispatcher: Optional[HandlerDispatcher] = None
@@ -55,9 +84,35 @@ class BotClient:
         self._debug = debug
         self._running = False
         self._listen_task: Optional[asyncio.Task] = None
+        self._listen_tasks: List[asyncio.Task] = []
 
         # 待注册的 handler（在 run 之前通过 @bot.on() 收集）
         self._pending_handlers: list[tuple[str, object, dict]] = []
+
+    @staticmethod
+    def _create_adapters_from_config() -> List[BaseAdapter]:
+        """从 config.yaml 的 adapters 列表创建适配器实例。"""
+        cfg = ncatbot_config.config
+        entries = [e for e in cfg.adapters if e.enabled]
+        if not entries:
+            raise ValueError(
+                "配置文件中没有启用的适配器 (adapters 列表为空或全部 enabled: false)"
+            )
+
+        result: List[BaseAdapter] = []
+        for entry in entries:
+            adapter = adapter_registry.create(
+                entry,
+                bot_uin=cfg.bot_uin,
+                websocket_timeout=cfg.websocket_timeout,
+            )
+            LOG.info(
+                "从配置创建适配器: type=%s, platform=%s",
+                entry.type,
+                entry.platform or adapter.platform,
+            )
+            result.append(adapter)
+        return result
 
     @property
     def plugin_loader(self) -> PluginLoader:
@@ -120,8 +175,18 @@ class BotClient:
         self._running = False
         LOG.info("正在关闭…")
         try:
+            # 取消所有监听 task
+            for task in self._listen_tasks:
+                if not task.done():
+                    task.cancel()
             if self._listen_task and not self._listen_task.done():
                 self._listen_task.cancel()
+            for task in self._listen_tasks:
+                try:
+                    await task
+                except asyncio.CancelledError:
+                    pass
+            if self._listen_task:
                 try:
                     await self._listen_task
                 except asyncio.CancelledError:
@@ -136,7 +201,9 @@ class BotClient:
                 await self._handler_dispatcher.stop()
             if self._dispatcher is not None:
                 await self._dispatcher.close()
-            await self._adapter.disconnect()
+            # 断开所有适配器
+            for adapter in self._adapters:
+                await adapter.disconnect()
         except Exception as e:
             LOG.error("关闭异常: %s", e)
         LOG.info("已关闭")
@@ -146,9 +213,14 @@ class BotClient:
     async def _run_blocking(self) -> None:
         """同步 run() 的内部实现：startup → 阻塞 listen → shutdown"""
         await self._startup()
-        LOG.info("Bot 已就绪，开始监听事件")
+        LOG.info("Bot 已就绪，开始监听事件（%d 个适配器）", len(self._adapters))
         try:
-            await self._adapter.listen()
+            if len(self._adapters) == 1:
+                await self._adapters[0].listen()
+            else:
+                # 多适配器并行监听
+                tasks = [asyncio.create_task(a.listen()) for a in self._adapters]
+                await asyncio.gather(*tasks)
         except asyncio.CancelledError:
             LOG.info("Bot 被取消")
         finally:
@@ -157,7 +229,11 @@ class BotClient:
     async def _listen_forever(self) -> None:
         """后台监听 task，异常时自动 shutdown"""
         try:
-            await self._adapter.listen()
+            if len(self._adapters) == 1:
+                await self._adapters[0].listen()
+            else:
+                tasks = [asyncio.create_task(a.listen()) for a in self._adapters]
+                await asyncio.gather(*tasks)
         except asyncio.CancelledError:
             pass
         except Exception as e:
@@ -172,35 +248,112 @@ class BotClient:
         self._running = True
 
     async def _startup_core(self) -> None:
-        """核心启动（不含插件加载）：adapter → API → dispatcher → 服务"""
-        await self._setup_adapter()
+        """核心启动（不含插件加载）：adapters → API → dispatcher → 服务"""
+        await self._setup_adapters()
         self._setup_api()
         self._setup_dispatcher()
         self._setup_handler_dispatcher()
         await self._setup_services()
 
+    async def _setup_adapters(self) -> None:
+        """准备并连接所有 Adapter（含 pip 依赖检查）。"""
+        skipped: list[BaseAdapter] = []
+        for adapter in self._adapters:
+            LOG.info(
+                "正在启动 Adapter: %s (platform=%s)",
+                adapter.name,
+                getattr(adapter, "platform", "?"),
+            )
+            if not await self._ensure_adapter_deps(adapter):
+                LOG.warning("适配器 %s 的 pip 依赖未满足，跳过该适配器", adapter.name)
+                skipped.append(adapter)
+                continue
+            await adapter.setup()
+            await adapter.connect()
+
+        for adapter in skipped:
+            self._adapters.remove(adapter)
+        if not self._adapters:
+            raise ValueError("所有适配器的依赖均未满足，无法启动")
+
+    async def _ensure_adapter_deps(self, adapter: BaseAdapter) -> bool:
+        """检查并安装适配器声明的 pip 依赖，返回是否就绪。"""
+        deps = getattr(adapter, "pip_dependencies", None)
+        if not deps:
+            return True
+
+        from ncatbot.plugin.loader.pip_helper import (
+            check_requirements,
+            install_packages,
+        )
+
+        _, missing = check_requirements(deps)
+        if not missing:
+            return True
+
+        from ncatbot.utils import async_confirm
+
+        listing = ", ".join(missing)
+        LOG.info("适配器 %s 需要安装 pip 依赖: %s", adapter.name, listing)
+        approved = await async_confirm(
+            f"适配器 {adapter.name} 需要安装以下 pip 依赖:\n  {listing}\n确认安装?",
+            default=True,
+        )
+        if not approved:
+            return False
+
+        success = install_packages(missing)
+        if not success:
+            LOG.error("适配器 %s 的 pip 依赖安装失败", adapter.name)
+            return False
+
+        # 二次确认
+        _, still_missing = check_requirements(deps)
+        if still_missing:
+            LOG.error("适配器 %s 安装后仍缺少依赖: %s", adapter.name, still_missing)
+            return False
+
+        LOG.info("适配器 %s 的 pip 依赖安装完成", adapter.name)
+        return True
+
+    # 向后兼容别名
     async def _setup_adapter(self) -> None:
-        """准备并连接 Adapter。"""
-        LOG.info("正在启动 Adapter: %s", self._adapter.name)
-        await self._adapter.setup()
-        await self._adapter.connect()
+        await self._setup_adapters()
 
     def _setup_api(self) -> None:
-        """从 Adapter 取出底层 IBotAPI，包装为 BotAPIClient。"""
-        raw_api = self._adapter.get_api()
-        self._api = BotAPIClient(raw_api)
-        LOG.info("BotAPIClient 已就绪")
+        """从所有 Adapter 取出底层 IAPIClient，包装为平台 Client 后注册到 BotAPIClient。"""
+        # 平台 → 包装类注册表
+        _CLIENT_REGISTRY: dict[str, type] = {"qq": QQAPIClient}
+
+        self._api = BotAPIClient()
+        for adapter in self._adapters:
+            platform = getattr(adapter, "platform", adapter.name)
+            raw_api = adapter.get_api()
+            if platform in _CLIENT_REGISTRY:
+                client = _CLIENT_REGISTRY[platform](raw_api)
+            else:
+                client = raw_api
+            self._api.register_platform(platform, client)
+        LOG.info("BotAPIClient 已就绪（平台: %s）", list(self._api.platforms.keys()))
 
     def _setup_dispatcher(self) -> None:
-        """创建事件分发器并接通 Adapter 事件回调。"""
+        """创建事件分发器并接通所有 Adapter 的事件回调。"""
         self._dispatcher = AsyncEventDispatcher()
-        self._adapter.set_event_callback(self._dispatcher.callback)
+        for adapter in self._adapters:
+            adapter.set_event_callback(self._dispatcher.callback)
 
     def _setup_handler_dispatcher(self) -> None:
         """创建 HandlerDispatcher 并订阅事件流。"""
+        # 收集每个平台的 API
+        platform_apis = {}
+        for adapter in self._adapters:
+            platform = getattr(adapter, "platform", adapter.name)
+            platform_apis[platform] = adapter.get_api()
+
         self._handler_dispatcher = HandlerDispatcher(
             api=self._api,
             service_manager=self._service_manager,
+            platform_apis=platform_apis,
         )
         self._handler_dispatcher.start(self.dispatcher)
 

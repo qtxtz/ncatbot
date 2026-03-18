@@ -394,7 +394,7 @@ def from_event(event: object) -> P:
             gid = str(event.group_id)  # type: ignore[union-attr]
             is_group_msg = True
         elif hasattr(event, "message_type"):
-            from ncatbot.types import MessageType
+            from ncatbot.types.qq import MessageType
 
             is_private_msg = event.message_type is MessageType.PRIVATE  # type: ignore[union-attr]
 

@@ -18,7 +18,7 @@ from ncatbot.utils import get_log
 from .hook import HookAction, HookContext, HookStage, get_hooks
 
 if TYPE_CHECKING:
-    from ncatbot.api import IBotAPI
+    from ncatbot.api import IAPIClient
     from ..dispatcher import AsyncEventDispatcher, Event
     from ..dispatcher.stream import EventStream
     from ncatbot.service import ServiceManager
@@ -49,14 +49,20 @@ class HandlerDispatcher:
 
     def __init__(
         self,
-        api: Optional["IBotAPI"] = None,
+        api: Optional["IAPIClient"] = None,
         service_manager: Optional["ServiceManager"] = None,
+        platform_apis: Optional[Dict[str, "IAPIClient"]] = None,
     ):
         self._handlers: Dict[str, List[HandlerEntry]] = {}
         self._api = api
         self._service_manager = service_manager
+        self._platform_apis: Dict[str, "IAPIClient"] = dict(platform_apis or {})
         self._stream: Optional["EventStream"] = None
         self._task: Optional[asyncio.Task] = None
+
+    def set_platform_api(self, platform: str, api: "IAPIClient") -> None:
+        """注册平台特定 API，用于事件实体注入"""
+        self._platform_apis[platform] = api
 
     # ==================== 生命周期 ====================
 
@@ -166,12 +172,16 @@ class HandlerDispatcher:
 
     async def _dispatch(self, event: "Event") -> None:
         """接收 Event 并分发到匹配的 handlers。"""
-        from ncatbot.event import create_entity
+        from ncatbot.event.common import create_entity as platform_create_entity
 
         event_type = event.type
 
         # 将数据模型包装为事件实体（如 GroupMessageEvent），供 handler 使用
-        entity = create_entity(event.data, self._api) if self._api else event
+        # 优先使用平台感知的 create_entity（根据 data.platform 路由到对应平台工厂）
+        # 选择平台特定 API 注入到事件实体
+        platform = getattr(event.data, "platform", "unknown")
+        api = self._platform_apis.get(platform, self._api)
+        entity = platform_create_entity(event.data, api) if api else event
 
         # snapshot 防止并发修改
         handlers = self._collect_handlers(event_type)
@@ -190,7 +200,7 @@ class HandlerDispatcher:
                 event=event,
                 event_type=event_type,
                 handler_entry=entry,
-                api=self._api,
+                api=api,
                 services=self._service_manager,
             )
 
@@ -213,12 +223,6 @@ class HandlerDispatcher:
                     skip = True
                     break
             if skip:
-                LOG.debug(
-                    "_dispatch: SKIP handler %s (plugin=%s, id=%d)",
-                    entry.func.__name__,
-                    entry.plugin_name,
-                    id(entry),
-                )
                 continue
 
             # --- 执行 handler ---

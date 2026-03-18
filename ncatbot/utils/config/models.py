@@ -1,9 +1,17 @@
 """配置数据模型 - 纯 Pydantic 结构定义，不含业务逻辑。"""
 
 import os
+import warnings
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    PrivateAttr,
+    field_validator,
+    model_validator,
+)
 
 # ==================== 常量 ====================
 
@@ -110,11 +118,45 @@ class NapCatConfig(BaseConfig):
 
         return urllib.parse.urlparse(self.webui_uri).port
 
+    def get_uri_with_token(self) -> str:
+        """返回带 access_token 的 WebSocket URI。"""
+        return f"{self.ws_uri}?access_token={self.ws_token}"
+
+
+# ==================== 适配器配置条目 ====================
+
+
+class AdapterEntry(BaseConfig):
+    """单个适配器的声明。
+
+    示例::
+
+        adapters:
+          - type: napcat
+            platform: qq
+            enabled: true
+            config:
+              ws_uri: ws://localhost:3001
+              ws_token: napcat_ws
+    """
+
+    type: str
+    """适配器类型名，对应注册表中的 key（如 ``"napcat"``、``"lagrange"``）。"""
+    platform: str = ""
+    """平台标识。留空则使用适配器类的默认 ``platform`` 属性。"""
+    enabled: bool = True
+    """是否启用此适配器。"""
+    config: Dict[str, Any] = Field(default_factory=dict)
+    """适配器专属配置，透传给适配器构造函数。"""
+
 
 class Config(BaseConfig):
     """主配置模型 — 聚合所有子配置。"""
 
-    napcat: NapCatConfig = Field(default_factory=NapCatConfig)
+    adapters: List[AdapterEntry] = Field(default_factory=list)
+    """适配器声明列表。"""
+    napcat: Optional[NapCatConfig] = Field(default=None)
+    """(deprecated) 旧版 NapCat 配置。请迁移到 adapters 列表。"""
     plugin: PluginConfig = Field(default_factory=PluginConfig)
     bot_uin: str = DEFAULT_BOT_UIN
     root: str = DEFAULT_ROOT
@@ -127,6 +169,52 @@ class Config(BaseConfig):
     skip_ncatbot_install_check: bool = False
     websocket_timeout: int = 15
 
+    # 标记本次加载是否发生了旧格式迁移（供 ConfigManager 判断是否回写）
+    _migrated: bool = PrivateAttr(default=False)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _migrate_legacy_napcat(cls, data: Any) -> Any:
+        """向后兼容：将旧版 ``napcat:`` 顶层配置自动迁移到 ``adapters:`` 列表。"""
+        if not isinstance(data, dict):
+            return data
+
+        has_adapters = bool(data.get("adapters"))
+        has_napcat = "napcat" in data and data["napcat"] is not None
+
+        if has_adapters:
+            # 新格式，无需迁移
+            return data
+
+        if has_napcat:
+            # 旧格式迁移
+            napcat_cfg = data.pop("napcat")
+            if isinstance(napcat_cfg, dict):
+                data["adapters"] = [
+                    {"type": "napcat", "platform": "qq", "config": napcat_cfg}
+                ]
+            else:
+                data["adapters"] = [{"type": "napcat", "platform": "qq"}]
+            data["__migrated_sentinel"] = True
+            warnings.warn(
+                "配置项 'napcat:' 已弃用，请迁移到 'adapters:' 列表格式。"
+                "本次启动已自动迁移，配置文件将被自动更新。",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+        else:
+            # 两者都不存在 → 默认 napcat 适配器
+            data["adapters"] = [{"type": "napcat", "platform": "qq"}]
+
+        return data
+
+    def model_post_init(self, __context: Any) -> None:
+        # 从 extra 字段中提取迁移哨兵标记
+        if self.__pydantic_extra__ and self.__pydantic_extra__.pop(
+            "__migrated_sentinel", None
+        ):
+            self._migrated = True
+
     @field_validator("bot_uin", "root", mode="before")
     @classmethod
     def _coerce_to_str(cls, v) -> str:
@@ -138,4 +226,8 @@ class Config(BaseConfig):
         return max(1, v)
 
     def to_dict(self) -> dict:
-        return self.model_dump(exclude_none=True)
+        d = self.model_dump(exclude_none=True)
+        # 排除内部标记
+        d.pop("_migrated", None)
+        d.pop("__migrated_sentinel", None)
+        return d

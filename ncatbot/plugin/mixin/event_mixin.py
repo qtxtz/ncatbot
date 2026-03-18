@@ -11,7 +11,7 @@ from ncatbot.utils import get_log
 
 if TYPE_CHECKING:
     from ncatbot.core import AsyncEventDispatcher, Event, EventStream
-    from ncatbot.types import EventType
+    from ncatbot.types.qq import EventType
 
 LOG = get_log("EventMixin")
 

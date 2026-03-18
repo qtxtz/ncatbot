@@ -1,11 +1,19 @@
 """配置管理器 — 对外暴露的主要接口。"""
 
 import os
+import warnings
 from typing import List, Optional
 
 from ..logger import get_early_logger
 
-from .models import Config, NapCatConfig, PluginConfig, DEFAULT_BOT_UIN, DEFAULT_ROOT
+from .models import (
+    AdapterEntry,
+    Config,
+    NapCatConfig,
+    PluginConfig,
+    DEFAULT_BOT_UIN,
+    DEFAULT_ROOT,
+)
 from .storage import ConfigStorage
 from .security import strong_password_check, generate_strong_token
 
@@ -25,6 +33,7 @@ class ConfigManager:
     - 嵌套键的读写（支持 'napcat.ws_uri' 形式）
     - 安全检查与修复
     - 目录创建等副作用操作
+    - 旧格式迁移时自动回写配置文件
     """
 
     def __init__(self, path: Optional[str] = None):
@@ -36,11 +45,19 @@ class ConfigManager:
         if self._config is None:
             self._config = self._storage.load()
             _log.info("配置加载完成")
+            # 旧格式迁移后自动回写
+            if getattr(self._config, "_migrated", False):
+                _log.info("检测到旧版 napcat 配置格式，自动回写为 adapters 格式")
+                self._config._migrated = False
+                self.save()
         return self._config
 
     def reload(self) -> Config:
         self._config = self._storage.load()
         _log.info("配置已重新加载")
+        if getattr(self._config, "_migrated", False):
+            self._config._migrated = False
+            self.save()
         return self._config
 
     def save(self) -> None:
@@ -63,11 +80,33 @@ class ConfigManager:
             raise ConfigValueError(f"未知的配置项: {key}")
         setattr(obj, final, value)
 
+    # ---- 适配器配置访问 ----
+
+    def get_adapter_configs(self) -> List[AdapterEntry]:
+        """返回所有已启用的适配器配置条目。"""
+        return [e for e in self.config.adapters if e.enabled]
+
+    def get_adapter_config(self, adapter_type: str) -> Optional[AdapterEntry]:
+        """返回指定类型的第一个适配器配置条目。"""
+        for e in self.config.adapters:
+            if e.type == adapter_type:
+                return e
+        return None
+
     # ---- 子配置访问 ----
 
     @property
     def napcat(self) -> NapCatConfig:
-        return self.config.napcat
+        """(deprecated) 返回第一个 napcat 适配器的配置。请使用 get_adapter_config('napcat')。"""
+        warnings.warn(
+            "ConfigManager.napcat 已弃用，请使用 get_adapter_config('napcat')",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        entry = self.get_adapter_config("napcat")
+        if entry:
+            return NapCatConfig.model_validate(entry.config)
+        return NapCatConfig()
 
     @property
     def plugin(self) -> PluginConfig:
@@ -89,24 +128,41 @@ class ConfigManager:
     def debug(self, value: bool) -> None:
         self.config.debug = value
 
-    def update_napcat(self, **kwargs) -> None:
-        """从键值对批量更新 napcat 子配置。
+    @property
+    def websocket_timeout(self) -> int:
+        return self.config.websocket_timeout
 
-        用法：ncatbot_config.update_napcat(ws_uri="ws://...", ws_token="...")
-        通过 Pydantic validate_assignment 自动验证每个字段。
-        """
+    def update_napcat(self, **kwargs) -> None:
+        """(deprecated) 批量更新 napcat 子配置。请直接修改 adapters 配置。"""
+        warnings.warn(
+            "ConfigManager.update_napcat() 已弃用",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        entry = self.get_adapter_config("napcat")
+        if entry is None:
+            raise ConfigValueError("配置中未找到 napcat 适配器")
         for key, value in kwargs.items():
-            if not hasattr(self.napcat, key):
-                raise ConfigValueError(f"NapCatConfig 不存在字段: {key}")
-            setattr(self.napcat, key, value)
+            entry.config[key] = value
 
     # ---- 便捷方法 ----
 
     def get_uri_with_token(self) -> str:
-        return f"{self.napcat.ws_uri}?access_token={self.napcat.ws_token}"
+        """(deprecated) 请通过适配器实例访问。"""
+        warnings.warn(
+            "ConfigManager.get_uri_with_token() 已弃用",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        nc = self.napcat
+        return nc.get_uri_with_token()
 
     def is_local(self) -> bool:
-        return self.napcat.ws_host in ("localhost", "127.0.0.1")
+        entry = self.get_adapter_config("napcat")
+        if entry:
+            nc = NapCatConfig.model_validate(entry.config)
+            return nc.ws_host in ("localhost", "127.0.0.1")
+        return True
 
     def is_default_uin(self) -> bool:
         return self.config.bot_uin == DEFAULT_BOT_UIN
@@ -120,21 +176,25 @@ class ConfigManager:
         """检查安全性问题。auto_fix=True 时自动修复弱 token。"""
         issues = []
 
-        if self.napcat.ws_listen_ip == "0.0.0.0":
-            if not strong_password_check(self.napcat.ws_token):
-                if auto_fix:
-                    self.napcat.ws_token = generate_strong_token()
-                    _log.warning("WS 令牌强度不足, 已自动生成新令牌")
-                else:
-                    issues.append("WS 令牌强度不足")
+        for entry in self.config.adapters:
+            if entry.type != "napcat":
+                continue
+            nc = NapCatConfig.model_validate(entry.config)
+            if nc.ws_listen_ip == "0.0.0.0":
+                if not strong_password_check(nc.ws_token):
+                    if auto_fix:
+                        entry.config["ws_token"] = generate_strong_token()
+                        _log.warning("WS 令牌强度不足, 已自动生成新令牌")
+                    else:
+                        issues.append("WS 令牌强度不足")
 
-        if self.napcat.enable_webui:
-            if not strong_password_check(self.napcat.webui_token):
-                if auto_fix:
-                    self.napcat.webui_token = generate_strong_token()
-                    _log.warning("WebUI 令牌强度不足, 已自动生成新令牌")
-                else:
-                    issues.append("WebUI 令牌强度不足")
+            if nc.enable_webui:
+                if not strong_password_check(nc.webui_token):
+                    if auto_fix:
+                        entry.config["webui_token"] = generate_strong_token()
+                        _log.warning("WebUI 令牌强度不足, 已自动生成新令牌")
+                    else:
+                        issues.append("WebUI 令牌强度不足")
 
         return issues
 

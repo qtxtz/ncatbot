@@ -17,7 +17,7 @@ from typing import (
     TYPE_CHECKING,
 )
 
-from ncatbot.types import EventType
+from ncatbot.types.qq import EventType
 from ncatbot.utils import get_log
 
 from .event import Event
@@ -76,7 +76,8 @@ class AsyncEventDispatcher:
             return
 
         event_type = self._resolve_type(data)
-        event = Event(type=event_type, data=data)
+        platform = getattr(data, "platform", "unknown")
+        event = Event(type=event_type, data=data, platform=platform)
 
         self._broadcast(event)
         self._resolve_waiters(event)
