@@ -123,6 +123,45 @@ class NapCatConfig(BaseConfig):
         return f"{self.ws_uri}?access_token={self.ws_token}"
 
 
+# ==================== 日志配置 ====================
+
+
+class LoggingConfig(BaseConfig):
+    """日志相关配置。"""
+
+    event_log_levels: Dict[str, str] = Field(default_factory=dict)
+    """事件日志级别覆盖。
+
+    键为事件类型前缀（如 ``"meta_event.heartbeat"``、``"meta_event"``），
+    值为日志级别字符串（``"DEBUG"``、``"INFO"``、``"WARNING"``、``"NONE"``）。
+    ``NONE`` 表示完全不记录该事件。
+    未匹配的事件默认以 INFO 级别记录。
+    匹配时精确匹配优先，然后按前缀匹配。
+
+    示例::
+
+        logging:
+          event_log_levels:
+            meta_event.heartbeat: DEBUG
+            meta_event.lifecycle: DEBUG
+    """
+
+    @field_validator("event_log_levels")
+    @classmethod
+    def _normalize_levels(cls, v: Dict[str, str]) -> Dict[str, str]:
+        valid = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL", "NONE"}
+        result = {}
+        for key, level in v.items():
+            upper = level.upper()
+            if upper not in valid:
+                raise ValueError(
+                    f"无效的日志级别 '{level}'（事件类型 '{key}'）。"
+                    f"可选值: {', '.join(sorted(valid))}"
+                )
+            result[key] = upper
+        return result
+
+
 # ==================== 适配器配置条目 ====================
 
 
@@ -158,6 +197,7 @@ class Config(BaseConfig):
     napcat: Optional[NapCatConfig] = Field(default=None)
     """(deprecated) 旧版 NapCat 配置。请迁移到 adapters 列表。"""
     plugin: PluginConfig = Field(default_factory=PluginConfig)
+    logging: LoggingConfig = Field(default_factory=LoggingConfig)
     bot_uin: str = DEFAULT_BOT_UIN
     root: str = DEFAULT_ROOT
     debug: bool = False
