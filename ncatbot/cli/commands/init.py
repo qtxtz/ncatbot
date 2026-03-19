@@ -84,7 +84,7 @@ def _sanitize_plugin_name(name: str) -> str:
 def _generate_template_plugin(plugins_path: Path):
     """在 plugins/ 下生成以当前用户名命名的模板插件。"""
     username = getpass.getuser()
-    plugin_name = _sanitize_plugin_name(username)
+    plugin_name = _sanitize_plugin_name(username) + "_plugin"
     class_name = plugin_name.title().replace("_", "") + "Plugin"
     plugin_dir = plugins_path / plugin_name
 
@@ -101,10 +101,9 @@ main = "plugin.py"
 author = "{username}"
 description = "NcatBot 模板插件 — 发送 hello 回复 hi"
 entry_class = "{class_name}"
+pip_dependencies = []
 
 [dependencies]
-
-pip_dependencies = []
 """
 
     plugin_py_content = f"""\
