@@ -21,6 +21,7 @@ from ncatbot.event.common.mixins import (
     Bannable,
     Deletable,
     GroupScoped,
+    HasAttachments,
     HasSender,
     Kickable,
     Replyable,
@@ -28,6 +29,7 @@ from ncatbot.event.common.mixins import (
 
 if TYPE_CHECKING:
     from ncatbot.api.qq import QQAPIClient
+    from ncatbot.types.common import Attachment, AttachmentList
 
 __all__ = [
     "MessageEvent",
@@ -36,7 +38,7 @@ __all__ = [
 ]
 
 
-class MessageEvent(BaseEvent, Replyable, Deletable, HasSender):
+class MessageEvent(BaseEvent, Replyable, Deletable, HasSender, HasAttachments):
     """QQ 消息事件实体"""
 
     _data: MessageEventData
@@ -118,6 +120,9 @@ class MessageEvent(BaseEvent, Replyable, Deletable, HasSender):
 
     async def delete(self) -> Any:
         return await self._api.delete_msg(message_id=self._data.message_id)
+
+    async def get_attachments(self) -> "AttachmentList[Attachment]":
+        return self._data.message.get_attachments()
 
 
 class PrivateMessageEvent(MessageEvent):

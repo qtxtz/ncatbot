@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 from typing import Any
+from ncatbot.types.common import Attachment, AttachmentList
 
 
 class Replyable:
@@ -77,6 +78,15 @@ class Approvable:
         raise NotImplementedError
 
     async def reject(self, **kwargs: Any) -> Any:
+        raise NotImplementedError
+
+    __slots__ = ()
+
+
+class HasAttachments:
+    """携带可下载附件的事件"""
+
+    async def get_attachments(self) -> "AttachmentList[Attachment]":
         raise NotImplementedError
 
     __slots__ = ()

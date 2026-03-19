@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from typing import Any, List, TYPE_CHECKING
 
-from ncatbot.event.common.base import BaseEvent
-from ncatbot.event.common.mixins import HasSender
+from .base import GitHubBaseEvent
 
 if TYPE_CHECKING:
     from ncatbot.types.github.events import GitHubPushEventData
@@ -15,18 +14,10 @@ __all__ = [
 ]
 
 
-class GitHubPushEvent(BaseEvent, HasSender):
+class GitHubPushEvent(GitHubBaseEvent):
     """GitHub Push 事件"""
 
     _data: "GitHubPushEventData"
-
-    @property
-    def user_id(self) -> str:
-        return self._data.sender.user_id or ""
-
-    @property
-    def sender(self) -> Any:
-        return self._data.sender
 
     @property
     def ref(self) -> str:
@@ -47,7 +38,3 @@ class GitHubPushEvent(BaseEvent, HasSender):
     @property
     def head_commit(self) -> Any:
         return self._data.head_commit
-
-    @property
-    def repo(self) -> str:
-        return self._data.repo.full_name

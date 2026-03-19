@@ -7,6 +7,7 @@ from .mixins import (
     Bannable,
     Deletable,
     GroupScoped,
+    HasAttachments,
     HasSender,
     Kickable,
     Replyable,
@@ -24,4 +25,5 @@ __all__ = [
     "Kickable",
     "Bannable",
     "Approvable",
+    "HasAttachments",
 ]

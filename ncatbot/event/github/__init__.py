@@ -1,5 +1,6 @@
 """GitHub 平台专用事件实体"""
 
+from .base import GitHubBaseEvent
 from .issue import GitHubIssueEvent, GitHubIssueCommentEvent
 from .pr import GitHubPREvent, GitHubPRReviewCommentEvent
 from .push import GitHubPushEvent
@@ -26,6 +27,8 @@ _register_keys(
 del _register, _register_keys
 
 __all__ = [
+    # base
+    "GitHubBaseEvent",
     # issue
     "GitHubIssueEvent",
     "GitHubIssueCommentEvent",
