@@ -410,7 +410,7 @@ graph LR
 
 | 组件 | 职责 |
 |---|---|
-| **AsyncEventDispatcher** | 接收事件、类型推导（`_resolve_type()` 推导 `"message.group"` 等类型）、广播到所有活跃 Stream |
+| **AsyncEventDispatcher** | 接收事件、类型推导（`BaseEventData.resolve_type()` 推导 `"message.group"` 等类型）、广播到所有活跃 Stream |
 | **Event** | 不可变数据类，包含解析后的事件类型 + 原始数据 |
 | **EventStream** | 异步迭代器，支持 `async with` / `async for` |
 

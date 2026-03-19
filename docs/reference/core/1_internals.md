@@ -51,30 +51,25 @@ flowchart LR
 
 ## 2. 事件类型解析机制
 
-`AsyncEventDispatcher._resolve_type()` 从 `BaseEventData` 数据模型自动推导事件类型字符串。
+`BaseEventData.resolve_type()` 从数据模型推导事件类型字符串。各平台通过 `register_platform_secondary_keys()` 注册自己的 secondary key 映射，子类可 override 此方法提供自定义逻辑。
 
 ### 解析规则
 
 格式：`"{post_type}.{secondary_type}"`
 
-| post_type | secondary 字段来源 | 特殊处理 |
-|---|---|---|
-| `message` | `data.message_type` | — |
-| `message_sent` | `data.message_type` | — |
-| `notice` | `data.notice_type` | 当 `notice_type == "notify"` 时，改用 `data.sub_type` |
-| `request` | `data.request_type` | — |
-| `meta_event` | `data.meta_event_type` | — |
+默认实现通过平台注册的 secondary key 查注册表，找到属性名后提取值并拼接。
 
 ### 解析流程
 
 ```text
-BaseEventData 到达
-  ├─ 读取 data.post_type → "message"
-  ├─ 查找对应 secondary 字段 → data.message_type → "group"
+BaseEventData.resolve_type()
+  ├─ 读取 self.post_type → "message"
+  ├─ get_secondary_key(platform, post_type) → "message_type"
+  ├─ 读取 self.message_type → "group"
   └─ 拼接 → "message.group"
 ```
 
-`notice` 类型的特殊逻辑：当 `notice_type` 为 `"notify"` 时，二级类型使用 `sub_type`（如 `"poke"`），产生 `"notice.poke"` 而非 `"notice.notify"`。
+子类可 override：如 QQ 的 `NotifyEventData.resolve_type()` 直接使用 `sub_type` 返回 `"notice.poke"` 等。
 
 ### EventStream 类型过滤
 

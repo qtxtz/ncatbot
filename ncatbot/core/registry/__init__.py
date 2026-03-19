@@ -10,7 +10,7 @@ Hook 驱动 + HandlerDispatcher 分发 + Registrar 装饰器 + ContextVar 隔离
 - ContextVar: PluginLoader 在 exec_module 前后设置/重置，装饰器内读取
 - PlatformRegistrar: 平台子注册器，提供平台专属便捷装饰器
 
-事件类型格式统一使用 AsyncEventDispatcher._resolve_type() 产出的格式:
+事件类型格式统一使用 BaseEventData.resolve_type() 产出的格式:
   QQ: "message.group"、"notice.group_increase"、"request.friend" 等。
   Bilibili: "live.danmu_msg"、"live.send_gift"、"comment.new_reply" 等。
   GitHub: "issue.opened"、"pull_request.closed"、"push" 等。

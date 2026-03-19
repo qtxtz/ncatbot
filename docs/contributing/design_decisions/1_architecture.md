@@ -201,7 +201,7 @@ class AsyncEventDispatcher:
         self._waiters: list[_Waiter] = []
 
     async def _on_event(self, data: BaseEventData) -> None:
-        event_type = self._resolve_type(data)
+        event_type = data.resolve_type()
         event = Event(type=event_type, data=data)
         self._broadcast(event)        # 广播到所有 Stream
         self._resolve_waiters(event)   # resolve 匹配的 waiter

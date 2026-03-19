@@ -136,7 +136,7 @@ class Registrar:
         return GitHubRegistrar(self)
 
     # ==================== 跨平台便捷装饰器 ====================
-    # 事件类型使用 AsyncEventDispatcher._resolve_type() 产出的格式
+    # 事件类型使用 BaseEventData.resolve_type() 产出的格式
 
     def on_group_message(
         self, priority: int = 0, platform: Optional[str] = None, **metadata: Any

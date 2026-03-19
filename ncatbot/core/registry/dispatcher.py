@@ -4,7 +4,7 @@ HandlerDispatcher — 纯机械分发器
 订阅 AsyncEventDispatcher 的事件流，分发到已注册的 handlers。
 不含任何 Session 逻辑（Session 完全通过 Hook 实现）。
 
-事件类型格式使用 AsyncEventDispatcher._resolve_type() 产出的格式:
+事件类型格式使用 BaseEventData.resolve_type() 产出的格式:
   "message.group"、"notice.group_increase" 等。
 前缀匹配: 注册 "message" 可匹配 "message.group" 和 "message.private"。
 """
