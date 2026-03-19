@@ -11,8 +11,12 @@ from ncatbot.types.github import (
     # 枚举
     GitHubPostType, GitHubAction, GitHubIssueState, GitHubPRState,
     GitHubUserType, GitHubMergeMethod,
-    # 数据模型
-    GitHubRepo, GitHubCommit, GitHubRelease, GitHubForkee,
+    # 事件内嵌模型
+    GitHubRepo, GitHubCommit, GitHubRelease, GitHubReleaseAsset, GitHubForkee,
+    # API 响应模型
+    GitHubUserInfo, GitHubLabelInfo, GitHubBranchRef,
+    GitHubIssueInfo, GitHubCommentInfo, GitHubPullRequestInfo,
+    GitHubMergeResult, GitHubReleaseInfo, GitHubRepoInfo,
     # Sender
     GitHubSender,
     # 事件数据
@@ -20,8 +24,21 @@ from ncatbot.types.github import (
     GitHubPREventData, GitHubPRReviewCommentEventData, GitHubPushEventData,
     GitHubStarEventData, GitHubForkEventData, GitHubReleaseEventData,
 )
+
+# 跨平台附件模型
+from ncatbot.types import Attachment
 ```
 
+---
+
+## 导入
+
+```python
+from ncatbot.types import (
+    Attachment, AttachmentKind, AttachmentList,
+    ImageAttachment, VideoAttachment, AudioAttachment, FileAttachment,
+)
+```
 ---
 
 ## 枚举
@@ -95,6 +112,12 @@ from ncatbot.types.github import (
 
 ## 数据模型
 
+所有 GitHub 模型继承自 `GitHubModel(BaseModel)`，具有以下通用特性：
+
+- `extra="allow"` — 容忍 GitHub API 返回的未声明字段
+- `populate_by_name=True` — 同时支持 alias 和字段原名
+- dict 兼容层 — `model["key"]`、`model.get(key)`、`"key" in model`
+
 ### GitHubRepo
 
 | 字段 | 类型 | 默认值 | 说明 |
@@ -134,6 +157,18 @@ from ncatbot.types.github import (
 | `draft` | bool | False | 是否草稿 |
 | `html_url` | str \| None | None | 网页 URL |
 
+### GitHubReleaseAsset
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `id` | str | `""` | Asset ID |
+| `name` | str | `""` | 文件名 |
+| `content_type` | str | `""` | MIME 类型 |
+| `size` | int | 0 | 文件大小（字节） |
+| `download_count` | int | 0 | 下载次数 |
+| `browser_download_url` | str | `""` | 下载 URL |
+| `created_at` | str \| None | None | 创建时间 |
+
 ### GitHubForkee
 
 | 字段 | 类型 | 默认值 | 说明 |
@@ -142,6 +177,193 @@ from ncatbot.types.github import (
 | `html_url` | str \| None | None | 网页 URL |
 | `owner` | str | `""` | Fork 所有者 |
 | `description` | str \| None | None | 描述 |
+
+---
+
+## API 响应模型
+
+API 方法返回的类型化模型（替代原来的 `dict`）。忠实映射 GitHub REST API 返回结构。
+
+### GitHubUserInfo
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `login` | str | `""` | GitHub 登录名 |
+| `id` | int | 0 | 数字 ID |
+| `avatar_url` | str \| None | None | 头像 URL |
+| `html_url` | str \| None | None | 个人主页 |
+| `type` | str | `"User"` | 用户类型 |
+| `name` | str \| None | None | 显示名 |
+| `email` | str \| None | None | 邮箱 |
+| `bio` | str \| None | None | 简介 |
+| `public_repos` | int | 0 | 公开仓库数 |
+
+### GitHubLabelInfo
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `id` | int | 0 | Label ID |
+| `name` | str | `""` | 标签名 |
+| `color` | str | `""` | 颜色 (hex) |
+| `description` | str \| None | None | 描述 |
+
+### GitHubBranchRef
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `ref` | str | `""` | 分支名 |
+| `sha` | str | `""` | Commit SHA |
+| `label` | str | `""` | 标签（如 `"user:branch"`） |
+
+### GitHubIssueInfo
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `id` | int | 0 | Issue ID |
+| `number` | int | 0 | Issue 编号 |
+| `title` | str | `""` | 标题 |
+| `body` | str \| None | None | 内容 |
+| `state` | str | `""` | 状态 |
+| `html_url` | str \| None | None | 网页 URL |
+| `user` | GitHubUserInfo \| None | None | 创建者 |
+| `labels` | List[GitHubLabelInfo] | `[]` | 标签列表 |
+| `assignees` | List[GitHubUserInfo] | `[]` | 负责人列表 |
+| `comments` | int | 0 | 评论数 |
+| `created_at` | str \| None | None | 创建时间 |
+| `updated_at` | str \| None | None | 更新时间 |
+| `closed_at` | str \| None | None | 关闭时间 |
+
+### GitHubCommentInfo
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `id` | int | 0 | 评论 ID |
+| `body` | str | `""` | 评论内容 |
+| `user` | GitHubUserInfo \| None | None | 评论者 |
+| `html_url` | str \| None | None | 网页 URL |
+| `created_at` | str \| None | None | 创建时间 |
+| `updated_at` | str \| None | None | 更新时间 |
+
+### GitHubPullRequestInfo
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `id` | int | 0 | PR ID |
+| `number` | int | 0 | PR 编号 |
+| `title` | str | `""` | 标题 |
+| `body` | str \| None | None | 内容 |
+| `state` | str | `""` | 状态 |
+| `html_url` | str \| None | None | 网页 URL |
+| `head` | GitHubBranchRef \| None | None | 源分支 |
+| `base` | GitHubBranchRef \| None | None | 目标分支 |
+| `user` | GitHubUserInfo \| None | None | 创建者 |
+| `merged` | bool | False | 是否已合并 |
+| `draft` | bool | False | 是否草稿 |
+| `mergeable` | bool \| None | None | 是否可合并 |
+| `created_at` | str \| None | None | 创建时间 |
+| `updated_at` | str \| None | None | 更新时间 |
+
+### GitHubMergeResult
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `sha` | str | `""` | 合并提交 SHA |
+| `merged` | bool | False | 是否合并成功 |
+| `message` | str | `""` | 合并消息 |
+
+### GitHubReleaseInfo
+
+继承 `GitHubRelease`，补充 API 返回的完整字段。
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| *(继承 GitHubRelease 所有字段)* | | | |
+| `author` | GitHubUserInfo \| None | None | 发布者 |
+| `assets` | List[GitHubReleaseAsset] | `[]` | Asset 列表 |
+| `created_at` | str \| None | None | 创建时间 |
+| `published_at` | str \| None | None | 发布时间 |
+| `tarball_url` | str \| None | None | Tarball 下载 URL |
+| `zipball_url` | str \| None | None | Zipball 下载 URL |
+
+### GitHubRepoInfo
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `id` | int | 0 | 仓库 ID |
+| `name` | str | `""` | 仓库名 |
+| `full_name` | str | `""` | 全名 |
+| `owner` | GitHubUserInfo \| None | None | 所有者 |
+| `private` | bool | False | 是否私有 |
+| `html_url` | str \| None | None | 网页 URL |
+| `description` | str \| None | None | 描述 |
+| `fork` | bool | False | 是否 Fork |
+| `default_branch` | str | `"main"` | 默认分支 |
+| `language` | str \| None | None | 主要语言 |
+| `stargazers_count` | int | 0 | Star 数 |
+| `forks_count` | int | 0 | Fork 数 |
+| `open_issues_count` | int | 0 | 开放 Issue 数 |
+| `created_at` | str \| None | None | 创建时间 |
+| `updated_at` | str \| None | None | 更新时间 |
+
+---
+
+## 跨平台附件模型
+
+### AttachmentKind
+
+| 值 | 说明 |
+|----|------|
+| `IMAGE` | 图片 |
+| `VIDEO` | 视频 |
+| `AUDIO` | 音频 |
+| `FILE` | 文件 |
+| `OTHER` | 其他 |
+
+### Attachment（基类）
+
+`from ncatbot.types import Attachment`
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `name` | str | — | 文件名 |
+| `url` | str | — | 下载 URL |
+| `size` | int \| None | None | 文件大小（字节） |
+| `content_type` | str \| None | None | MIME 类型 |
+| `kind` | AttachmentKind | `OTHER` | 附件类型 |
+| `extra` | dict | `{}` | 平台特有字段 |
+
+| 方法 | 签名 | 说明 |
+|------|------|------|
+| `download()` | `async download(dest: str \| Path) -> Path` | 下载到指定目录 |
+| `as_bytes()` | `async as_bytes() -> bytes` | 下载到内存 |
+| `to_segment()` | `to_segment() -> MessageSegment` | 转为消息段（用 URL） |
+| `to_local_segment()` | `async to_local_segment(cache_dir) -> MessageSegment` | 先下载再转段 |
+
+### 附件子类
+
+| 子类 | kind | 特有字段 | `to_segment()` 返回 |
+|------|------|---------|---------------------|
+| `ImageAttachment` | `IMAGE` | `width: int?`, `height: int?` | `Image` |
+| `VideoAttachment` | `VIDEO` | `duration: int?` | `Video` |
+| `AudioAttachment` | `AUDIO` | `duration: int?` | `Record` |
+| `FileAttachment` | `FILE` | — | `File` |
+
+### AttachmentList
+
+`list` 子类，兼容 `List[Attachment]`。
+
+| 方法 | 返回 | 说明 |
+|------|------|------|
+| `images()` | `AttachmentList` | 只含 ImageAttachment |
+| `videos()` | `AttachmentList` | 只含 VideoAttachment |
+| `audios()` | `AttachmentList` | 只含 AudioAttachment |
+| `files()` | `AttachmentList` | 只含 FileAttachment |
+| `by_kind(*kinds)` | `AttachmentList` | 按 kind 过滤 |
+| `by_content_type(pattern)` | `AttachmentList` | glob 过滤（如 `"image/*"`） |
+| `first()` | `Attachment?` | 第一个 |
+| `largest()` | `Attachment?` | size 最大 |
+| `smallest()` | `Attachment?` | size 最小 |
+| `download_all(dest)` | `async -> List[Path]` | 批量下载 |
 
 ---
 

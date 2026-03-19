@@ -16,7 +16,7 @@ result = await self.api.github.create_issue(
     labels=["bug", "high-priority"],
     assignees=["octocat"],
 )
-print(result["number"])  # 新 Issue 编号
+print(result.number)  # 新 Issue 编号
 ```
 
 ### 更新 Issue
@@ -41,7 +41,7 @@ await self.api.github.reopen_issue("owner/repo", 42)
 
 ```python
 issue = await self.api.github.get_issue("owner/repo", 42)
-print(issue["title"], issue["state"])
+print(issue.title, issue.state)
 ```
 
 ## 标签管理
@@ -70,7 +70,7 @@ result = await self.api.github.create_issue_comment(
     issue_number=42,
     body="已确认，将在下个版本修复。",
 )
-print(result["id"])  # 评论 ID
+print(result.id)  # 评论 ID
 ```
 
 ### 更新评论
@@ -99,7 +99,7 @@ comments = await self.api.github.list_issue_comments(
     per_page=50,
 )
 for c in comments:
-    print(f"#{c['id']} by {c['user']['login']}: {c['body'][:50]}")
+    print(f"#{c.id} by {c.user.login}: {c.body[:50]}")
 ```
 
 ## 实战：自动标签分类

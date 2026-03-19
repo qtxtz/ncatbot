@@ -1,6 +1,8 @@
 # GitHub API 参考
 
-> `GitHubBotAPI` 完整方法签名 — Issue、Comment、PR、Query 四个 Mixin 共 20 个方法。
+> `GitHubBotAPI` 完整方法签名 — Issue、Comment、PR、Query、Release 五个 Mixin 共 24 个方法。
+>
+> 所有查询/操作方法均返回类型化的 Pydantic 模型而非原始 `dict`。模型定义见 `ncatbot.types.github.models`。
 
 ---
 
@@ -11,8 +13,25 @@ api.github : GitHubBotAPI
 ├── IssueAPIMixin       ← Issue 增删改查 + 标签 + 指派
 ├── CommentAPIMixin     ← 评论增删改查
 ├── PRAPIMixin          ← PR 评论 / 合并 / 关闭 / 审查
-└── QueryAPIMixin       ← 仓库 / 用户查询
+├── QueryAPIMixin       ← 仓库 / 用户查询
+└── ReleaseAPIMixin     ← Release 查询 / Assets 列表
 ```
+
+### 返回类型总览
+
+| 返回模型 | 说明 | 继承 |
+|---------|------|------|
+| `GitHubIssueInfo` | Issue 详情（含 user / labels / assignees） | `GitHubModel` |
+| `GitHubLabelInfo` | 标签信息 | `GitHubModel` |
+| `GitHubCommentInfo` | 评论详情 | `GitHubModel` |
+| `GitHubPullRequestInfo` | PR 详情（含 head / base） | `GitHubModel` |
+| `GitHubMergeResult` | PR 合并结果 | `GitHubModel` |
+| `GitHubRepoInfo` | 仓库信息（含 owner） | `GitHubModel` |
+| `GitHubUserInfo` | 用户信息 | `GitHubModel` |
+| `GitHubReleaseInfo` | Release 完整信息（含 assets） | `GitHubRelease → GitHubModel` |
+| `GitHubReleaseAsset` | Release Asset | `GitHubModel` |
+
+所有模型支持 `extra="allow"`（容忍未声明字段）和 `dict` 兼容访问（`model["key"]`、`model.get(key)`）。
 
 ---
 
@@ -27,7 +46,7 @@ async def create_issue(
     body: str = "",
     labels: Optional[List[str]] = None,
     assignees: Optional[List[str]] = None,
-) -> dict
+) -> GitHubIssueInfo
 ```
 
 | 参数 | 类型 | 默认值 | 说明 |
@@ -50,7 +69,7 @@ async def update_issue(
     state: Optional[str] = None,
     labels: Optional[List[str]] = None,
     assignees: Optional[List[str]] = None,
-) -> dict
+) -> GitHubIssueInfo
 ```
 
 | 参数 | 类型 | 默认值 | 说明 |
@@ -66,25 +85,25 @@ async def update_issue(
 ### close_issue()
 
 ```python
-async def close_issue(repo: str, issue_number: int) -> dict
+async def close_issue(repo: str, issue_number: int) -> GitHubIssueInfo
 ```
 
 ### reopen_issue()
 
 ```python
-async def reopen_issue(repo: str, issue_number: int) -> dict
+async def reopen_issue(repo: str, issue_number: int) -> GitHubIssueInfo
 ```
 
 ### get_issue()
 
 ```python
-async def get_issue(repo: str, issue_number: int) -> dict
+async def get_issue(repo: str, issue_number: int) -> GitHubIssueInfo
 ```
 
 ### add_labels()
 
 ```python
-async def add_labels(repo: str, issue_number: int, labels: List[str]) -> list
+async def add_labels(repo: str, issue_number: int, labels: List[str]) -> List[GitHubLabelInfo]
 ```
 
 ### remove_label()
@@ -96,7 +115,7 @@ async def remove_label(repo: str, issue_number: int, label: str) -> None
 ### set_assignees()
 
 ```python
-async def set_assignees(repo: str, issue_number: int, assignees: List[str]) -> dict
+async def set_assignees(repo: str, issue_number: int, assignees: List[str]) -> GitHubIssueInfo
 ```
 
 ---
@@ -106,7 +125,7 @@ async def set_assignees(repo: str, issue_number: int, assignees: List[str]) -> d
 ### create_issue_comment()
 
 ```python
-async def create_issue_comment(repo: str, issue_number: int, body: str) -> dict
+async def create_issue_comment(repo: str, issue_number: int, body: str) -> GitHubCommentInfo
 ```
 
 | 参数 | 类型 | 说明 |
@@ -118,7 +137,7 @@ async def create_issue_comment(repo: str, issue_number: int, body: str) -> dict
 ### update_comment()
 
 ```python
-async def update_comment(repo: str, comment_id: int, body: str) -> dict
+async def update_comment(repo: str, comment_id: int, body: str) -> GitHubCommentInfo
 ```
 
 ### delete_comment()
@@ -132,7 +151,7 @@ async def delete_comment(repo: str, comment_id: int) -> None
 ```python
 async def list_issue_comments(
     repo: str, issue_number: int, page: int = 1, per_page: int = 30
-) -> list
+) -> List[GitHubCommentInfo]
 ```
 
 | 参数 | 类型 | 默认值 | 说明 |
@@ -147,7 +166,7 @@ async def list_issue_comments(
 ### create_pr_comment()
 
 ```python
-async def create_pr_comment(repo: str, pr_number: int, body: str) -> dict
+async def create_pr_comment(repo: str, pr_number: int, body: str) -> GitHubCommentInfo
 ```
 
 > PR 评论与 Issue 评论共用 GitHub REST 端点。
@@ -162,7 +181,7 @@ async def merge_pr(
     merge_method: Union[GitHubMergeMethod, str] = GitHubMergeMethod.MERGE,
     commit_title: Optional[str] = None,
     commit_message: Optional[str] = None,
-) -> dict
+) -> GitHubMergeResult
 ```
 
 | 参数 | 类型 | 默认值 | 说明 |
@@ -174,19 +193,19 @@ async def merge_pr(
 ### close_pr()
 
 ```python
-async def close_pr(repo: str, pr_number: int) -> dict
+async def close_pr(repo: str, pr_number: int) -> GitHubPullRequestInfo
 ```
 
 ### request_review()
 
 ```python
-async def request_review(repo: str, pr_number: int, reviewers: List[str]) -> dict
+async def request_review(repo: str, pr_number: int, reviewers: List[str]) -> GitHubPullRequestInfo
 ```
 
 ### get_pr()
 
 ```python
-async def get_pr(repo: str, pr_number: int) -> dict
+async def get_pr(repo: str, pr_number: int) -> GitHubPullRequestInfo
 ```
 
 ---
@@ -196,20 +215,67 @@ async def get_pr(repo: str, pr_number: int) -> dict
 ### get_repo()
 
 ```python
-async def get_repo(repo: str) -> dict
+async def get_repo(repo: str) -> GitHubRepoInfo
 ```
 
 ### get_user()
 
 ```python
-async def get_user(username: str) -> dict
+async def get_user(username: str) -> GitHubUserInfo
 ```
 
 ### get_authenticated_user()
 
 ```python
-async def get_authenticated_user() -> dict
+async def get_authenticated_user() -> GitHubUserInfo
 ```
+
+---
+
+## Release 操作（ReleaseAPIMixin）
+
+### get_release()
+
+```python
+async def get_release(repo: str, release_id: Union[str, int]) -> GitHubReleaseInfo
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| repo | str | 仓库全名 |
+| release_id | str \| int | Release ID |
+
+### get_release_by_tag()
+
+```python
+async def get_release_by_tag(repo: str, tag: str) -> GitHubReleaseInfo
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| repo | str | 仓库全名 |
+| tag | str | Git Tag 名称，如 `"v5.2.0"` |
+
+### get_latest_release()
+
+```python
+async def get_latest_release(repo: str) -> GitHubReleaseInfo
+```
+
+### list_release_assets()
+
+```python
+async def list_release_assets(
+    repo: str, release_id: Union[str, int]
+) -> List[GitHubReleaseAsset]
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| repo | str | 仓库全名 |
+| release_id | str \| int | Release ID |
+
+返回包含 `name`, `content_type`, `size`, `download_count`, `browser_download_url` 等字段的 `GitHubReleaseAsset` 对象列表。
 
 ---
 

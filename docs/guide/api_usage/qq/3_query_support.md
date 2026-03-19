@@ -69,12 +69,32 @@ await self.api.qq.file.delete_group_file(group_id, file_id)
 
 | 方法 | 说明 |
 |------|------|
-| `upload_group_file(gid, file, name, folder_id="")` | 上传群文件 |
+| `upload_group_file(gid, file, name="", folder_id="")` | 上传群文件（`file` 支持 str \| Attachment） |
 | `delete_group_file(gid, file_id)` | 删除群文件 |
 | `create_group_file_folder(gid, name, parent_id="")` | 创建群文件夹 |
 | `delete_group_folder(gid, folder_id)` | 删除群文件夹 |
-| `upload_private_file(uid, file, name)` | 上传私聊文件 |
+| `upload_private_file(uid, file, name="")` | 上传私聊文件（`file` 支持 str \| Attachment） |
 | `download_file(url="", file="", headers="")` | 下载文件到本地 |
+| `upload_attachment(target_id, att, *, folder="", ...)` | 一步上传 Attachment（sugar） |
+| `get_or_create_group_folder(gid, folder_name, parent_id="")` | 查找/创建文件夹（sugar） |
+
+#### get_or_create_group_folder 示例
+
+```python
+# 在根目录查找或创建
+folder_id = await self.api.qq.file.get_or_create_group_folder(group_id, "备份")
+
+# 在指定父文件夹下查找或创建
+child_id = await self.api.qq.file.get_or_create_group_folder(
+    group_id, "daily", parent_id=folder_id
+)
+
+# 使用路径格式自动创建两级目录
+folder_id = await self.api.qq.file.get_or_create_group_folder(group_id, "备份/daily")
+
+# 上传文件到该文件夹
+await self.api.qq.file.upload_group_file(group_id, "/tmp/report.pdf", "报告.pdf", folder_id)
+```
 
 ### 群文件查询（通过 .query）
 

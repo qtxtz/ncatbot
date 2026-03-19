@@ -83,7 +83,10 @@ from ncatbot.api.traits import IFileTransfer
 | 方法 | 说明 |
 |------|------|
 | `upload_group_file(group_id, file, name, folder_id="")` | 上传群文件 |
+| `upload_private_file(user_id, file, name)` | 上传私聊文件 |
 | `download_file(url="", file="", headers="")` | 下载文件 |
+
+> `upload_attachment()` 是 QQ 平台专属 sugar，不属于跨平台 Trait。参见 [QQ 文件操作](../../qq/3_query_support.md)。
 
 ---
 

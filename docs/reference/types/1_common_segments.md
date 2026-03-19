@@ -95,6 +95,12 @@ Reply(id="12345")
 | `file_size` | `int?` | 文件大小 (bytes) |
 | `file_name` | `str?` | 文件名 |
 
+| 方法 | 签名 | 说明 |
+|------|------|------|
+| `to_attachment()` | `to_attachment() -> Attachment` | 转为跨平台附件对象 |
+
+> `Image` → `ImageAttachment`，`Video` → `VideoAttachment`，`Record` → `AudioAttachment`，`File` → `FileAttachment`。
+
 ### Image
 
 图片消息段。`_type = "image"`

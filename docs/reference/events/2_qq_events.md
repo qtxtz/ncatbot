@@ -27,7 +27,7 @@
 
 ### MessageEvent
 
-QQ 消息事件基类。**Traits：** `Replyable`, `Deletable`, `HasSender`
+QQ 消息事件基类。**Traits：** `Replyable`, `Deletable`, `HasSender`, `HasAttachments`
 
 | 属性 | 类型 | 说明 |
 |------|------|------|
@@ -45,6 +45,7 @@ QQ 消息事件基类。**Traits：** `Replyable`, `Deletable`, `HasSender`
 | `is_group_msg()` | `() → bool` | 是否群消息 |
 | `reply()` | `async (text=, *, at=, image=, video=, rtf=, at_sender=True)` | 回复消息 |
 | `delete()` | `async ()` | 撤回消息 |
+| `get_attachments()` | `async () → AttachmentList` | 提取媒体附件 |
 
 **`reply()` 行为详情：**
 - 自动添加引用回复（`Reply` 段）
@@ -215,7 +216,7 @@ QQ 工厂 (`create_qq_entity`) 的映射规则：
 
 ```
 BaseEvent (common)
-├── MessageEvent               Replyable, Deletable, HasSender
+├── MessageEvent               Replyable, Deletable, HasSender, HasAttachments
 │   ├── PrivateMessageEvent
 │   └── GroupMessageEvent      + GroupScoped, Kickable, Bannable
 ├── NoticeEvent                HasSender, GroupScoped

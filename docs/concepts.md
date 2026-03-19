@@ -234,7 +234,35 @@ Segment 的有序容器，支持链式构造（`.add_text().add_at().add_image()
 
 **用途**：避免手动构造 MessageArray — 简单消息一行搞定。
 
-**关键类**：`Segment`（各子类）、`MessageArray`、`QQMessageSugarMixin`
+### DownloadableSegment — 可下载媒体段
+
+`Image`、`Video`、`Record`、`File` 四种媒体段的共同基类。携带 `file`、`url`、`file_id`、`file_size`、`file_name` 等字段，表示**一条消息中的某个媒体子段**。
+
+**本质**：消息的组成部分 — 始终附着于 `MessageArray`，不独立存在。
+
+### Attachment — 跨平台附件对象
+
+平台无关的可下载文件模型（Pydantic）。携带 `name`、`url`、`size`、`content_type`、`kind` 等字段，表示**独立的可下载对象**。
+
+**本质**：独立的数据实体 — 不依附于消息，可来自 GitHub Release 资产、文件系统，或经由段转换而来。
+
+### DownloadableSegment vs Attachment
+
+两者都代表"可下载的媒体"，但语义和使用场景截然不同：
+
+| 维度 | DownloadableSegment | Attachment |
+|------|-------------------|------------|
+| **定位** | 消息的子段 | 独立的可下载对象 |
+| **来源** | QQ/聊天消息中的媒体 | GitHub Release 资产、文件系统、或由段转换 |
+| **所属** | 附着于 MessageArray | 独立存在 |
+| **跨平台** | 与 OneBot 消息协议绑定 | 平台无关 |
+| **获取方式** | `MessageArray.filter(Image)` | `event.get_attachments()` / `segment.to_attachment()` |
+
+**桥接**：`DownloadableSegment.to_attachment()` 将消息段转为 Attachment，`Attachment.to_segment()` 反向转回。`MessageArray.get_attachments()` 批量提取所有可下载段为 `AttachmentList`。
+
+**设计意图**：Attachment 提供统一的跨平台文件处理抽象 — 无论文件来自 QQ 消息图片还是 GitHub Release，都用同一套 `download()` / `as_bytes()` / `upload_attachment()` 接口操作。
+
+**关键类**：`Segment`（各子类）、`MessageArray`、`QQMessageSugarMixin`、`Attachment`（及子类）、`AttachmentList`
 
 **参见**：[消息发送指南](guide/send_message/)、[类型参考](reference/types/)
 

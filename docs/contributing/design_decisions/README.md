@@ -102,6 +102,7 @@ graph TB
 | ADR-007 | [HandlerDispatcher 单 Handler 执行模型](2_implementation.md#adr-007handlerdispatcher-单-handler-执行模型) | ✅ 已采纳 | 遍历执行所有匹配 handler（精确+前缀），按优先级排序，`_propagation_stopped` 控制传播 |
 | ADR-008 | [命名空间分层 API](2_implementation.md#adr-008命名空间分层-api) | ✅ 已采纳 | 高频 API 顶层平铺，低频 API 按命名空间分组，`__getattr__` 兜底代理 |
 | ADR-009 | [RBAC Trie 权限路径](2_implementation.md#adr-009rbac-trie-权限路径) | ✅ 已采纳 | Trie 前缀树存储权限路径，支持 `*`/`**` 通配符，$O(k)$ 查询效率 |
+| ADR-010 | [Segment vs Attachment 双模型](3_types.md#adr-010-segment-vs-attachment-双模型设计) | ✅ 已采纳 | DownloadableSegment 是消息子段，Attachment 是独立可下载对象；桥接互转，url 不 fallback file |
 
 **ADR-005 Mixin** — `NcatBotPlugin` 通过多继承组合 EventMixin、TimeTaskMixin、RBACMixin 等能力。MRO 自动排序 load/unload 钩子，`self.events()` 直接调用比组合模式的 `self.event_helper.events()` 更直观。
 
@@ -112,6 +113,8 @@ graph TB
 **ADR-008 命名空间 API** — 90+ OneBot API 分为 Sugar 高频（`api.qq.post_group_msg()`）和命名空间低频（`api.qq.manage.*` / `api.qq.query.*` / `api.qq.file.*`），`BotAPIClient` 作为多平台路由组合器。
 
 **ADR-009 RBAC Trie** — 权限路径 `plugin.admin.kick` 用 Trie 前缀树存储，$O(k)$ 查询，支持 `*`/`**` 通配符。QQ 机器人权限天然具有层级结构（插件 → 功能 → 操作）。
+
+**ADR-010 Segment vs Attachment** — `DownloadableSegment` 是消息的子段（Image/Video/Record/File），`Attachment` 是独立的跨平台可下载对象。两者通过 `to_attachment()` / `to_segment()` 桥接。`to_attachment()` 的 url 仅取 `seg.url`，不 fallback 到 `seg.file`（可能是 QQ 内部路径）。
 
 ---
 

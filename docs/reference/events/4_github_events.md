@@ -4,21 +4,39 @@
 
 ---
 
+## 基类
+
+### GitHubBaseEvent
+
+所有 GitHub 事件的公共基类。提供以下共有属性，子类无需重复定义。
+
+**Traits：** `HasSender`
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| `api` | IGitHubAPIClient | GitHub API 客户端 |
+| `user_id` | str | 操作者 ID |
+| `sender` | GitHubSender | 操作者信息 |
+| `repo` | str | 仓库全名（`"owner/repo"`） |
+| `action` | str | Webhook action 字段 |
+
+```python
+from ncatbot.event.github import GitHubBaseEvent
+```
+
+---
+
 ## Issue 事件
 
 ### GitHubIssueEvent
 
-**Traits：** `HasSender`, `Replyable`
+**继承：** `GitHubBaseEvent` + `Replyable`
 
 | 属性 | 类型 | 说明 |
 |------|------|------|
 | `issue_number` | int | Issue 编号 |
 | `issue_title` | str | Issue 标题 |
-| `action` | str | 动作（opened / edited / closed / reopened / labeled 等） |
 | `labels` | list | 标签列表 |
-| `repo` | str | 仓库全名（`"owner/repo"`） |
-| `user_id` | str | 操作者 ID |
-| `sender` | GitHubSender | 操作者信息 |
 
 | 方法 | 签名 | 说明 |
 |------|------|------|
@@ -33,15 +51,12 @@ async def on_issue(self, event: GitHubIssueEvent):
 
 ### GitHubIssueCommentEvent
 
-**Traits：** `HasSender`, `Replyable`, `Deletable`
+**继承：** `GitHubBaseEvent` + `Replyable`, `Deletable`
 
 | 属性 | 类型 | 说明 |
 |------|------|------|
 | `comment_body` | str | 评论内容 |
 | `issue_number` | int | 所属 Issue/PR 编号 |
-| `repo` | str | 仓库全名 |
-| `user_id` | str | 评论者 ID |
-| `sender` | GitHubSender | 评论者信息 |
 
 | 方法 | 签名 | 说明 |
 |------|------|------|
@@ -54,17 +69,13 @@ async def on_issue(self, event: GitHubIssueEvent):
 
 ### GitHubPREvent
 
-**Traits：** `HasSender`, `Replyable`
+**继承：** `GitHubBaseEvent` + `Replyable`
 
 | 属性 | 类型 | 说明 |
 |------|------|------|
 | `pr_number` | int | PR 编号 |
 | `pr_title` | str | PR 标题 |
-| `action` | str | 动作（opened / closed / synchronize / merged 等） |
 | `merged` | bool | 是否已合并 |
-| `repo` | str | 仓库全名 |
-| `user_id` | str | 操作者 ID |
-| `sender` | GitHubSender | 操作者信息 |
 
 | 方法 | 签名 | 说明 |
 |------|------|------|
@@ -79,16 +90,13 @@ async def on_pr(self, event: GitHubPREvent):
 
 ### GitHubPRReviewCommentEvent
 
-**Traits：** `HasSender`, `Replyable`, `Deletable`
+**继承：** `GitHubBaseEvent` + `Replyable`, `Deletable`
 
 | 属性 | 类型 | 说明 |
 |------|------|------|
 | `comment_body` | str | Review 评论内容 |
 | `pr_number` | int | 所属 PR 编号 |
 | `path` | str | 评论所在文件路径 |
-| `repo` | str | 仓库全名 |
-| `user_id` | str | 评论者 ID |
-| `sender` | GitHubSender | 评论者信息 |
 
 | 方法 | 签名 | 说明 |
 |------|------|------|
@@ -101,7 +109,7 @@ async def on_pr(self, event: GitHubPREvent):
 
 ### GitHubPushEvent
 
-**Traits：** `HasSender`
+**继承：** `GitHubBaseEvent`
 
 | 属性 | 类型 | 说明 |
 |------|------|------|
@@ -110,9 +118,6 @@ async def on_pr(self, event: GitHubPREvent):
 | `after` | str | Push 后 SHA |
 | `commits` | List[GitHubCommit] | 提交列表 |
 | `head_commit` | GitHubCommit \| None | 最新提交 |
-| `repo` | str | 仓库全名 |
-| `user_id` | str | 推送者 ID |
-| `sender` | GitHubSender | 推送者信息 |
 
 ```python
 @registrar.github.on_push()
@@ -127,47 +132,50 @@ async def on_push(self, event: GitHubPushEvent):
 
 ### GitHubStarEvent
 
-**Traits：** `HasSender`
+**继承：** `GitHubBaseEvent`
 
 | 属性 | 类型 | 说明 |
 |------|------|------|
-| `repo` | str | 仓库全名 |
 | `starred_at` | str | Star 时间 |
-| `user_id` | str | Star 用户 ID |
-| `sender` | GitHubSender | Star 用户信息 |
 
 ### GitHubForkEvent
 
-**Traits：** `HasSender`
+**继承：** `GitHubBaseEvent`
 
 | 属性 | 类型 | 说明 |
 |------|------|------|
-| `repo` | str | 原仓库全名 |
 | `forkee` | GitHubForkee | Fork 目标仓库信息 |
 | `forkee_full_name` | str | Fork 后的仓库全名 |
-| `user_id` | str | Fork 用户 ID |
-| `sender` | GitHubSender | Fork 用户信息 |
 
 ### GitHubReleaseEvent
 
-**Traits：** `HasSender`
+**继承：** `GitHubBaseEvent` + `HasAttachments`
 
 | 属性 | 类型 | 说明 |
 |------|------|------|
-| `repo` | str | 仓库全名 |
 | `release` | GitHubRelease | Release 详情 |
 | `release_tag` | str | Tag 名称 |
 | `release_name` | str | Release 名称 |
 | `release_body` | str | Release 说明 |
 | `prerelease` | bool | 是否预发布 |
-| `user_id` | str | 发布者 ID |
-| `sender` | GitHubSender | 发布者信息 |
+
+| 方法 | 签名 | 说明 |
+|------|------|------|
+| `get_assets()` | `async get_assets() -> List[GitHubReleaseAsset]` | 获取该 Release 的所有 Assets（平台原生） |
+| `get_full_release()` | `async get_full_release() -> GitHubReleaseInfo` | 通过 API 获取完整 Release 信息 |
+| `get_attachments()` | `async get_attachments() -> AttachmentList` | 获取跨平台附件列表（HasAttachments） |
 
 ```python
 @registrar.github.on_release()
 async def on_release(self, event: GitHubReleaseEvent):
-    if event.data.action == "published" and not event.prerelease:
-        print(f"正式版发布: {event.release_tag}")
+    if event.action == "published" and not event.prerelease:
+        # 跨平台方式（HasAttachments）
+        atts = await event.get_attachments()
+        for att in atts:
+            path = await att.download("./downloads")
+            print(f"已下载: {path}")
+        # 可以过滤
+        print(f"共 {len(atts)} 个附件，最大: {atts.largest().name}")
 ```
 
 ---
@@ -176,14 +184,15 @@ async def on_release(self, event: GitHubReleaseEvent):
 
 ```text
 BaseEvent
-├── GitHubIssueEvent         (HasSender, Replyable)
-├── GitHubIssueCommentEvent  (HasSender, Replyable, Deletable)
-├── GitHubPREvent            (HasSender, Replyable)
-├── GitHubPRReviewCommentEvent (HasSender, Replyable, Deletable)
-├── GitHubPushEvent          (HasSender)
-├── GitHubStarEvent          (HasSender)
-├── GitHubForkEvent          (HasSender)
-└── GitHubReleaseEvent       (HasSender)
+└── GitHubBaseEvent              (HasSender)
+    ├── GitHubIssueEvent         (Replyable)
+    ├── GitHubIssueCommentEvent  (Replyable, Deletable)
+    ├── GitHubPREvent            (Replyable)
+    ├── GitHubPRReviewCommentEvent (Replyable, Deletable)
+    ├── GitHubPushEvent
+    ├── GitHubStarEvent
+    ├── GitHubForkEvent
+    └── GitHubReleaseEvent       (HasAttachments)
 ```
 
 ## 工厂映射
@@ -202,38 +211,6 @@ BaseEvent
 ---
 
 > **返回**：[事件参考首页](README.md) · **相关**：[GitHub API 参考](../api/github/1_api.md) · [GitHub 类型](../types/6_github_types.md)
-
-| 属性 | 类型 | 说明 |
-|------|------|------|
-| `user_id` | `str` | 操作者 |
-| `repo` | `str` | 仓库全名 |
-| `starred_at` | `str` | Star 时间 |
-
-### GitHubForkEvent
-
-Fork 事件。**Traits：** `HasSender`
-
-| 属性 | 类型 | 说明 |
-|------|------|------|
-| `user_id` | `str` | Fork 者 |
-| `repo` | `str` | 源仓库全名 |
-| `forkee` | `GitHubForkee` | Fork 出的仓库对象 |
-| `forkee_full_name` | `str` | Fork 仓库全名 |
-
-### GitHubReleaseEvent
-
-Release 发布事件。**Traits：** `HasSender`
-
-| 属性 | 类型 | 说明 |
-|------|------|------|
-| `user_id` | `str` | 发布者 |
-| `repo` | `str` | 仓库全名 |
-| `release` | `GitHubRelease` | Release 对象 |
-| `release_tag` | `str` | Tag 名称 |
-| `release_name` | `str` | Release 名称 |
-| `release_body` | `str` | Release 说明 |
-
----
 
 ## 注册器速查
 

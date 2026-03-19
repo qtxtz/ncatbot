@@ -308,21 +308,26 @@ OCR 图片识别。
 
 ```python
 async def upload_group_file(
-    self, group_id: Union[str, int], file: str, name: str, folder_id: str = "",
+    self, group_id: Union[str, int], file: Union[str, Attachment],
+    name: str = "", folder_id: str = "",
 ) -> None:
 ```
 
-上传群文件。
+上传群文件。`file` 可以是本地路径字符串，也可以直接传入 `Attachment` 对象（自动下载并上传）。
 
 | 参数 | 类型 | 必填 | 说明 |
 |---|---|---|---|
 | group_id | str \| int | 是 | 群号 |
-| file | str | 是 | 本地文件路径或 URL |
-| name | str | 是 | 上传后的文件名 |
+| file | str \| Attachment | 是 | 本地文件路径、URL，或 `Attachment` 对象 |
+| name | str | 否 | 上传后的文件名（传 `Attachment` 时自动取 `att.name`） |
 | folder_id | str | 否 | 目标文件夹 ID，默认为根目录 |
 
 ```python
+# 传统 str 用法
 await api.qq.file.upload_group_file(123456, "/tmp/report.pdf", "月报.pdf")
+
+# 直接传 Attachment 对象
+await api.qq.file.upload_group_file(123456, attachment, folder_id=folder_id)
 ```
 
 ---
@@ -363,15 +368,85 @@ async def delete_group_folder(
 
 ---
 
+### get_or_create_group_folder()
+
+```python
+async def get_or_create_group_folder(
+    self, group_id: Union[str, int], folder_name: str, parent_id: str = "",
+) -> str:
+```
+
+查找群文件夹，不存在则自动创建，返回 `folder_id`。这是一个 sugar 方法，组合了 `get_group_root_files` / `get_group_files_by_folder` + `create_group_file_folder`。
+
+| 参数 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| group_id | str \| int | 是 | 群号 |
+| folder_name | str | 是 | 文件夹名称，或 `"parent/child"` 路径格式 |
+| parent_id | str | 否 | 父文件夹 ID，为空表示根目录 |
+
+**返回值**：`str` — 文件夹 ID；失败返回空字符串。
+
+支持路径格式 `"parent/child"` 自动拆分为两级查找/创建（仅限一级子目录）。当同时提供 `parent_id` 和含 `/` 的 `folder_name` 时，以 `parent_id` 优先。
+
+```python
+# 根目录查找或创建
+folder_id = await api.qq.file.get_or_create_group_folder(123456, "备份")
+
+# 在指定父文件夹下查找或创建
+child_id = await api.qq.file.get_or_create_group_folder(
+    123456, "daily", parent_id=folder_id
+)
+
+# 路径格式：自动创建两级目录
+folder_id = await api.qq.file.get_or_create_group_folder(123456, "备份/daily")
+```
+
+---
+
 ### upload_private_file()
 
 ```python
 async def upload_private_file(
-    self, user_id: Union[str, int], file: str, name: str,
+    self, user_id: Union[str, int], file: Union[str, Attachment], name: str = "",
 ) -> None:
 ```
 
-上传私聊文件。
+上传私聊文件。`file` 同样支持 `str` 或 `Attachment`。
+
+---
+
+### upload_attachment()
+
+```python
+async def upload_attachment(
+    self, target_id: Union[str, int], attachment: Attachment, *,
+    target_type: str = "group", folder_id: str = "", folder: str = "",
+) -> None:
+```
+
+一步上传 `Attachment` 对象到 QQ 群/私聊。自动处理下载→上传→清理临时文件的全部流程。
+
+> 这是 QQFile 平台专属 sugar，不属于跨平台 `IFileTransfer` 协议。
+
+| 参数 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| target_id | str \| int | 是 | 群号或用户 ID |
+| attachment | Attachment | 是 | Attachment 实例 |
+| target_type | str | 否 | `"group"`（默认）或 `"private"` |
+| folder_id | str | 否 | 群文件夹 ID（仅 group） |
+| folder | str | 否 | 群文件夹名称（仅 group），自动查找/创建 |
+
+```python
+# 从 GitHub Release 获取附件并上传到群文件
+await api.qq.file.upload_attachment(
+    group_id, attachment, folder="ncatbot-ref"
+)
+
+# 上传到私聊
+await api.qq.file.upload_attachment(
+    user_id, attachment, target_type="private"
+)
+```
 
 ---
 

@@ -191,6 +191,24 @@ ats      = msg.filter(At)        # 仅 @段
 | `filter_image()` | `filter(Image)` | `List[Image]` |
 | `filter_video()` | `filter(Video)` | `List[Video]` |
 
+### get_attachments
+
+```python
+get_attachments() -> AttachmentList
+```
+
+将所有可下载段（`Image`, `Video`, `Record`, `File`）转为类型化附件列表：
+
+```python
+atts = msg.get_attachments()
+for img in atts.images():
+    print(f"图片: {img.name}, {img.url}")
+for vid in atts.videos():
+    seg = vid.to_segment()  # 转回 Video 段用于转发
+```
+
+> 详见 [跨平台附件模型](6_github_types.md#跨平台附件模型)。
+
 ### is_at
 
 ```python

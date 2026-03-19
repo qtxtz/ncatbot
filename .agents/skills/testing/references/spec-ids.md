@@ -27,6 +27,11 @@
 | B | BotClient E2E | B-01 ~ B-05 | `tests/e2e/` |
 | NC | NapCat E2E | NC-01 ~ NC-21 | `tests/e2e/napcat/` |
 | PL | Plugin E2E | PL-01 ~ PL-53 | `tests/e2e/plugin/` |
+| GHE | GitHub Event Entity | GHE-01 ~ GHE-08 | `tests/unit/event/` |
+| GHM | GitHub Types / Models | GHM-01 ~ GHM-15 | `tests/unit/types/` |
+| GHA | GitHub API (typed returns) | GHA-01 ~ GHA-05 | `tests/unit/api/` |
+| SEG | Segment ↔ Attachment 桥接 | SEG-01 ~ SEG-07 | `tests/unit/types/` |
+| QMA | QQ Message Attachments | QMA-01 ~ QMA-03 | `tests/unit/event/` |
 
 ## 命名规范
 
@@ -55,3 +60,8 @@ async def test_dispatcher_routes_group_message(event_dispatcher):
 | N | N-05 | 2026-03-18：NapCat 类型模型（索引化已有测试） |
 | K | K-22 | Hook System 含内置 Hook 扩展 |
 | PL | PL-53 | Plugin E2E: hello_world/event_handling/hook_filter/dialog/full |
+| GHE | GHE-08 | GitHub Event Entity: Star/Fork/Release + HasAttachments |
+| GHM | GHM-15 | GitHub Models: GitHubModel + API response models + Attachment subclasses + AttachmentList |
+| GHA | GHA-05 | GitHub API: typed returns for query/issue/comment/pr/release |
+| SEG | SEG-07 | Segment ↔ Attachment: Image/Video/Record/File.to_attachment + MessageArray.get_attachments |
+| QMA | QMA-03 | QQ Message HasAttachments: isinstance + get_attachments from segments |

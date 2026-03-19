@@ -174,14 +174,16 @@ msg = await self.api.qq.query.get_msg(message_id)
 
 | 方法 | 说明 |
 |------|------|
-| `upload_group_file(group_id, file, name, folder_id="")` | 上传群文件 |
-| `upload_private_file(user_id, file, name)` | 上传私聊文件 |
+| `upload_group_file(group_id, file, name="", folder_id="")` | 上传群文件（`file` 支持 str \| Attachment） |
+| `upload_private_file(user_id, file, name="")` | 上传私聊文件（`file` 支持 str \| Attachment） |
+| `upload_attachment(target_id, att, *, folder="", ...)` | 一步上传 Attachment（sugar） |
 | `download_file(url=, file=, headers=)` | 下载文件 |
 | `get_group_root_files(group_id)` | 获取群根目录文件 |
 | `get_group_file_url(group_id, file_id)` | 获取文件下载链接 |
 | `delete_group_file(group_id, file_id)` | 删除群文件 |
 | `create_group_file_folder(group_id, name, parent_id="")` | 创建文件夹 |
 | `delete_group_folder(group_id, folder_id)` | 删除文件夹 |
+| `get_or_create_group_folder(group_id, folder_name, parent_id="")` | 查找/创建文件夹（sugar） |
 
 ---
 

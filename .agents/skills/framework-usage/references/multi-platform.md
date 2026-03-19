@@ -90,7 +90,7 @@ async def all_platforms(event):
 | `IMessaging` | `send_private_msg`, `send_group_msg`, `delete_msg`, `send_forward_msg` |
 | `IGroupManage` | `set_group_kick`, `set_group_ban`, `set_group_admin`, ... |
 | `IQuery` | `get_login_info`, `get_friend_list`, `get_group_list`, ... |
-| `IFileTransfer` | `upload_group_file`, `download_file` |
+| `IFileTransfer` | `upload_group_file`, `upload_private_file`, `download_file` |
 
 ### Event Trait（`ncatbot.event.common.mixins`，通过 `ncatbot.event` 重新导出）
 
@@ -102,11 +102,21 @@ async def all_platforms(event):
 | `GroupScoped` | `group_id` 属性 |
 | `Kickable` | `kick()` |
 | `Bannable` | `ban()` |
+| `Approvable` | `approve()`, `reject()` |
+| `HasAttachments` | `get_attachments() -> AttachmentList` |
+
+> **Attachment 体系**（`ncatbot.types` 重新导出）：
+> - `Attachment`（基类）— `name`, `url`, `size`, `content_type`, `kind`, `extra`
+> - `ImageAttachment`, `VideoAttachment`, `AudioAttachment`, `FileAttachment` — 类型化子类
+> - `AttachmentList`（`list` 子类）— `images()`, `videos()`, `audios()`, `files()`, `by_kind()`, `first()`, `largest()`, `download_all()`
+> - 每个 Attachment 带 `download(dest)`, `as_bytes()`, `to_segment()`, `to_local_segment(cache_dir)` 方法
+> - `DownloadableSegment`（Image/Video/Record/File）带 `to_attachment()` 反向转换
+> - `MessageArray.get_attachments()` 提取所有可下载段为 AttachmentList
 
 ### 跨平台 handler 示例
 
 ```python
-from ncatbot.event import Replyable, GroupScoped
+from ncatbot.event import Replyable, GroupScoped, HasAttachments
 
 @bot.on("message")
 async def handler(event):
@@ -114,6 +124,12 @@ async def handler(event):
         await event.reply("收到!")
     if isinstance(event, GroupScoped):
         print(f"群 {event.group_id}")
+    if isinstance(event, HasAttachments):
+        atts = await event.get_attachments()
+        for img in atts.images():
+            await img.download("/tmp/images")
+        for vid in atts.videos():
+            seg = vid.to_segment()  # 转为消息段用于转发
 ```
 
 ## event.platform

@@ -114,6 +114,45 @@ async def approve(self, **kwargs) -> Any: ...
 async def reject(self, **kwargs) -> Any: ...
 ```
 
+### HasAttachments
+
+携带可下载附件的事件。返回 `AttachmentList`（`list` 子类），包含类型化的附件对象，支持按类型过滤。
+
+```python
+async def get_attachments(self) -> AttachmentList: ...
+```
+
+附件子类层级：
+
+| 类型 | kind | 特有字段 | `to_segment()` 返回 |
+|------|------|---------|---------------------|
+| `Attachment` | `OTHER` | — | `File` |
+| `ImageAttachment` | `IMAGE` | `width`, `height` | `Image` |
+| `VideoAttachment` | `VIDEO` | `duration` | `Video` |
+| `AudioAttachment` | `AUDIO` | `duration` | `Record` |
+| `FileAttachment` | `FILE` | — | `File` |
+
+`AttachmentList` 过滤方法：`images()`, `videos()`, `audios()`, `files()`, `by_kind()`, `by_content_type()`, `first()`, `largest()`, `smallest()`, `download_all()`。
+
+附件转换方法：`to_segment()`, `to_local_segment(cache_dir)`, `as_bytes()`, `download(dest)`。
+
+示例：
+
+```python
+from ncatbot.event import HasAttachments
+
+if isinstance(event, HasAttachments):
+    atts = await event.get_attachments()
+    for img in atts.images():
+        path = await img.download("./images")
+    for vid in atts.videos():
+        seg = vid.to_segment()  # 转为 Video 消息段用于转发
+```
+
+当前实现了 `HasAttachments` 的事件：
+- `GitHubReleaseEvent` — 将 Release Assets 转为 Attachment
+- `QQ MessageEvent` — 将消息中的 Image/Video/Record/File 段转为类型化附件
+
 ---
 
 ## 事件工厂

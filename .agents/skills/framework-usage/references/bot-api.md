@@ -201,6 +201,12 @@ await self.api.qq.file.upload_group_file(group_id, file="/path/to/file", name="n
 await self.api.qq.file.delete_group_file(group_id, file_id)
 await self.api.qq.messaging.send_like(user_id, times=1)
 
+# 直接传 Attachment 对象（自动下载并上传）
+await self.api.qq.file.upload_group_file(group_id, file=attachment)
+
+# 一步上传 Attachment 到指定文件夹（QQFile sugar）
+await self.api.qq.file.upload_attachment(group_id, attachment, folder="备份")
+
 # 文件系统扩展
 result = await self.api.qq.file.create_group_file_folder(group_id, name, parent_id="")  # -> CreateFolderResult
 await self.api.qq.file.delete_group_folder(group_id, folder_id)

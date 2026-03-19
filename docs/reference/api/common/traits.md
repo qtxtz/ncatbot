@@ -123,10 +123,16 @@ class IFileTransfer(Protocol):
         folder_id: str = "",
     ) -> None: ...
 
+    async def upload_private_file(
+        self, user_id: Union[str, int], file: str, name: str,
+    ) -> None: ...
+
     async def download_file(
         self, url: str = "", file: str = "", headers: str = "",
     ) -> Any: ...
 ```
+
+> `upload_attachment()` 不属于跨平台协议，作为 QQ 平台专属 sugar 提供在 `QQFile` 上。参见 [QQFile 文件操作](../qq/3_info_support_api.md#upload_attachment)。
 
 ---
 
@@ -144,4 +150,5 @@ class IFileTransfer(Protocol):
 | `get_login_info` | ✅ | ❌ |
 | `get_group_info` | ✅ | ✅（直播间信息） |
 | `upload_group_file` | ✅ | ❌ |
+| `upload_private_file` | ✅ | ❌ |
 | `download_file` | ✅ | ❌ |

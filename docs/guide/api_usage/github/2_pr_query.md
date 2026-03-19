@@ -52,7 +52,7 @@ await self.api.github.request_review(
 
 ```python
 pr = await self.api.github.get_pr("owner/repo", 10)
-print(pr["title"], pr["state"], pr["merged"])
+print(pr.title, pr.state, pr.merged)
 ```
 
 ## 信息查询
@@ -61,21 +61,21 @@ print(pr["title"], pr["state"], pr["merged"])
 
 ```python
 repo_info = await self.api.github.get_repo("owner/repo")
-print(repo_info["full_name"], repo_info["description"])
+print(repo_info.full_name, repo_info.description)
 ```
 
 ### 查询用户
 
 ```python
 user = await self.api.github.get_user("octocat")
-print(user["login"], user["html_url"])
+print(user.login, user.html_url)
 ```
 
 ### 查询当前认证用户
 
 ```python
 me = await self.api.github.get_authenticated_user()
-print(me["login"])
+print(me.login)
 ```
 
 ## 实战：PR 自动审查流程
