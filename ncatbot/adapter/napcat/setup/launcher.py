@@ -129,11 +129,11 @@ class NapCatLauncher:
 
     async def _setup_and_connect(self) -> None:
         """Setup 模式: 保证环境就绪, 按需安装/配置/启动/登录"""
-        LOG.info("Setup 模式, 检查 NapCat 服务...")
+        LOG.debug("Setup 模式, 检查 NapCat 服务...")
 
         # 环境已就绪, 跳过准备
         if await self.is_service_ok():
-            LOG.info(f"NapCat 服务 {self._napcat_config.ws_uri} 在线, 跳过环境准备")
+            LOG.debug(f"NapCat 服务 {self._napcat_config.ws_uri} 在线, 跳过环境准备")
             await self._verify_account()
             return
 

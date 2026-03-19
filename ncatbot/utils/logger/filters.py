@@ -4,6 +4,20 @@ import re
 import logging
 
 
+# 需要按前缀压制的第三方动态命名 logger（低于 WARNING 的消息被丢弃）
+_SUPPRESSED_PREFIXES = ("LiveDanmaku_",)
+
+
+class ThirdPartyNameFilter(logging.Filter):
+    """按 logger 名称前缀压制第三方库的低级别日志。"""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        for prefix in _SUPPRESSED_PREFIXES:
+            if record.name.startswith(prefix):
+                return record.levelno >= logging.WARNING
+        return True
+
+
 class MessageFoldFilter(logging.Filter):
     """折叠超长消息和 base64 内容。
 

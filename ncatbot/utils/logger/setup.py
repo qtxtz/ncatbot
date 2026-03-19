@@ -8,7 +8,7 @@ from typing import Sequence
 
 from .core import cleanup_early_handlers
 from .formatter import ColoredFormatter, FileFormatter
-from .filters import MessageFoldFilter
+from .filters import MessageFoldFilter, ThirdPartyNameFilter
 
 DEFAULT_ROUTING_RULES: list[tuple[str, str]] = [
     ("database", "db.log"),
@@ -67,12 +67,16 @@ def setup_logging(
     # 压制高频第三方库日志
     logging.getLogger("apscheduler").setLevel(logging.WARNING)
     logging.getLogger("websockets").setLevel(logging.WARNING)
+    logging.getLogger("schedule").setLevel(logging.WARNING)
+    logging.getLogger("asyncio").setLevel(logging.WARNING)
+    logging.getLogger("Session").setLevel(logging.WARNING)
 
     # 控制台 handler — level 由 console_level 控制
     console_handler = logging.StreamHandler()
     console_handler.setLevel(console_level)
     console_handler.setFormatter(ColoredFormatter())
     console_handler.addFilter(MessageFoldFilter())
+    console_handler.addFilter(ThirdPartyNameFilter())
     root.addHandler(console_handler)
 
     # 主文件 handler
@@ -87,6 +91,7 @@ def setup_logging(
     main_fh.setLevel(file_level)
     main_fh.setFormatter(FileFormatter())
     main_fh.addFilter(MessageFoldFilter())
+    main_fh.addFilter(ThirdPartyNameFilter())
     root.addHandler(main_fh)
 
     # 路由规则 handler

@@ -69,7 +69,7 @@ class BilibiliAdapter(BaseAdapter):
                 self._credential = await qrcode_login()
                 save_credential_to_config(self._credential)
             else:
-                LOG.info("Bilibili 凭据验证通过")
+                LOG.debug("Bilibili 凭据验证通过")
         else:
             LOG.info("未检测到 Bilibili 凭据，启动扫码登录...")
             self._credential = await qrcode_login()
