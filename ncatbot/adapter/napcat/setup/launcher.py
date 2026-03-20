@@ -16,6 +16,7 @@ from typing import Optional, TYPE_CHECKING
 import websockets
 
 from ncatbot.utils import NcatBotError, get_log  # type: ignore[attr-defined]
+from ncatbot.utils.config.models import DEFAULT_BOT_UIN
 from .auth import AuthHandler
 from .config import NapCatConfigManager
 from .installer import NapCatInstaller
@@ -124,6 +125,7 @@ class NapCatLauncher:
                 f"请检查 NapCat 服务是否已启动"
             )
         LOG.info("NapCat 服务连接成功")
+        await self._verify_account()
 
     # ==================== Setup 模式 ====================
 
@@ -154,6 +156,7 @@ class NapCatLauncher:
         self.platform.start_napcat(self._bot_uin)
 
         await self._wait_and_login()
+        await self._verify_account()
 
     async def _verify_account(self) -> None:
         """通过 WS self_id 校验当前登录的 QQ 号是否为目标账号。"""
@@ -161,10 +164,19 @@ class NapCatLauncher:
         if self_id is None:
             raise NcatBotError("WebSocket 连接异常, 无法获取登录账号信息")
 
+        if self._bot_uin == DEFAULT_BOT_UIN:
+            LOG.warning(
+                f"bot_uin 未配置 (仍为默认值 {DEFAULT_BOT_UIN}), "
+                f"当前登录账号为 {self_id}, 跳过账号校验。"
+                f"建议在 config.yaml 中将 bot_uin 设置为实际 QQ 号"
+            )
+            return
+
         target_uin = int(self._bot_uin)
         if self_id != target_uin:
             raise NcatBotError(
-                f"NapCat 当前登录账号 {self_id} 与目标账号 {target_uin} 不匹配"
+                f"NapCat 当前登录账号 {self_id} 与配置的 bot_uin {target_uin} 不匹配, "
+                f"请确认 config.yaml 中的 bot_uin 与实际扫码登录的 QQ 号一致"
             )
         LOG.info(f"账号验证通过 (QQ {self_id})")
 

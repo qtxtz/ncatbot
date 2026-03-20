@@ -13,6 +13,7 @@ from typing import Optional, TYPE_CHECKING
 import qrcode
 
 from ncatbot.utils import get_log, post_json
+from ncatbot.utils.config.models import DEFAULT_BOT_UIN
 from ..constants import NAPCAT_WEBUI_SALT
 
 if TYPE_CHECKING:
@@ -281,8 +282,22 @@ class AuthHandler:
                     LOG.warning("二维码即将失效, 请尽快扫码登录")
                     warn_time += 60
 
-            LOG.info("登录成功")
-        except (QQLoginedError, LoginTimeoutError):
+            LOG.info("扫码登录成功")
+
+            # 登录后立即检查账号是否匹配
+            if self._bot_uin and self._bot_uin != DEFAULT_BOT_UIN:
+                status = self.report_status()
+                if status == LoginStatus.UIN_MISMATCH:
+                    info = self.get_login_info()
+                    actual_uin = info.get("uin", "未知") if info else "未知"
+                    LOG.error(
+                        f"扫码登录的 QQ ({actual_uin}) 与配置的 bot_uin ({self._bot_uin}) 不一致, "
+                        f"请使用正确的 QQ 扫码, 或修改 config.yaml 中的 bot_uin"
+                    )
+                    raise AuthError(
+                        f"登录账号不匹配: 扫码 QQ {actual_uin} ≠ 配置 bot_uin {self._bot_uin}"
+                    )
+        except (QQLoginedError, LoginTimeoutError, AuthError):
             raise
         except Exception as e:
             LOG.error(f"二维码登录出错: {e}")
