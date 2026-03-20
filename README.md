@@ -39,8 +39,13 @@ pip install ncatbot5
 
 ```
 your-project/
-├── .agents/skills/   ← AI Agent 技能文件
-├── docs/             ← 框架文档（含示例代码 docs/docs/examples/）
+├── .agents/skills/          ← AI Agent 技能文件（framework-usage / testing 等）
+├── docs/
+│   └── docs/
+│       ├── examples/        ← 示例代码（qq / github / cross_platform …）
+│       └── notes/
+│           ├── guide/       ← 使用指南（快速开始 → 多平台开发，共 11 章）
+│           └── reference/   ← API 参考（Bot API / 事件类型 / 插件系统 等）
 ├── config.yaml
 └── plugins/
 ```
