@@ -112,6 +112,10 @@ directory = "htmlcov"
 [tool.codespell]
 ignore-words-list = "ans,fo"
 
+[tool.ruff]
+# docs/ 是 Git submodule，不进行 lint
+extend-exclude = ["docs"]
+
 [tool.ruff.lint.per-file-ignores]
 # legacy 代码正在重构替换，不再维护 lint
 "ncatbot_legacy/**" = ["F401", "F405", "F841", "E402"]
