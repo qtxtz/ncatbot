@@ -298,3 +298,20 @@ class LinuxOps(PlatformOps):
         except Exception as e:
             LOG.error(f"停止 napcat 失败: {e}")
             raise
+
+
+class MacOps(PlatformOps):
+    """macOS 平台操作"""
+
+    @property
+    def napcat_dir(self) -> Path:
+        raise UnsupportedPlatformError("macOS 平台暂不支持 NcatBot")
+
+    def is_napcat_running(self, uin: Optional[str] = None) -> bool:
+        raise UnsupportedPlatformError("macOS 平台暂不支持 NcatBot")
+
+    def start_napcat(self, uin: str) -> None:
+        raise UnsupportedPlatformError("macOS 平台暂不支持 NcatBot")
+
+    def stop_napcat(self) -> None:
+        raise UnsupportedPlatformError("macOS 平台暂不支持 NcatBot")
