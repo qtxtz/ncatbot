@@ -14,6 +14,7 @@ from typing import List, Optional, Sequence, TYPE_CHECKING
 from ncatbot.adapter import BaseAdapter, adapter_registry
 from ncatbot.api import BotAPIClient
 from ncatbot.api.qq import QQAPIClient
+from ncatbot.api.misc import MiscAPI
 from ncatbot.core import AsyncEventDispatcher, HandlerDispatcher, flush_pending
 from ncatbot.plugin import PluginLoader
 from ncatbot.service import ServiceManager
@@ -165,6 +166,7 @@ class BotClient:
                     ...
         """
         await self._startup()
+        # listen 已在 _startup_core 中启动，包装为单 task 供 shutdown 使用
         self._listen_task = asyncio.create_task(self._listen_forever())
         LOG.info("Bot 已就绪，后台监听已启动")
 
@@ -224,19 +226,12 @@ class BotClient:
     # ---- 内部 ----
 
     async def _run_blocking(self) -> None:
-        """同步 run() 的内部实现：startup → 阻塞 listen → shutdown"""
+        """同步 run() 的内部实现：startup → 阻塞等待 listen 结束 → shutdown"""
         await self._startup()
-        LOG.info("Bot 已就绪，开始监听事件（%d 个适配器）", len(self._adapters))
+        LOG.info("Bot 已就绪（%d 个适配器）", len(self._adapters))
         try:
-            if len(self._adapters) == 1:
-                await self._adapters[0].listen()
-            else:
-                # 多适配器并行监听，单个适配器崩溃不影响其他适配器
-                tasks = [
-                    asyncio.create_task(self._safe_listen(a)) for a in self._adapters
-                ]
-                self._listen_tasks = tasks
-                await asyncio.gather(*tasks)
+            # listen 已在 _startup_core 中启动，这里只等待其结束
+            await asyncio.gather(*self._listen_tasks)
         except asyncio.CancelledError:
             LOG.info("Bot 被取消")
         finally:
@@ -251,17 +246,17 @@ class BotClient:
         except Exception as e:
             LOG.error("适配器 %s 监听异常，已停止: %s", adapter.name, e)
 
+    def _start_listening(self) -> None:
+        """为每个适配器启动后台监听 task。"""
+        self._listen_tasks = [
+            asyncio.create_task(self._safe_listen(a)) for a in self._adapters
+        ]
+        LOG.info("已启动 %d 个适配器的事件监听", len(self._listen_tasks))
+
     async def _listen_forever(self) -> None:
-        """后台监听 task，异常时自动 shutdown"""
+        """后台监听 task，异常时自动 shutdown（供 run_async 使用）"""
         try:
-            if len(self._adapters) == 1:
-                await self._adapters[0].listen()
-            else:
-                tasks = [
-                    asyncio.create_task(self._safe_listen(a)) for a in self._adapters
-                ]
-                self._listen_tasks = tasks
-                await asyncio.gather(*tasks)
+            await asyncio.gather(*self._listen_tasks)
         except asyncio.CancelledError:
             pass
         except Exception as e:
@@ -276,11 +271,12 @@ class BotClient:
         self._running = True
 
     async def _startup_core(self) -> None:
-        """核心启动（不含插件加载）：adapters → API → dispatcher → 服务"""
+        """核心启动（不含插件加载）：adapters → API → dispatcher → listen → 服务"""
         await self._setup_adapters()
         self._setup_api()
         self._setup_dispatcher()
         self._setup_handler_dispatcher()
+        self._start_listening()
         await self._setup_services()
 
     async def _setup_adapters(self) -> None:
@@ -314,6 +310,10 @@ class BotClient:
         _CLIENT_REGISTRY: dict[str, type] = {"qq": QQAPIClient}
 
         self._api = BotAPIClient()
+
+        # 注册与平台无关的 MiscAPI
+        self._api.register_platform("misc", MiscAPI(ncatbot_config.config))
+
         for adapter in self._adapters:
             platform = getattr(adapter, "platform", adapter.name)
             raw_api = adapter.get_api()
