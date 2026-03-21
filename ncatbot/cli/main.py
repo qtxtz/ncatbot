@@ -9,6 +9,7 @@ from .commands.config import config
 from .commands.plugin import plugin
 from .commands.napcat import napcat
 from .commands.init import init
+from .commands.adapter import adapter
 
 
 def _get_version() -> str:
@@ -35,3 +36,4 @@ cli.add_command(config)
 cli.add_command(plugin)
 cli.add_command(napcat)
 cli.add_command(init)
+cli.add_command(adapter)
