@@ -79,8 +79,10 @@ async def scenario_basic_info(api: BotAPIClient, report: TestReport, **_) -> Non
         "get_login_info 返回 user_id + nickname",
         async_fn=async_test(
             lambda: api.info.get_login_info(),
-            lambda r: r is not None
-            and ("user_id" in r if isinstance(r, dict) else hasattr(r, "user_id")),
+            lambda r: (
+                r is not None
+                and ("user_id" in r if isinstance(r, dict) else hasattr(r, "user_id"))
+            ),
         ),
     )
 
