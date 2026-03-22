@@ -6,15 +6,16 @@ from .init import ensure_project_initialized
 
 
 @click.command()
-@click.option("--debug", is_flag=True, help="启用调试模式")
-@click.option("--no-hot-reload", is_flag=True, help="禁用插件热重载")
-@click.option("--plugin-dir", default="plugins", show_default=True, help="插件目录路径")
-def run(debug: bool, no_hot_reload: bool, plugin_dir: str):
+# @click.option("--debug", is_flag=True, help="启用调试模式")
+# @click.option("--no-hot-reload", is_flag=True, help="禁用插件热重载")
+# @click.option("--plugin-dir", default="plugins", show_default=True, help="插件目录路径")
+# def run(debug: bool, no_hot_reload: bool, plugin_dir: str):
+def run():
     """启动 NcatBot（连接 NapCat + 加载插件 + 监听事件）"""
     from ncatbot.app import BotClient
 
     ensure_project_initialized(".")
-    bot = BotClient(debug=debug, plugin_dir=plugin_dir)
+    bot = BotClient()
     bot.run()
 
 
