@@ -7,13 +7,13 @@
 ```
 tests/
 ├── unit/              # 单元测试 — 按模块组织
-│   ├── types/         # 类型系统 (T-01 ~ T-05, S-01 ~ S-10, CQ-01 ~ CQ-08, N-01 ~ N-05, MA-01 ~ MA-04, FW-01 ~ FW-03, SEG-01, LR-01 ~ LR-03)
+│   ├── types/         # 类型系统 (T-01 ~ T-05, S-01 ~ S-10, CQ-01 ~ CQ-08, N-01 ~ N-05, MA-01 ~ MA-04, FW-01 ~ FW-03, SEG-01, LR-01 ~ LR-03, VI-01 ~ VI-05)
 │   ├── event/         # 事件工厂 (E-01 ~ E-04, GHE-01 ~ GHE-04, QMA-01 ~ QMA-03)
 │   ├── api/           # API 客户端 + 错误层级 + Sugar (A-01 ~ A-02, AE-01 ~ AE-07, SG-01 ~ SG-06, FL-01 ~ FL-06)
 │   ├── core/          # 核心分发与注册 + 谓词 (D-01 ~ D-09, K-01 ~ K-21, H-01 ~ H-11, R-01 ~ R-09, PR-01 ~ PR-06)
 │   ├── service/       # 服务管理 + RBAC + 调度 (SM-01 ~ SM-08, SC-01 ~ SC-12, TS-01 ~ TS-06)
 │   ├── plugin/        # 插件 Mixin + 导入去重 + Loader (M-01 ~ M-41, ID-01 ~ ID-02, LD-01 ~ LD-05)
-│   ├── adapter/       # 适配器解析 + 注册表 + 真实数据 (P-01 ~ P-07, RF-01 ~ RF-08, AR-01 ~ AR-05, GM-01 ~ GM-05, BL-01 ~ BL-22, GH-01 ~ GH-11)
+│   ├── adapter/       # 适配器解析 + 注册表 + 真实数据 (P-01 ~ P-07, RF-01 ~ RF-08, AR-01 ~ AR-05, GM-01 ~ GM-05, BL-01 ~ BL-22, GH-01 ~ GH-11, BQ-01 ~ BQ-05)
 │   └── config/        # 配置迁移 + 安全 (CF-01 ~ CF-05, CS-01 ~ CS-05)
 ├── integration/       # 集成测试 (I-01 ~ I-21)
 ├── e2e/               # 端到端测试

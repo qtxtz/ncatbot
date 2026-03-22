@@ -10,7 +10,7 @@ from abc import abstractmethod
 from typing import Any, Dict, List, Optional
 
 from ncatbot.api.base import IAPIClient
-from ncatbot.types.bilibili.models import LiveRoomInfo
+from ncatbot.types.bilibili.models import LiveRoomInfo, ParsedBiliId, VideoInfo
 
 
 class IBiliAPIClient(IAPIClient):
@@ -150,3 +150,13 @@ class IBiliAPIClient(IAPIClient):
     @abstractmethod
     async def get_user_info(self, user_id: int) -> dict:
         """获取用户信息"""
+
+    # ---- 视频查询 ----
+
+    @abstractmethod
+    async def get_video_info(self, video_id: str) -> Optional[VideoInfo]:
+        """获取视频信息（BV号或av号）"""
+
+    @abstractmethod
+    async def parse_bili_id(self, text: str) -> Optional[ParsedBiliId]:
+        """从文本中解析B站视频ID（支持 b23 短链、BV号、av号）。结果可通过 ``.video_id`` 属性直接获取视频 ID。"""

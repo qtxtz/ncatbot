@@ -15,6 +15,12 @@ from .models import (
     DynamicMusicInfo,
     DynamicArticleInfo,
     DynamicLiveRcmdInfo,
+    VideoOwner,
+    VideoStat,
+    VideoPage,
+    VideoStaffMember,
+    VideoInfo,
+    ParsedBiliId,
 )
 from .events import (
     BiliCommentEventData,
@@ -74,4 +80,10 @@ __all__ = [
     "DynamicMusicInfo",
     "DynamicArticleInfo",
     "DynamicLiveRcmdInfo",
+    "VideoOwner",
+    "VideoStat",
+    "VideoPage",
+    "VideoStaffMember",
+    "VideoInfo",
+    "ParsedBiliId",
 ]
