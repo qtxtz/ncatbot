@@ -21,7 +21,12 @@ from .network import (  # noqa
     async_check_proxy,
 )
 from .status import Status, status  # noqa
-from .error import NcatBotError, NcatBotValueError, NcatBotConnectionError  # noqa
+from .error import (  # noqa
+    NcatBotError,
+    NcatBotValueError,
+    NcatBotConnectionError,
+    AdapterEventError,
+)
 from .prompt import (  # noqa
     confirm,
     ask,
@@ -63,6 +68,7 @@ __all__ = [
     "NcatBotError",
     "NcatBotValueError",
     "NcatBotConnectionError",
+    "AdapterEventError",
     "confirm",
     "ask",
     "select",
