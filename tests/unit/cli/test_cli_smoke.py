@@ -58,6 +58,8 @@ def test_run_invokes_bot_client_with_bound_options(tmp_path):
                 "--no-hot-reload",
                 "--plugins-dir",
                 pdir,
+                "--bot-uin",
+                "9999999",
             ],
             catch_exceptions=False,
         )
@@ -78,7 +80,7 @@ def test_run_plugins_dir_only_passes_missing_for_debug_and_hot_reload(tmp_path):
         mock_bc.return_value.run = MagicMock()
         r = runner.invoke(
             cli,
-            ["run", "--plugins-dir", pdir],
+            ["run", "--plugins-dir", pdir, "--bot-uin", "9999999"],
             catch_exceptions=False,
         )
     assert r.exit_code == 0
