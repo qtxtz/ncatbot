@@ -214,6 +214,37 @@ await self.api.qq.file.upload_private_file(user_id, file, name)
 result = await self.api.qq.file.download_file(url="", file="", headers="")
 ```
 
+## 飞书 (Lark) API
+
+通过 `self.api.lark.*` 访问：
+
+```python
+# 发送文本
+await self.api.lark.send_text(receive_id, text, receive_id_type="chat_id")
+
+# 回复文本
+await self.api.lark.reply_text(message_id, text)
+
+# 发送富文本 (post)
+from ncatbot.adapter.lark import LarkPostBuilder
+content = LarkPostBuilder("标题").text("第一行").newline().text("第二行").build()
+await self.api.lark.send_post(receive_id, content, receive_id_type="chat_id")
+
+# 回复富文本
+await self.api.lark.reply_post(message_id, content)
+
+# 发送 MessageArray（自动转换为 post）
+from ncatbot.types import MessageArray
+msg = MessageArray().add_text("测试").add_at("ou_xxx")
+await self.api.lark.send_msg_array(receive_id, msg, title="标题")
+
+# 撤回消息
+await self.api.lark.delete_message(message_id)
+
+# 上传文件
+await self.api.lark.upload_file(file_type, file_name, file)
+```
+
 ## GitHub 平台 API
 
 > 参考文档：`docs/docs/notes/guide/5. API 使用/4. GitHub/`、`docs/docs/notes/reference/1. Bot API/4. GitHub/1. API.md`

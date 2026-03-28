@@ -28,6 +28,12 @@
 | 类型 QQ 层 | `ncatbot/types/qq/` | `GroupSender`, `Face`, `Forward` |
 | API Trait | `ncatbot/api/traits/` | `IMessaging`, `IGroupManage`, `IQuery`, `IFileTransfer` |
 | 平台 API | `ncatbot/api/qq/`, `ncatbot/api/bilibili/` | `QQAPIClient`, `IQQAPIClient` |
+| 飞书适配 | `ncatbot/adapter/lark/` | `LarkAdapter`（WebSocket）、`LarkEventParser`、`LarkBotAPI`、`LarkPostBuilder` |
+| 飞书 Bot API | `ncatbot/adapter/lark/api.py` | `LarkBotAPI`（send_text/reply_text/send_post/reply_post/send_msg_array/delete_message/upload_file） |
+| 飞书事件解析 | `ncatbot/adapter/lark/parser.py` | `LarkEventParser`（parse_message/parse_message_read/parse_message_recalled） |
+| 飞书事件实体 | `ncatbot/event/lark/` | `LarkGroupMessageEvent`、`LarkPrivateMessageEvent`、`LarkMessageReadEvent`、`LarkMessageRecalledEvent` |
+| 飞书类型 | `ncatbot/types/lark/` | `LarkSender`、`LarkMessageEventData`、`LarkPostType`、`LarkMessageType` |
+| 飞书富文本 | `ncatbot/adapter/lark/post_builder.py` | `LarkPostBuilder`、`message_array_to_post()` |
 | Bilibili 认证 | `ncatbot/adapter/bilibili/auth.py` | `qrcode_login()` 扫码登录 |
 | Bilibili 凭据持久化 | `ncatbot/adapter/bilibili/credential_store.py` | `save_credential_to_config()` |
 | 消息段 | `ncatbot/types/common/segment/` | text / media / array |

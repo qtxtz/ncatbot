@@ -64,6 +64,17 @@ from ncatbot.event.qq import GroupMessageEvent, PrivateMessageEvent
 | `@registrar.github.on_release()` | Release |
 | `@registrar.github.on_comment()` | Comment |
 
+### 飞书平台装饰器 (`registrar.lark`)
+
+| 装饰器 | 匹配事件 |
+|--------|--------|
+| `@registrar.lark.on_message()` | 所有飞书消息 |
+| `@registrar.lark.on_group_message()` | 飞书群消息 |
+| `@registrar.lark.on_private_message()` | 飞书私聊消息 |
+| `@registrar.lark.on_command(*names)` | 飞书命令 |
+| `@registrar.lark.on_message_read()` | 消息已读通知 |
+| `@registrar.lark.on_message_recalled()` | 消息撤回通知 |
+
 所有装饰器均支持 `platform` 参数，用于限定只接收特定平台的事件：
 
 ```python
@@ -203,6 +214,26 @@ pred = from_event(event) * P.of(lambda e: int(e.data.raw_message) > 0)
 | `BiliCommentEvent` | 评论 | `@registrar.bilibili.on_comment()` |
 
 导入：`from ncatbot.event.bilibili import DanmuMsgEvent, BiliPrivateMessageEvent, ...`
+
+### 飞书事件实体
+
+| 实体类 | 说明 | 注册装饰器 |
+|--------|------|-----------|
+| `LarkGroupMessageEvent` | 飞书群消息 | `@registrar.lark.on_group_message()` |
+| `LarkPrivateMessageEvent` | 飞书私聊消息 | `@registrar.lark.on_private_message()` |
+| `LarkMessageReadEvent` | 消息已读通知 | `@registrar.lark.on_message_read()` |
+| `LarkMessageRecalledEvent` | 消息撤回通知 | `@registrar.lark.on_message_recalled()` |
+
+导入：`from ncatbot.event.lark import LarkGroupMessageEvent, LarkPrivateMessageEvent, LarkMessageReadEvent, LarkMessageRecalledEvent`
+
+飞书事件类型字符串：
+
+| 事件类型 | 说明 | 数据类 |
+|---------|------|--------|
+| `"message.group"` | 飞书群消息 | `LarkGroupMessageEventData` |
+| `"message.private"` | 飞书私聊消息 | `LarkPrivateMessageEventData` |
+| `"notice.message_read"` | 消息已读 | `LarkMessageReadEventData` |
+| `"notice.message_recalled"` | 消息撤回 | `LarkMessageRecalledEventData` |
 
 ## 前缀匹配规则
 

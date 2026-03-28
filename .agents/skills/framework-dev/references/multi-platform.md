@@ -31,7 +31,7 @@
 
 | Layer | 允许的二级子模块 |
 |-------|----------------|
-| `event` | `event.qq`, `event.bilibili`, `event.common` |
-| `types` | `types.qq`, `types.bilibili`, `types.common`, `types.napcat` |
-| `api` | `api.qq`, `api.bilibili`, `api.traits` |
-| `adapter` | `adapter.napcat`, `adapter.mock`, `adapter.bilibili` |
+| `event` | `event.qq`, `event.bilibili`, `event.github`, `event.lark`, `event.common` |
+| `types` | `types.qq`, `types.bilibili`, `types.github`, `types.lark`, `types.common`, `types.napcat` |
+| `api` | `api.qq`, `api.bilibili`, `api.github`, `api.traits` |
+| `adapter` | `adapter.napcat`, `adapter.mock`, `adapter.bilibili`, `adapter.github`, `adapter.lark` |

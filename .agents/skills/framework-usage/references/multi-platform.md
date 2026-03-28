@@ -9,6 +9,7 @@
 | QQ (NapCat) | WebUI 扫码 / 快速登录 | `docs/docs/notes/guide/2. 适配器/1. NapCat QQ.md` |
 | Bilibili | 终端扫码（sessdata 留空自动弹码） | `docs/docs/notes/guide/2. 适配器/2. Bilibili.md` |
 | GitHub | Personal Access Token | `docs/docs/notes/guide/2. 适配器/3. GitHub.md` |
+| 飞书 (Lark) | App ID + App Secret | config.yaml 配置 `app_id` / `app_secret` |
 | Mock | 无需认证 | `docs/docs/notes/guide/2. 适配器/4. Mock 适配器.md` |
 
 > QQ (NapCat) 首次启动时由 NcatBot 自动安装，无需手动配置。启动后通过 WebUI 扫码登录。
@@ -50,6 +51,29 @@ adapters:
     poll_interval: 60.0
 ```
 
+### 飞书适配器配置
+
+```yaml
+adapters:
+  - type: lark
+    app_id: "cli_xxxx"
+    app_secret: "xxxx"
+    verification_token: ""   # 固定空字符串
+    encrypt_key: ""          # 固定空字符串
+```
+
+启动代码：
+
+```python
+from ncatbot.app import BotClient
+from ncatbot.adapter.lark import LarkAdapter
+
+bot = BotClient(adapters=[
+    LarkAdapter(),             # platform="lark"
+])
+bot.run()
+```
+
 ## 多平台 API 访问
 
 各平台 API 通过 `self.api.<platform>` 访问，详见 [bot-api.md](./bot-api.md)。
@@ -58,7 +82,8 @@ adapters:
 await self.api.qq.post_group_msg(group_id, text="Hello!")
 await self.api.bilibili.send_danmu(room_id, "弹幕")
 await self.api.github.create_issue_comment(repo, number, body)
-print(self.api.platforms)  # {"qq": ..., "bilibili": ..., "github": ...}
+await self.api.lark.send_text(receive_id, "Hello!", receive_id_type="chat_id")
+print(self.api.platforms)  # {"qq": ..., "bilibili": ..., "github": ..., "lark": ...}
 ```
 
 ## 平台过滤
