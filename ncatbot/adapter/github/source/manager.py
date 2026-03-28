@@ -36,6 +36,8 @@ class SourceManager:
         webhook_secret: str = "",
         # polling
         poll_interval: float = 60.0,
+        # network
+        proxy: Optional[str] = None,
     ) -> None:
         self._callback = callback
         self._mode = mode
@@ -48,6 +50,8 @@ class SourceManager:
         self._webhook_secret = webhook_secret
         # polling
         self._poll_interval = poll_interval
+        # network
+        self._proxy = proxy
         self._etags: Dict[str, str] = {}
         self._seen_ids: Set[str] = set()
         # runtime
@@ -149,7 +153,7 @@ class SourceManager:
             headers["Authorization"] = f"Bearer {self._token}"
 
         self._client = httpx.AsyncClient(
-            headers=headers, follow_redirects=True, timeout=30
+            headers=headers, follow_redirects=True, timeout=30, proxy=self._proxy
         )
 
         LOG.info(

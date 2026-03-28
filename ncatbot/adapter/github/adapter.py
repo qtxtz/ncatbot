@@ -52,7 +52,8 @@ class GitHubAdapter(BaseAdapter):
             LOG.warning("未配置 GitHub token，API 调用将受到严格速率限制")
             return
 
-        api = GitHubBotAPI(self._config.token)
+        proxy = self._resolve_proxy()
+        api = GitHubBotAPI(self._config.token, proxy=proxy)
         try:
             user = await api.get_authenticated_user()
             LOG.info("GitHub 认证成功: %s", user.get("login", "unknown"))
@@ -63,8 +64,14 @@ class GitHubAdapter(BaseAdapter):
             await api.close()
 
     async def connect(self) -> None:
+        proxy = self._resolve_proxy()
         self._parser = GitHubEventParser(self_id=self._bot_uin)
-        self._api = GitHubBotAPI(self._config.token)
+        self._api = GitHubBotAPI(self._config.token, proxy=proxy)
+        self._api.set_network_config(
+            mode=self._config.network_mode,
+            mirror_url=self._config.mirror_url,
+            mirror_hosts=self._config.mirror_hosts,
+        )
 
         self._source_manager = SourceManager(
             callback=self._on_source_event,
@@ -76,14 +83,30 @@ class GitHubAdapter(BaseAdapter):
             webhook_path=self._config.webhook_path,
             webhook_secret=self._config.webhook_secret,
             poll_interval=self._config.poll_interval,
+            proxy=proxy,
         )
 
         self._connected = True
         LOG.info(
-            "GitHub 适配器已连接 (mode=%s, repos=%s)",
+            "GitHub 适配器已连接 (mode=%s, network=%s, repos=%s)",
             self._config.mode,
+            self._config.network_mode,
             self._config.repos,
         )
+
+    def _resolve_proxy(self) -> Optional[str]:
+        """仅 proxy 模式返回主配置 http_proxy，其他模式返回 None。"""
+        if self._config.network_mode != "proxy":
+            return None
+        try:
+            from ncatbot.utils import get_config_manager
+
+            proxy = get_config_manager().config.http_proxy or None
+        except Exception:
+            proxy = None
+        if not proxy:
+            LOG.warning("network_mode=proxy 但主配置未设置 http_proxy，将直连")
+        return proxy
 
     async def listen(self) -> None:
         await self._source_manager.run_forever()

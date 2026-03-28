@@ -46,6 +46,7 @@ from ncatbot.types.github.models import (
 from ncatbot.types.github.sender import GitHubSender
 from ncatbot.types.common.attachment import Attachment
 from ncatbot.types.common.attachment_list import AttachmentList
+from ncatbot.adapter.github.api.bot_api import _pick_attachment_cls
 
 
 # ---- Helpers ----
@@ -59,6 +60,27 @@ def _mock_github_api() -> MagicMock:
     api.delete_comment = AsyncMock(return_value=None)
     api.list_release_assets = AsyncMock(return_value=[])
     api.get_release_by_tag = AsyncMock(return_value={})
+
+    # assets_to_attachments 使用真实转换逻辑（network_mode=direct，无镜像）
+    def _assets_to_attachments(assets):
+        items = []
+        for asset in assets:
+            cls = _pick_attachment_cls(asset.content_type or None)
+            items.append(
+                cls(
+                    name=asset.name,
+                    url=asset.browser_download_url,
+                    size=asset.size,
+                    content_type=asset.content_type or None,
+                    extra={
+                        "id": asset.id,
+                        "download_count": asset.download_count,
+                    },
+                )
+            )
+        return AttachmentList(items)
+
+    api.assets_to_attachments = _assets_to_attachments
     return api
 
 

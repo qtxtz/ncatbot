@@ -22,6 +22,7 @@ from ncatbot.types.github import (
     GitHubRepoInfo,
     GitHubUserInfo,
 )
+from ncatbot.types.common import Attachment, AttachmentList
 
 
 class IGitHubAPIClient(IAPIClient):
@@ -175,3 +176,15 @@ class IGitHubAPIClient(IAPIClient):
         self, repo: str, release_id: Union[str, int]
     ) -> List[GitHubReleaseAsset]:
         """列出 Release 的所有 Assets"""
+
+    # ---- 网络 / 附件工具 ----
+
+    @abstractmethod
+    def resolve_download_url(self, url: str) -> str:
+        """根据 network_mode 处理下载 URL（mirror 模式加镜像前缀）"""
+
+    @abstractmethod
+    def assets_to_attachments(
+        self, assets: List[GitHubReleaseAsset]
+    ) -> AttachmentList[Attachment]:
+        """将 GitHubReleaseAsset 列表转换为跨平台 Attachment 列表"""

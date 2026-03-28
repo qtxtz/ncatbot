@@ -9,10 +9,6 @@ from ..common.mixins import HasAttachments
 from ncatbot.types.common import (
     AttachmentList,
     Attachment,
-    FileAttachment,
-    AudioAttachment,
-    ImageAttachment,
-    VideoAttachment,
 )
 from ncatbot.types.github import (
     GitHubStarEventData,
@@ -97,34 +93,9 @@ class GitHubReleaseEvent(GitHubBaseEvent, HasAttachments):
         )
 
     async def get_attachments(self) -> "AttachmentList[Attachment]":
-        """将 Release Assets 转换为跨平台 Attachment 列表"""
-        _CONTENT_TYPE_MAP: dict[str, type[Attachment]] = {
-            "image": ImageAttachment,
-            "video": VideoAttachment,
-            "audio": AudioAttachment,
-        }
+        """将 Release Assets 转换为跨平台 Attachment 列表
 
-        def _pick_cls(ct: str | None) -> type[Attachment]:
-            if ct:
-                major = ct.split("/", 1)[0]
-                if major in _CONTENT_TYPE_MAP:
-                    return _CONTENT_TYPE_MAP[major]
-            return FileAttachment
-
+        通过 BotAPI 统一转换，自动应用 network_mode 的镜像/代理策略。
+        """
         assets = await self.get_assets()
-        items: list[Attachment] = []
-        for asset in assets:
-            cls = _pick_cls(asset.content_type)
-            items.append(
-                cls(
-                    name=asset.name,
-                    url=asset.browser_download_url,
-                    size=asset.size,
-                    content_type=asset.content_type or None,
-                    extra={
-                        "id": asset.id,
-                        "download_count": asset.download_count,
-                    },
-                )
-            )
-        return AttachmentList(items)
+        return self._api.assets_to_attachments(assets)
