@@ -11,6 +11,10 @@ from ..utils.colors import error, info, success, warning
 
 GITHUB_API_LATEST = "https://api.github.com/repos/ncatbot/NcatBot/releases/latest"
 GITHUB_API_TAG = "https://api.github.com/repos/ncatbot/NcatBot/releases/tags/v{version}"
+GITHUB_RELEASES_LATEST = "https://github.com/ncatbot/NcatBot/releases/latest"
+GITHUB_RELEASE_DOWNLOAD = (
+    "https://github.com/ncatbot/NcatBot/releases/download/{tag}/{asset_name}"
+)
 ASSET_PREFIX = "ncatbot5-"
 ASSET_SUFFIX = "-user-reference.zip"
 
@@ -24,6 +28,17 @@ def _find_asset(release: dict) -> tuple[str, str] | None:
         if name.startswith(ASSET_PREFIX) and name.endswith(ASSET_SUFFIX):
             return name, asset["browser_download_url"]
     return None
+
+
+def _get_tag_from_redirect() -> str | None:
+    """通过 releases/latest 重定向获取最新 tag（不消耗 API 限额）。"""
+    try:
+        resp = httpx.head(GITHUB_RELEASES_LATEST, follow_redirects=True, timeout=10)
+        # 最终 URL 形如 https://github.com/ncatbot/NcatBot/releases/tag/v5.x.x
+        tag = str(resp.url).rsplit("/", 1)[-1]
+        return tag if tag else None
+    except Exception:
+        return None
 
 
 def _resolve_ide(vscode: bool, trae: bool, cursor: bool) -> str:
@@ -86,6 +101,7 @@ def ref(
     # 查询 Release
     click.echo(info("正在查询 GitHub Release..."))
     api_url = GITHUB_API_TAG.format(version=version) if version else GITHUB_API_LATEST
+    release = None
     try:
         resp = httpx.get(
             api_url,
@@ -101,22 +117,40 @@ def ref(
     except httpx.HTTPStatusError as exc:
         if exc.response.status_code == 404:
             click.echo(error("未找到指定版本的 Release"))
-        else:
-            click.echo(error(f"GitHub API 请求失败: {exc.response.status_code}"))
-        raise SystemExit(1)
+            raise SystemExit(1)
+        click.echo(
+            warning(
+                f"GitHub API 请求失败 ({exc.response.status_code})，尝试备用方式..."
+            )
+        )
     except (httpx.ConnectError, httpx.TimeoutException):
-        click.echo(error("无法连接到 GitHub，请检查网络或稍后重试"))
-        raise SystemExit(1)
+        click.echo(warning("GitHub API 连接失败，尝试备用方式..."))
 
-    tag_name = release.get("tag_name", "unknown")
-    click.echo(info(f"Release: {tag_name}"))
+    # API 成功：从 release JSON 提取资源
+    if release is not None:
+        tag_name = release.get("tag_name", "unknown")
+        click.echo(info(f"Release: {tag_name}"))
 
-    # 查找资源
-    result = _find_asset(release)
-    if result is None:
-        click.echo(error("该 Release 中未找到 user-reference.zip 资源"))
-        raise SystemExit(1)
-    asset_name, asset_url = result
+        result = _find_asset(release)
+        if result is None:
+            click.echo(error("该 Release 中未找到 user-reference.zip 资源"))
+            raise SystemExit(1)
+        asset_name, asset_url = result
+    else:
+        # 备用方式：通过 redirect 获取 tag，拼接下载 URL（不消耗 API 限额）
+        if version:
+            tag_name = f"v{version}"
+        else:
+            tag_name = _get_tag_from_redirect()
+            if not tag_name:
+                click.echo(error("无法获取最新版本信息，请检查网络或稍后重试"))
+                raise SystemExit(1)
+
+        ver = tag_name.lstrip("v")
+        asset_name = f"{ASSET_PREFIX}{ver}{ASSET_SUFFIX}"
+        asset_url = GITHUB_RELEASE_DOWNLOAD.format(tag=tag_name, asset_name=asset_name)
+        click.echo(info(f"Release: {tag_name}（备用方式）"))
+
     click.echo(info(f"资源: {asset_name}"))
 
     # 代理
