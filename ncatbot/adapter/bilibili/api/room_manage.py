@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from ncatbot.types.bilibili.models import LiveRoomInfo
+from ncatbot.types.bilibili import LiveRoomInfo
 
 
 class RoomManageAPIMixin:

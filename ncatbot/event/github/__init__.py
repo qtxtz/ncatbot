@@ -8,7 +8,7 @@ from .misc import GitHubStarEvent, GitHubForkEvent, GitHubReleaseEvent
 from .factory import create_github_entity
 
 # 自动注册 GitHub 平台工厂和 secondary keys 到通用工厂
-from ncatbot.event.common.factory import (
+from ..common.factory import (
     register_platform_factory as _register,
     register_platform_secondary_keys as _register_keys,
 )

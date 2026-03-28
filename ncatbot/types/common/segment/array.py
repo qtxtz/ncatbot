@@ -126,7 +126,7 @@ class MessageArray:
 
     def get_attachments(self) -> "AttachmentList":
         """提取所有可下载段为 AttachmentList"""
-        from ncatbot.types.common.attachment_list import AttachmentList
+        from ..attachment_list import AttachmentList
 
         return AttachmentList(
             seg.to_attachment()

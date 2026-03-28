@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Any, TYPE_CHECKING
 
-from ncatbot.event.common.base import BaseEvent
-from ncatbot.event.common.mixins import Replyable, HasSender
+from ..common.base import BaseEvent
+from ..common.mixins import Replyable, HasSender
 
 if TYPE_CHECKING:
     from ncatbot.api.bilibili import IBiliAPIClient

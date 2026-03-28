@@ -30,6 +30,8 @@ import re
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Callable, Sequence, Union
 
+from ncatbot.types.qq import MessageType
+
 if TYPE_CHECKING:
     from .event import Event
 
@@ -394,8 +396,6 @@ def from_event(event: object) -> P:
             gid = str(event.group_id)  # type: ignore[union-attr]
             is_group_msg = True
         elif hasattr(event, "message_type"):
-            from ncatbot.types.qq import MessageType
-
             is_private_msg = event.message_type is MessageType.PRIVATE  # type: ignore[union-attr]
 
     # 底层 Event (dispatcher Event): 有 .type 和 .data

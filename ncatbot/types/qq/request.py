@@ -6,7 +6,7 @@ from typing import Optional
 
 from pydantic import Field
 
-from ncatbot.types.common.base import BaseEventData
+from ..common.base import BaseEventData
 from .enums import PostType, RequestType
 
 __all__ = [

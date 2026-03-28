@@ -8,9 +8,9 @@ import tempfile
 from typing import Any, TYPE_CHECKING, Union
 
 from ncatbot.types.napcat import CreateFolderResult, DownloadResult
+from ncatbot.types import Attachment
 
 if TYPE_CHECKING:
-    from ncatbot.types.common.attachment import Attachment
     from .interface import IQQAPIClient
 
 log = logging.getLogger("QQFile")
@@ -101,8 +101,6 @@ class QQFile:
         - ``str`` → 直接返回，无需清理
         - ``Attachment`` → 下载到临时目录，返回路径 + att.name + 需清理的临时目录
         """
-        from ncatbot.types.common.attachment import Attachment
-
         if isinstance(file, Attachment):
             tmp_dir = tempfile.mkdtemp(prefix="ncatbot_upload_")
             local_path = await file.download(tmp_dir)

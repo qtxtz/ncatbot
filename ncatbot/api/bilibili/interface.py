@@ -9,8 +9,8 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import Any, Dict, List, Optional
 
-from ncatbot.api.base import IAPIClient
-from ncatbot.types.bilibili.models import LiveRoomInfo
+from ..base import IAPIClient
+from ncatbot.types.bilibili import LiveRoomInfo
 
 
 class IBiliAPIClient(IAPIClient):

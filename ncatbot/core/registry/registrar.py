@@ -18,6 +18,7 @@ from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING
 from ncatbot.utils import get_log
 
 from .context import get_current_plugin
+from .platform import BilibiliRegistrar, GitHubRegistrar, QQRegistrar
 from .hook import Hook
 from .builtin_hooks import MessageTypeFilter, PlatformFilter
 from .command_hook import CommandHook
@@ -117,22 +118,16 @@ class Registrar:
     @cached_property
     def qq(self):
         """QQ 平台子注册器"""
-        from .platform import QQRegistrar
-
         return QQRegistrar(self)
 
     @cached_property
     def bilibili(self):
         """Bilibili 平台子注册器"""
-        from .platform import BilibiliRegistrar
-
         return BilibiliRegistrar(self)
 
     @cached_property
     def github(self):
         """GitHub 平台子注册器"""
-        from .platform import GitHubRegistrar
-
         return GitHubRegistrar(self)
 
     # ==================== 跨平台便捷装饰器 ====================

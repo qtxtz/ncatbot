@@ -7,8 +7,8 @@ from __future__ import annotations
 from typing import List, Optional, Union
 
 from ncatbot.api.github import IGitHubAPIClient
-from ncatbot.types.github.enums import GitHubMergeMethod
-from ncatbot.types.github.models import (
+from ncatbot.types.github import GitHubMergeMethod
+from ncatbot.types.github import (
     GitHubCommentInfo,
     GitHubIssueInfo,
     GitHubLabelInfo,

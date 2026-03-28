@@ -12,7 +12,7 @@ HandlerDispatcher — 纯机械分发器
 import asyncio
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING
-
+from ncatbot.event import create_entity as platform_create_entity
 from ncatbot.utils import get_log
 
 from .hook import HookAction, HookContext, HookStage, get_hooks
@@ -172,8 +172,6 @@ class HandlerDispatcher:
 
     async def _dispatch(self, event: "Event") -> None:
         """接收 Event 并分发到匹配的 handlers。"""
-        from ncatbot.event.common import create_entity as platform_create_entity
-
         event_type = event.type
 
         # 将数据模型包装为事件实体（如 GroupMessageEvent），供 handler 使用

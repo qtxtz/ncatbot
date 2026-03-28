@@ -1,6 +1,13 @@
 """NcatBot 工具包。"""
 
-from .logger import get_log, BoundLogger, setup_logging, tqdm  # noqa
+from .logger import (
+    get_log,
+    get_early_logger,
+    resolve_event_log_level,
+    BoundLogger,
+    setup_logging,
+    tqdm,
+)  # noqa
 from .config import (  # noqa
     ConfigManager,
     get_config_manager,
@@ -8,6 +15,9 @@ from .config import (  # noqa
     CONFIG_PATH,
     ConfigValueError,
     MISSING,
+    NapCatConfig,
+    DEFAULT_BOT_UIN,
+    AdapterEntry,
 )
 from .network import (  # noqa
     post_json,
@@ -38,6 +48,11 @@ from .prompt import (  # noqa
     set_interactive,
     set_non_interactive,
 )
+from .pip_helper import (  # noqa
+    check_requirements,
+    install_packages,
+    format_missing_report,
+)
 from .assets import *  # noqa: F401,F403
 
 ncatbot_config = get_config_manager()
@@ -50,7 +65,12 @@ __all__ = [
     "ConfigValueError",
     "MISSING",
     "CONFIG_PATH",
+    "NapCatConfig",
+    "DEFAULT_BOT_UIN",
+    "AdapterEntry",
     "get_log",
+    "get_early_logger",
+    "resolve_event_log_level",
     "BoundLogger",
     "setup_logging",
     "tqdm",
@@ -78,4 +98,7 @@ __all__ = [
     "is_interactive",
     "set_interactive",
     "set_non_interactive",
+    "check_requirements",
+    "install_packages",
+    "format_missing_report",
 ]

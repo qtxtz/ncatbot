@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ncatbot.types.github.models import GitHubRepoInfo, GitHubUserInfo
+from ncatbot.types.github import GitHubRepoInfo, GitHubUserInfo
 
 
 class QueryAPIMixin:

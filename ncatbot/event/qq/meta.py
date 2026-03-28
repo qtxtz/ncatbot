@@ -4,10 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ncatbot.types.qq.meta import MetaEventData
-from ncatbot.types.qq.enums import MetaEventType
+from ncatbot.types.qq import MetaEventData, MetaEventType
 
-from ncatbot.event.common.base import BaseEvent
+from ..common.base import BaseEvent
 
 if TYPE_CHECKING:
     from ncatbot.api.qq import QQAPIClient

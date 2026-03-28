@@ -6,7 +6,7 @@ from typing import List, Optional
 
 from pydantic import Field
 
-from ncatbot.types.common.base import BaseEventData
+from ..common.base import BaseEventData
 
 from .enums import GitHubAction, GitHubIssueState, GitHubPRState, GitHubPostType
 from .models import GitHubCommit, GitHubForkee, GitHubRelease, GitHubRepo

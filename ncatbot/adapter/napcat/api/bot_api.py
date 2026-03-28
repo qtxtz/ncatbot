@@ -19,6 +19,8 @@ from .account import AccountAPIMixin
 from .query import QueryAPIMixin
 from .file import FileAPIMixin
 
+from ..service.preupload import PreUploadService
+
 if TYPE_CHECKING:
     from ..connection.protocol import OB11Protocol
 
@@ -41,8 +43,6 @@ class NapCatBotAPI(
 
     def __init__(self, protocol: "OB11Protocol"):
         self._protocol = protocol
-        from ..service.preupload import PreUploadService
-
         self._preupload = PreUploadService(protocol)
 
     async def call(self, action: str, params: Optional[dict] = None) -> dict:

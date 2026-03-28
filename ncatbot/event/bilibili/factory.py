@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, Optional, Type
 
-from ncatbot.types.common.base import BaseEventData
-from ncatbot.types.bilibili.enums import BiliPostType
-from ncatbot.types.bilibili.events import (
+from ncatbot.types import BaseEventData
+from ncatbot.types.bilibili import (
+    BiliPostType,
     DanmuMsgEventData,
     SuperChatEventData,
     GiftEventData,
@@ -18,7 +18,7 @@ from ncatbot.types.bilibili.events import (
     BiliCommentEventData,
     BiliDynamicEventData,
 )
-from ncatbot.event.common.base import BaseEvent
+from ..common.base import BaseEvent
 from .live import (
     BiliLiveEvent,
     DanmuMsgEvent,

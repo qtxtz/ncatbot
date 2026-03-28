@@ -4,15 +4,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Optional
 
-from ncatbot.types.qq.request import (
+from ncatbot.types.qq import (
     FriendRequestEventData,
     GroupRequestEventData,
     RequestEventData,
+    RequestType,
 )
-from ncatbot.types.qq.enums import RequestType
 
-from ncatbot.event.common.base import BaseEvent
-from ncatbot.event.common.mixins import Approvable, GroupScoped, HasSender
+from ..common.base import BaseEvent
+from ..common.mixins import Approvable, GroupScoped, HasSender
 
 if TYPE_CHECKING:
     from ncatbot.api.qq import QQAPIClient

@@ -2,7 +2,7 @@
 
 import click
 
-from ncatbot.utils.config.manager import MISSING
+from ncatbot.utils import MISSING
 
 
 @click.command()

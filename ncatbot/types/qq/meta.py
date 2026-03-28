@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pydantic import Field
 
-from ncatbot.types.common.base import BaseEventData
+from ..common.base import BaseEventData
 from .enums import PostType, MetaEventType
 from .misc import Status
 

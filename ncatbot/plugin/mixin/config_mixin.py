@@ -10,7 +10,7 @@ from typing import Any, Dict, TYPE_CHECKING
 
 import yaml
 
-from ncatbot.utils import get_log
+from ncatbot.utils import get_config_manager, get_log
 
 if TYPE_CHECKING:
     pass
@@ -88,8 +88,6 @@ class ConfigMixin:
     def _apply_global_overrides(self) -> None:
         """如果全局配置 plugin.plugin_configs 中存在本插件的条目，用它覆盖当前 config。"""
         try:
-            from ncatbot.utils import get_config_manager
-
             overrides = get_config_manager().config.plugin.plugin_configs.get(self.name)
             if overrides:
                 self.config.update(overrides)

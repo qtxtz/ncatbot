@@ -4,9 +4,13 @@ import json
 import socket
 import urllib
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Optional
+
+import httpx
+from tqdm import tqdm
 
 from .logger import get_log
 
@@ -80,34 +84,30 @@ def get_json(url: str, headers: Optional[dict] = None, timeout: float = 5.0) -> 
 
 def download_file(url: str, file_name: str) -> None:
     """下载文件（带进度条）。"""
-    import requests
-    from tqdm import tqdm
-
-    r = requests.get(url, stream=True)
-    total_size = int(r.headers.get("content-length", 0))
-    progress_bar = tqdm(
-        total=total_size,
-        unit="iB",
-        unit_scale=True,
-        desc=f"Downloading {file_name}",
-        bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]",
-        colour="green",
-        dynamic_ncols=True,
-        smoothing=0.3,
-        mininterval=0.1,
-        maxinterval=1.0,
-    )
-    with open(file_name, "wb") as f:
-        for data in r.iter_content(chunk_size=1024):
-            progress_bar.update(len(data))
-            f.write(data)
-    progress_bar.close()
+    with httpx.stream("GET", url, follow_redirects=True) as r:
+        r.raise_for_status()
+        total_size = int(r.headers.get("content-length", 0))
+        progress_bar = tqdm(
+            total=total_size,
+            unit="iB",
+            unit_scale=True,
+            desc=f"Downloading {file_name}",
+            bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]",
+            colour="green",
+            dynamic_ncols=True,
+            smoothing=0.3,
+            mininterval=0.1,
+            maxinterval=1.0,
+        )
+        with open(file_name, "wb") as f:
+            for data in r.iter_bytes(chunk_size=1024):
+                progress_bar.update(len(data))
+                f.write(data)
+        progress_bar.close()
 
 
 def get_proxy_url() -> str:
     """获取 GitHub 代理 URL（结果会缓存）。"""
-    import requests
-
     global _cached_github_proxy, _proxy_resolved
     if _proxy_resolved:
         return _cached_github_proxy or ""
@@ -118,12 +118,12 @@ def get_proxy_url() -> str:
 
     for proxy in github_proxy_urls:
         try:
-            response = requests.get(proxy, timeout=10)
+            response = httpx.get(proxy, timeout=10, follow_redirects=True)
             if response.status_code == 200:
                 _cached_github_proxy = proxy
                 _proxy_resolved = True
                 return proxy
-        except TimeoutError:
+        except httpx.TimeoutException:
             _log.warning(f"代理请求超时: {proxy}")
         except Exception:
             pass
@@ -167,14 +167,13 @@ async def async_download_to_file(
     proxy : str, optional
         HTTP/SOCKS5 代理地址（如 ``"http://127.0.0.1:7890"``）。
     """
-    from urllib.parse import unquote, urlparse
-
-    import httpx
-
     dest = Path(dest_dir)
     dest.mkdir(parents=True, exist_ok=True)
     if filename is None:
-        filename = unquote(urlparse(url).path.rsplit("/", 1)[-1]) or "download"
+        filename = (
+            urllib.parse.unquote(urllib.parse.urlparse(url).path.rsplit("/", 1)[-1])
+            or "download"
+        )
     filepath = dest / filename
 
     async with httpx.AsyncClient(
@@ -201,8 +200,6 @@ async def async_download_to_bytes(
     proxy : str, optional
         HTTP/SOCKS5 代理地址。
     """
-    import httpx
-
     async with httpx.AsyncClient(
         proxy=proxy, follow_redirects=True, timeout=120
     ) as client:
@@ -231,8 +228,6 @@ async def async_http_get(
     timeout : float
         超时秒数，默认 10。
     """
-    import httpx
-
     req_headers = {"User-Agent": "ncatbot/1.0"}
     if headers:
         req_headers.update(headers)
@@ -260,8 +255,6 @@ async def async_check_proxy(proxy_url: str) -> bool:
     bool
         代理可用返回 ``True``，否则 ``False``。
     """
-    import httpx
-
     test_url = "https://www.google.com/generate_204"
     try:
         async with httpx.AsyncClient(

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import ClassVar, Literal, Optional
 
-from ncatbot.types.common.segment.base import MessageSegment
+from ...common.segment.base import MessageSegment
 
 __all__ = [
     "Share",

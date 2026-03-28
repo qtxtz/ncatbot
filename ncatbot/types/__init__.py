@@ -13,6 +13,8 @@ from .common import (
     AttachmentList,
     AudioAttachment,
     BaseEventData,
+    register_platform_secondary_keys,
+    get_secondary_key,
     BaseSender,
     DownloadableSegment,
     File,
@@ -38,6 +40,8 @@ __all__ = [
     "AudioAttachment",
     "FileAttachment",
     "BaseEventData",
+    "register_platform_secondary_keys",
+    "get_secondary_key",
     "BaseSender",
     # segments
     "SEGMENT_MAP",

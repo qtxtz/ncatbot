@@ -1,4 +1,10 @@
-from .manager import ConfigManager, get_config_manager, ConfigValueError, MISSING
+from .manager import (
+    ConfigManager,
+    get_config_manager,
+    ConfigValueError,
+    MISSING,
+    DEFAULT_BOT_UIN,
+)
 from .models import (
     Config,
     NapCatConfig,
@@ -31,4 +37,5 @@ __all__ = [
     "strong_password_check",
     "generate_strong_token",
     "ncatbot_config",
+    "DEFAULT_BOT_UIN",
 ]

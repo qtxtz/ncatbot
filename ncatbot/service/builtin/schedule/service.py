@@ -13,6 +13,7 @@ from schedule import Scheduler
 from ...base import BaseService
 from ncatbot.utils import get_log
 from .parser import TimeTaskParser
+from .executor import TaskExecutor
 
 LOG = get_log("TimeTaskService")
 
@@ -45,8 +46,6 @@ class TimeTaskService(BaseService):
     def executor(self):
         """获取任务执行器（延迟初始化）"""
         if self._executor is None:
-            from .executor import TaskExecutor
-
             self._executor = TaskExecutor(self)
         return self._executor
 

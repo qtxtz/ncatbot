@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Callable, Optional, Set, Dict
 
 from ...base import BaseService
-from ncatbot.utils import get_config_manager, get_log
+from ncatbot.utils import get_config_manager, get_log, CONFIG_PATH
 
 LOG = get_log("FileWatcher")
 
@@ -129,8 +129,6 @@ class FileWatcherService(BaseService):
     def _setup_config_watch(self) -> None:
         """读取全局配置文件路径并初始化 mtime 缓存。"""
         try:
-            from ncatbot.utils import CONFIG_PATH
-
             config_path = os.path.abspath(CONFIG_PATH)
             if os.path.exists(config_path):
                 self._config_file_path = config_path

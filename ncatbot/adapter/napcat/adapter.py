@@ -8,9 +8,9 @@ from typing import Any, Dict, Optional
 
 from ..base import BaseAdapter
 from ncatbot.api import IAPIClient
-from ncatbot.utils import get_log
-from ncatbot.utils.config.models import NapCatConfig
-from ncatbot.utils.logger import resolve_event_log_level
+from ncatbot.utils import get_config_manager, get_log
+from ncatbot.utils import NapCatConfig
+from ncatbot.utils import resolve_event_log_level
 
 from .api.bot_api import NapCatBotAPI
 from .connection.protocol import OB11Protocol
@@ -90,8 +90,6 @@ class NapCatAdapter(BaseAdapter):
             return
 
         # 根据配置决定事件日志级别
-        from ncatbot.utils.config import get_config_manager
-
         event_type = data_model.resolve_type()
         overrides = get_config_manager().config.logging.event_log_levels
         log_level = resolve_event_log_level(event_type, overrides)

@@ -6,7 +6,14 @@ from typing import List
 
 from .base import GitHubBaseEvent
 from ..common.mixins import HasAttachments
-from ncatbot.types.common import AttachmentList, Attachment, FileAttachment
+from ncatbot.types.common import (
+    AttachmentList,
+    Attachment,
+    FileAttachment,
+    AudioAttachment,
+    ImageAttachment,
+    VideoAttachment,
+)
 from ncatbot.types.github import (
     GitHubStarEventData,
     GitHubForkEventData,
@@ -91,12 +98,6 @@ class GitHubReleaseEvent(GitHubBaseEvent, HasAttachments):
 
     async def get_attachments(self) -> "AttachmentList[Attachment]":
         """将 Release Assets 转换为跨平台 Attachment 列表"""
-        from ncatbot.types.common.attachment import (
-            AudioAttachment,
-            ImageAttachment,
-            VideoAttachment,
-        )
-
         _CONTENT_TYPE_MAP: dict[str, type[Attachment]] = {
             "image": ImageAttachment,
             "video": VideoAttachment,

@@ -6,6 +6,8 @@
 事件字段通过 event.data 访问（Event.data: BaseEventData，extra="allow"）。
 """
 
+import re
+
 from .hook import Hook, HookAction, HookContext, HookStage
 
 
@@ -189,8 +191,6 @@ class RegexHook(Hook):
     stage = HookStage.BEFORE_CALL
 
     def __init__(self, pattern: str, flags: int = 0, *, priority: int = 90):
-        import re
-
         self.pattern = re.compile(pattern, flags)
         self.priority = priority
 

@@ -7,7 +7,7 @@ from __future__ import annotations
 import time
 from typing import Any, Optional
 
-from ncatbot.types.bilibili.events import (
+from ncatbot.types.bilibili import (
     DanmuMsgEventData,
     SuperChatEventData,
     GiftEventData,

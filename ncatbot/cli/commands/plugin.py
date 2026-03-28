@@ -2,6 +2,7 @@
 
 import re
 import shutil
+import tomllib
 from pathlib import Path
 
 import click
@@ -25,10 +26,6 @@ def _read_manifest(plugins_dir: Path) -> dict | None:
     manifest_path = plugins_dir / "manifest.toml"
     if not manifest_path.exists():
         return None
-    try:
-        import tomllib
-    except ModuleNotFoundError:
-        import tomli as tomllib  # type: ignore[no-redef]
     with open(manifest_path, "rb") as f:
         return tomllib.load(f)
 

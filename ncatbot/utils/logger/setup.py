@@ -6,7 +6,7 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 from typing import Sequence
 
-from .core import cleanup_early_handlers
+from .core import cleanup_early_handlers, set_debug_mode
 from .formatter import ColoredFormatter, FileFormatter
 from .filters import MessageFoldFilter, ThirdPartyNameFilter
 
@@ -55,8 +55,6 @@ def setup_logging(
     os.makedirs(log_dir, exist_ok=True)
 
     # 同步 debug 标志到 core 模块，供 get_log() 使用
-    from .core import set_debug_mode
-
     set_debug_mode(debug)
 
     # root 设为 DEBUG（若调试）或 INFO（第三方库继承此级别）

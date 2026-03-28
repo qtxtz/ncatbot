@@ -7,7 +7,9 @@
 
 import importlib
 import importlib.util
+import shutil
 import sys
+from pathlib import Path
 from types import ModuleType
 from typing import Optional, Set, Type
 
@@ -39,8 +41,6 @@ class ModuleImporter:
 
     def add_plugin_root(self, root_dir: str | object) -> None:
         """将插件根目录添加到 sys.path（仅一次，append 避免遮蔽标准库）。"""
-        from pathlib import Path
-
         root_str = str(Path(str(root_dir)).resolve())
         if root_str not in self._plugin_roots:
             self._plugin_roots.add(root_str)
@@ -181,8 +181,6 @@ class ModuleImporter:
     def _clear_pycache(manifest: PluginManifest) -> None:
         pycache = manifest.plugins_dir / "__pycache__"
         if pycache.exists():
-            import shutil
-
             try:
                 shutil.rmtree(pycache)
             except Exception as e:

@@ -6,7 +6,7 @@ from typing import Literal, Optional
 
 from pydantic import Field
 
-from ncatbot.types.common.base import BaseEventData
+from ..common.base import BaseEventData
 from .enums import PostType, NoticeType, NotifySubType
 from .misc import FileInfo
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, ClassVar, Dict, Optional
 
-from ncatbot.types.common.segment.media import Image, Record
+from ...common.segment.media import Image, Record
 
 __all__ = [
     "QQImage",

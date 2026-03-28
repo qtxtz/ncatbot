@@ -7,8 +7,8 @@ from typing import Optional
 
 from pydantic import Field
 
-from ncatbot.types.common.base import BaseEventData
-from ncatbot.types.common.segment.array import MessageArray
+from ..common.base import BaseEventData
+from ..common.segment.array import MessageArray
 from .enums import (
     BiliPostType,
     BiliLiveEventType,

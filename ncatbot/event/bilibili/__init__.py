@@ -16,7 +16,7 @@ from .dynamic import BiliDynamicEvent
 from .factory import create_bili_entity
 
 # 自动注册 Bilibili 平台工厂和 secondary keys 到通用工厂
-from ncatbot.event.common.factory import (
+from ..common.factory import (
     register_platform_factory as _register,
     register_platform_secondary_keys as _register_keys,
 )

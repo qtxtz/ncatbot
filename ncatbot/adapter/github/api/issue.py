@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, List, Optional
 
-from ncatbot.types.github.models import GitHubIssueInfo, GitHubLabelInfo
+from ncatbot.types.github import GitHubIssueInfo, GitHubLabelInfo
 
 
 class IssueAPIMixin:

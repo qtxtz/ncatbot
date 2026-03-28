@@ -9,7 +9,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from ncatbot.api.base import IAPIClient
+from ..base import IAPIClient
 
 if TYPE_CHECKING:
     from ncatbot.types import Image as ImageSegment

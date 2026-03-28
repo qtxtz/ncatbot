@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Any, Dict, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
-from ncatbot.utils.network import async_download_to_bytes, async_download_to_file
-from ncatbot.utils.config import get_config_manager
+from ncatbot.utils import async_download_to_bytes, async_download_to_file
+from ncatbot.utils import get_config_manager
 
 from .segment.base import MessageSegment
 from .segment.media import File, Image, Video, Record

@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from ncatbot.api.base import IAPIClient
-
-if TYPE_CHECKING:
-    from ncatbot.types import Image
-    from ncatbot.types.common.segment.array import MessageArray
-    from ncatbot.types.common.segment.base import MessageSegment
-
+from ncatbot.types import (
+    At,
+    DownloadableSegment,
+    Image,
+    MessageArray,
+    MessageSegment,
+    PlainText,
+    Reply,
+)
 from ncatbot.utils import get_log
 
 from ..config import AIConfig
@@ -253,9 +256,6 @@ class AIBotAPI(IAPIClient):
         nickname_map: Optional[Dict[str, str]] = None,
     ) -> List[dict]:
         """将各种输入格式统一为 ``list[dict]`` (OpenAI messages 格式)"""
-        from ncatbot.types.common.segment.array import MessageArray
-        from ncatbot.types.common.segment.base import MessageSegment
-
         if isinstance(content_or_messages, str):
             return [{"role": "user", "content": content_or_messages}]
 
@@ -286,12 +286,6 @@ class AIBotAPI(IAPIClient):
 
         纯文本时返回 str；包含图片时返回多模态 content list。
         """
-        from ncatbot.types.common.segment.media import (
-            DownloadableSegment,
-            Image,
-        )
-        from ncatbot.types.common.segment.text import At, PlainText, Reply
-
         parts: list[dict] = []
         has_image = False
 
@@ -352,8 +346,6 @@ class AIBotAPI(IAPIClient):
         参数与 ``image_generation()`` 相同，返回 ``ncatbot.types.Image``。
         URL 响应设为 ``file``，b64_json 响应使用 ``base64://`` 前缀。
         """
-        from ncatbot.types import Image
-
         resp = await self.image_generation(prompt, model=model, size=size, **kwargs)
         image = resp.data[0]
         if image.url:

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any, Callable, List, TYPE_CHECKING
 
-from ncatbot.adapter.mock.api_base import APICall
+from ncatbot.adapter import APICall
 
 if TYPE_CHECKING:
     from ncatbot.adapter.mock.api_base import MockAPIBase

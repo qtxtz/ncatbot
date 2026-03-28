@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import cast
 
-from ncatbot.api.proxy import BaseLoggingProxy
+from ..proxy import BaseLoggingProxy
 
 from .interface import IQQAPIClient
 

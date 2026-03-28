@@ -16,7 +16,7 @@ from typing import Optional, TYPE_CHECKING
 import websockets
 
 from ncatbot.utils import NcatBotError, get_config_manager, get_log  # type: ignore[attr-defined]
-from ncatbot.utils.config.models import DEFAULT_BOT_UIN
+from ncatbot.utils import DEFAULT_BOT_UIN
 from .auth import AuthHandler
 from .config import NapCatConfigManager
 from .installer import NapCatInstaller
@@ -211,8 +211,6 @@ class NapCatLauncher:
     def _update_bot_uin(self, actual_uin: str) -> None:
         """将实际登录的 QQ 号写回 config 并更新内部状态。"""
         try:
-            from ncatbot.utils.config import get_config_manager
-
             mgr = get_config_manager()
             mgr.update_value("bot_uin", actual_uin)
             mgr.save()

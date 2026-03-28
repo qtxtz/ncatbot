@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from ncatbot.types.common.sender import BaseSender
+from ..common.sender import BaseSender
 
 __all__ = [
     "BiliSender",

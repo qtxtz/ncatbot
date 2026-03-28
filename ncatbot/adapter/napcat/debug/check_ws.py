@@ -13,17 +13,12 @@ WebSocket 能正常通信意味着 QQ 已登录且 OneBot11 协议就绪。
 import asyncio
 import json
 import sys
+import urllib.parse
 
-try:
-    import websockets
-except ImportError:
-    print("[ERROR] websockets 未安装, 请执行: pip install websockets")
-    sys.exit(1)
+import websockets
 
 
 async def check_ws(uri: str, token: str = "") -> None:
-    import urllib.parse
-
     ws_uri = (
         f"{uri}?access_token={urllib.parse.quote(token, safe='')}" if token else uri
     )

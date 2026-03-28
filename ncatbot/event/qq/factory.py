@@ -4,19 +4,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, Optional, Type
 
-from ncatbot.types.common.base import BaseEventData
-from ncatbot.types.qq.enums import PostType
-from ncatbot.types.qq.message import (
+from ncatbot.types import BaseEventData
+from ncatbot.types.qq import (
+    PostType,
     GroupMessageEventData,
     PrivateMessageEventData,
-)
-from ncatbot.types.qq.notice import GroupIncreaseNoticeEventData
-from ncatbot.types.qq.request import (
+    GroupIncreaseNoticeEventData,
     FriendRequestEventData,
     GroupRequestEventData,
 )
 
-from ncatbot.event.common.base import BaseEvent
+from ..common.base import BaseEvent
 from .message import MessageEvent, GroupMessageEvent, PrivateMessageEvent
 from .notice import NoticeEvent, GroupIncreaseEvent
 from .request import FriendRequestEvent, GroupRequestEvent, RequestEvent

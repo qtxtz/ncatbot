@@ -20,6 +20,10 @@ import json
 import socket
 import urllib.error
 import urllib.request
+from urllib.parse import urlparse
+
+from ncatbot.utils import ncatbot_config
+from ncatbot.utils import NapCatConfig as _NC
 
 SALT = "napcat"
 
@@ -190,9 +194,6 @@ def main():
     if args.token is None:
         # 尝试从 config.yaml 读取
         try:
-            from ncatbot.utils import ncatbot_config
-            from ncatbot.utils.config.models import NapCatConfig as _NC
-
             nc = None
             for entry in ncatbot_config.config.adapters:
                 if entry.type == "napcat":
@@ -205,8 +206,6 @@ def main():
             host = args.host
             port = args.port
             if nc.webui_uri:
-                from urllib.parse import urlparse
-
                 parsed = urlparse(nc.webui_uri)
                 host = parsed.hostname or host
                 port = parsed.port or port

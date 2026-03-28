@@ -10,16 +10,16 @@ import hmac
 import time
 from typing import Optional
 
-from ncatbot.types.common.base import BaseEventData
-from ncatbot.types.github.enums import GitHubUserType
-from ncatbot.types.github.models import (
+from ncatbot.types import BaseEventData
+from ncatbot.types.github import GitHubUserType
+from ncatbot.types.github import (
     GitHubCommit,
     GitHubForkee,
     GitHubRelease,
     GitHubRepo,
 )
-from ncatbot.types.github.sender import GitHubSender
-from ncatbot.types.github.events import (
+from ncatbot.types.github import GitHubSender
+from ncatbot.types.github import (
     GitHubEventData,
     GitHubIssueEventData,
     GitHubIssueCommentEventData,

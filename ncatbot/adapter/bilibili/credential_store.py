@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ncatbot.utils import get_log
+from ncatbot.utils import get_config_manager, get_log
 
 if TYPE_CHECKING:
     from bilibili_api import Credential
@@ -25,8 +25,6 @@ def save_credential_to_config(credential: "Credential") -> None:
     更新其 ``config`` 字典中的 sessdata / bili_jct / dedeuserid / ac_time_value，
     然后调用 ``ConfigManager.save()`` 原子写入磁盘。
     """
-    from ncatbot.utils.config import get_config_manager
-
     mgr = get_config_manager()
     cfg = mgr.config
 

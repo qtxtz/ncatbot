@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, List
 
-from ncatbot.types.github.models import GitHubCommentInfo
+from ncatbot.types.github import GitHubCommentInfo
 
 
 class CommentAPIMixin:

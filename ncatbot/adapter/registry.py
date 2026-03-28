@@ -5,7 +5,7 @@ from __future__ import annotations
 import importlib.metadata
 from typing import Dict, Type, TYPE_CHECKING
 
-from ncatbot.utils.logger import get_early_logger
+from ncatbot.utils import get_early_logger
 
 if TYPE_CHECKING:
     from .base import BaseAdapter

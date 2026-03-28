@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, ClassVar, Optional
 from .base import MessageSegment
 
 if TYPE_CHECKING:
-    from ncatbot.types.common.attachment import Attachment
+    from ..attachment import Attachment
 
 __all__ = [
     "DownloadableSegment",
@@ -29,7 +29,7 @@ class DownloadableSegment(MessageSegment):
 
     def to_attachment(self) -> "Attachment":
         """转为跨平台 Attachment（基类实现，子类覆盖返回具体类型）"""
-        from ncatbot.types.common.attachment import Attachment
+        from ..attachment import Attachment
 
         return Attachment(
             name=self.file_name or self.file,
@@ -43,7 +43,7 @@ class Image(DownloadableSegment):
     _type: ClassVar[str] = "image"
 
     def to_attachment(self) -> "Attachment":
-        from ncatbot.types.common.attachment import ImageAttachment
+        from ..attachment import ImageAttachment
 
         return ImageAttachment(
             name=self.file_name or self.file,
@@ -58,7 +58,7 @@ class Record(DownloadableSegment):
     _type: ClassVar[str] = "record"
 
     def to_attachment(self) -> "Attachment":
-        from ncatbot.types.common.attachment import AudioAttachment
+        from ..attachment import AudioAttachment
 
         return AudioAttachment(
             name=self.file_name or self.file,
@@ -73,7 +73,7 @@ class Video(DownloadableSegment):
     _type: ClassVar[str] = "video"
 
     def to_attachment(self) -> "Attachment":
-        from ncatbot.types.common.attachment import VideoAttachment
+        from ..attachment import VideoAttachment
 
         return VideoAttachment(
             name=self.file_name or self.file,
@@ -88,7 +88,7 @@ class File(DownloadableSegment):
     _type: ClassVar[str] = "file"
 
     def to_attachment(self) -> "Attachment":
-        from ncatbot.types.common.attachment import FileAttachment
+        from ..attachment import FileAttachment
 
         return FileAttachment(
             name=self.file_name or self.file,

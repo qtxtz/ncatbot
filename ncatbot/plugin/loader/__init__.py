@@ -9,7 +9,7 @@ from .resolver import (
     PluginVersionError,
 )
 from .importer import ModuleImporter
-from .pip_helper import check_requirements, install_packages
+from ncatbot.utils import check_requirements, install_packages
 
 __all__ = [
     "PluginLoader",

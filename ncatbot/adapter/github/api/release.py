@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, List, Union
 
-from ncatbot.types.github.models import GitHubReleaseAsset, GitHubReleaseInfo
+from ncatbot.types.github import GitHubReleaseAsset, GitHubReleaseInfo
 
 
 class ReleaseAPIMixin:

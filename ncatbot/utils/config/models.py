@@ -2,6 +2,7 @@
 
 import os
 import warnings
+import urllib.parse
 from typing import Any, Dict, List, Optional
 
 from pydantic import (
@@ -118,32 +119,22 @@ class NapCatConfig(BaseConfig):
 
     @property
     def ws_host(self) -> Optional[str]:
-        import urllib.parse
-
         return urllib.parse.urlparse(self.ws_uri).hostname
 
     @property
     def ws_port(self) -> Optional[int]:
-        import urllib.parse
-
         return urllib.parse.urlparse(self.ws_uri).port
 
     @property
     def webui_host(self) -> Optional[str]:
-        import urllib.parse
-
         return urllib.parse.urlparse(self.webui_uri).hostname
 
     @property
     def webui_port(self) -> Optional[int]:
-        import urllib.parse
-
         return urllib.parse.urlparse(self.webui_uri).port
 
     def get_uri_with_token(self) -> str:
         """返回带 access_token 的 WebSocket URI。"""
-        import urllib.parse
-
         encoded_token = urllib.parse.quote(self.ws_token, safe="")
         return f"{self.ws_uri}?access_token={encoded_token}"
 

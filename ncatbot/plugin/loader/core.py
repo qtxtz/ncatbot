@@ -9,14 +9,27 @@ import asyncio
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Type, TYPE_CHECKING
 
-from ncatbot.utils import get_log
+from ncatbot.utils import (
+    get_log,
+    async_confirm,
+    get_config_manager,
+    check_requirements,
+    install_packages,
+    format_missing_report,
+)
+from ncatbot.core import (
+    set_current_plugin,
+    _current_plugin_ctx,
+    flush_pending,
+    clear_pending,
+    _pending_handlers,
+)
 
 from ..base import BasePlugin
 from ..manifest import PluginManifest
 from .indexer import PluginIndexer
 from .resolver import DependencyResolver
 from .importer import ModuleImporter
-from .pip_helper import check_requirements, install_packages, format_missing_report
 
 if TYPE_CHECKING:
     from ncatbot.core import HandlerDispatcher
@@ -149,14 +162,6 @@ class PluginLoader:
 
     async def load_plugin(self, name: str) -> Optional[BasePlugin]:
         """加载单个插件（必须已索引）。"""
-        from ncatbot.core import (
-            set_current_plugin,
-        )
-        from ncatbot.core.registry.context import (
-            _current_plugin_ctx,
-        )
-        from ncatbot.core import flush_pending, clear_pending
-
         manifest = self._indexer.get(name)
         if manifest is None:
             LOG.error("插件 %s 未索引，无法加载", name)
@@ -199,8 +204,6 @@ class PluginLoader:
 
     async def unload_plugin(self, name: str) -> bool:
         """卸载单个插件。"""
-        from ncatbot.core import clear_pending
-
         plugin = self.plugins.get(name)
         if plugin is None:
             LOG.warning("插件 %s 未加载", name)
@@ -365,9 +368,6 @@ class PluginLoader:
         # 内置模块在首次 flush_pending(__global__) 之后才导入，@registrar 收集在 __global__。
         # 移到真实插件名以便 unload_plugin 时 revoke_plugin 能移除；并注入实例以绑定 self。
         if self._handler_dispatcher is not None and last_loaded is not None:
-            from ncatbot.core import flush_pending
-            from ncatbot.core.registry.registrar import _pending_handlers
-
             pending = _pending_handlers.pop("__global__", [])
             if pending:
                 _pending_handlers[last_loaded.name] = pending
@@ -383,9 +383,6 @@ class PluginLoader:
 
     async def _check_pip_deps_batch(self, manifests: Dict[str, PluginManifest]) -> set:
         """批量检查所有插件的 pip 依赖，返回应跳过的插件名集合。"""
-        from ncatbot.utils import async_confirm
-        from ncatbot.utils import get_config_manager
-
         config = get_config_manager()
         if not config.plugin.auto_install_pip_deps:
             # 配置禁用自动安装，仅输出警告
@@ -482,9 +479,6 @@ class PluginLoader:
 
     async def _ensure_pip_deps(self, manifest: PluginManifest) -> bool:
         """检查并安装单个插件的 pip 依赖。返回 True 表示满足/已安装。"""
-        from ncatbot.utils import async_confirm
-        from ncatbot.utils import get_config_manager
-
         _, missing = check_requirements(manifest.pip_dependencies)
         if not missing:
             return True
@@ -529,8 +523,6 @@ class PluginLoader:
 
         # 注入框架属性
         plugin._manifest = manifest
-        from ncatbot.utils import get_config_manager
-
         plugin._debug = get_config_manager().effective_debug
         plugin.workspace = Path("data") / manifest.name
         plugin.config = {}

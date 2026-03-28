@@ -299,10 +299,6 @@ class BotClient:
         if not self._adapters:
             raise ValueError("所有适配器的依赖均未满足，无法启动")
 
-    # 向后兼容别名
-    async def _setup_adapter(self) -> None:
-        await self._setup_adapters()
-
     def _setup_api(self) -> None:
         """从所有 Adapter 取出底层 IAPIClient，包装为平台 Client 后注册到 BotAPIClient。"""
         # 平台 → 包装类注册表

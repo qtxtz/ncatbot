@@ -25,6 +25,12 @@ def _get_version() -> str:
 def cli(ctx: click.Context):
     """NcatBot — QQ 机器人框架 CLI"""
     if ctx.invoked_subcommand is None:
+        from ncatbot.utils import is_interactive
+
+        if not is_interactive():
+            click.echo(ctx.get_help())
+            return
+
         from .utils.repl import start_repl
 
         start_repl(ctx)

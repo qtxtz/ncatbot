@@ -17,6 +17,7 @@ import shlex
 from typing import Any, Dict, List, Optional, Tuple, get_type_hints
 
 from ncatbot.utils import get_log
+from ncatbot.types import PlainText, At
 
 LOG = get_log("CommandBinding")
 
@@ -72,8 +73,6 @@ def preprocess_segments(message: Any) -> List[Any]:
 
     返回段列表的副本，不修改原消息。
     """
-    from ncatbot.types.common.segment.text import PlainText
-
     segments = list(message)  # MessageArray 支持 __iter__
     if not segments:
         return segments
@@ -134,8 +133,6 @@ def build_binding_stream(
     - At 段 → ``("at", At)``
     - 其他段 → ``(segment._type, segment)``
     """
-    from ncatbot.types.common.segment.text import PlainText, At
-
     stream: List[StreamItem] = []
 
     # 1) 首段 PlainText 的剩余文本
@@ -183,8 +180,6 @@ def bind_params(
     Returns:
         成功 → kwargs dict; 必选参数缺失 → None
     """
-    from ncatbot.types import At
-
     kwargs: Dict[str, Any] = {}
     pos = 0  # stream 当前位置
 

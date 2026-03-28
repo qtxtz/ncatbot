@@ -8,9 +8,11 @@ PluginTestHarness — 离线插件测试编排器
 from __future__ import annotations
 
 import asyncio
+import importlib
 from pathlib import Path
 from typing import List, Optional, Sequence, TYPE_CHECKING
 
+import ncatbot.plugin.builtin as _bi
 from ncatbot.adapter.mock import MockAdapter
 from ncatbot.app import BotClient
 
@@ -69,10 +71,6 @@ class PluginTestHarness(TestHarness):
         loader._on_plugin_init = _inject_plugin_deps
 
         if not self._skip_builtin:
-            import importlib
-
-            import ncatbot.plugin.builtin as _bi
-
             importlib.reload(_bi.system_manager.main)
             importlib.reload(_bi)
             await loader.load_builtin_plugins()

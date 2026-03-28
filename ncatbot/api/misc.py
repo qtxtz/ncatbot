@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Optional, Union, TYPE_CHECKING
 
 from ncatbot.utils import get_log
-from ncatbot.utils.network import (
+from ncatbot.utils import (
     async_check_proxy,
     async_download_to_bytes,
     async_download_to_file,

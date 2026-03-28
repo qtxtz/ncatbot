@@ -7,7 +7,7 @@ from __future__ import annotations
 import time
 from typing import Any, List, Optional
 
-from ncatbot.types.github.events import (
+from ncatbot.types.github import (
     GitHubIssueEventData,
     GitHubIssueCommentEventData,
     GitHubPREventData,

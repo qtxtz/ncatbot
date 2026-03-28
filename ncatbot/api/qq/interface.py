@@ -9,8 +9,8 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import List, Union
 
-from ncatbot.api.base import IAPIClient
-from ncatbot.api.traits import IMessaging, IGroupManage, IQuery, IFileTransfer
+from ..base import IAPIClient
+from ..traits import IMessaging, IGroupManage, IQuery, IFileTransfer
 from ncatbot.types.napcat import (
     BotStatus,
     CreateFolderResult,

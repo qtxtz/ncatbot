@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from ncatbot.types.common.segment import (
+from ...common.segment import (
     File,
     Image,
     MessageArray,

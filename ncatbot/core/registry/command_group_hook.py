@@ -39,6 +39,7 @@ CommandGroupHook — 命令组匹配与自动路由
 from typing import Any, Dict, List, Optional
 
 from .hook import Hook, HookAction, HookContext, HookStage
+from ncatbot.types import PlainText
 from ._command_binding import (
     _ParamSpec,
     preprocess_segments,
@@ -165,8 +166,6 @@ class CommandGroupHook(Hook):
             return HookAction.SKIP
 
         # 2) 从首段 PlainText 取文本
-        from ncatbot.types.common.segment.text import PlainText
-
         first_seg = segments[0]
         if not isinstance(first_seg, PlainText):
             return HookAction.SKIP

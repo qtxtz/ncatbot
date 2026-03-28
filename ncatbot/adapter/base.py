@@ -5,7 +5,13 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, Callable, Awaitable, List, TYPE_CHECKING
 
-from ncatbot.utils import get_log
+from ncatbot.utils import (
+    get_log,
+    check_requirements,
+    install_packages,
+    async_confirm,
+    get_config_manager,
+)
 
 _LOG = get_log("BaseAdapter")
 
@@ -65,17 +71,9 @@ class BaseAdapter(ABC):
         if not deps:
             return True
 
-        from ncatbot.plugin.loader.pip_helper import (
-            check_requirements,
-            install_packages,
-        )
-
         _, missing = check_requirements(deps)
         if not missing:
             return True
-
-        from ncatbot.utils import async_confirm
-        from ncatbot.utils import get_config_manager
 
         listing = ", ".join(missing)
         _LOG.info("适配器 %s 需要安装 pip 依赖: %s", self.name, listing)

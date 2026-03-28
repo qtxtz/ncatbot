@@ -11,7 +11,7 @@ import sys
 import zipfile
 from typing import Optional
 
-import requests
+import httpx
 from tqdm import tqdm
 
 from ncatbot.utils import gen_url_with_proxy, get_json, get_log
@@ -26,28 +26,29 @@ LOG = get_log("NapCatInstaller")
 
 def download_file(url: str, file_name: str) -> None:
     """下载文件（带进度条）"""
-    r = requests.get(url, stream=True)
-    total_size = int(r.headers.get("content-length", 0))
+    with httpx.stream("GET", url, follow_redirects=True) as r:
+        r.raise_for_status()
+        total_size = int(r.headers.get("content-length", 0))
 
-    progress_bar = tqdm(
-        total=total_size,
-        unit="iB",
-        unit_scale=True,
-        desc=f"Downloading {file_name}",
-        bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]",
-        colour="green",
-        dynamic_ncols=True,
-        smoothing=0.3,
-        mininterval=0.1,
-        maxinterval=1.0,
-    )
+        progress_bar = tqdm(
+            total=total_size,
+            unit="iB",
+            unit_scale=True,
+            desc=f"Downloading {file_name}",
+            bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]",
+            colour="green",
+            dynamic_ncols=True,
+            smoothing=0.3,
+            mininterval=0.1,
+            maxinterval=1.0,
+        )
 
-    with open(file_name, "wb") as f:
-        for data in r.iter_content(chunk_size=1024):
-            progress_bar.update(len(data))
-            f.write(data)
+        with open(file_name, "wb") as f:
+            for data in r.iter_bytes(chunk_size=1024):
+                progress_bar.update(len(data))
+                f.write(data)
 
-    progress_bar.close()
+        progress_bar.close()
 
 
 def unzip_file(file_name: str, extract_path: str, remove: bool = False) -> None:
@@ -75,9 +76,9 @@ class NapCatInstaller:
         """通过 releases/latest 重定向获取最新版本号（不依赖 API 限额）"""
         url = "https://github.com/NapNeko/NapCatQQ/releases/latest"
         try:
-            resp = requests.head(url, allow_redirects=True, timeout=10)
+            resp = httpx.head(url, follow_redirects=True, timeout=10)
             # 最终 URL 形如: https://github.com/NapNeko/NapCatQQ/releases/tag/vX.X.X
-            version = resp.url.rsplit("/", 1)[-1].lstrip("v")
+            version = str(resp.url).rsplit("/", 1)[-1].lstrip("v")
             if version:
                 LOG.debug(f"通过重定向获取版本号成功: {version}")
                 return version

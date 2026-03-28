@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, Optional, Type
 
-from ncatbot.types.common.base import BaseEventData
-from ncatbot.types.github.enums import GitHubPostType
-from ncatbot.types.github.events import (
+from ncatbot.types import BaseEventData
+from ncatbot.types.github import (
+    GitHubPostType,
     GitHubIssueEventData,
     GitHubIssueCommentEventData,
     GitHubPREventData,
@@ -16,7 +16,7 @@ from ncatbot.types.github.events import (
     GitHubForkEventData,
     GitHubReleaseEventData,
 )
-from ncatbot.event.common.base import BaseEvent
+from ..common.base import BaseEvent
 from .issue import GitHubIssueEvent, GitHubIssueCommentEvent
 from .pr import GitHubPREvent, GitHubPRReviewCommentEvent
 from .push import GitHubPushEvent

@@ -15,6 +15,7 @@ CommandHook — 命令匹配 + 注解式参数绑定
 from typing import Dict, Optional
 
 from ncatbot.utils import get_log
+from ncatbot.types import PlainText
 
 from .hook import Hook, HookAction, HookContext, HookStage
 from ._command_binding import (
@@ -74,8 +75,6 @@ class CommandHook(Hook):
             return HookAction.SKIP
 
         # 2) 从首段 PlainText 取文本
-        from ncatbot.types.common.segment.text import PlainText
-
         first_seg = segments[0]
         if not isinstance(first_seg, PlainText):
             return HookAction.SKIP

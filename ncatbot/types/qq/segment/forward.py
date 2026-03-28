@@ -6,7 +6,7 @@ from typing import Any, ClassVar, Dict, List, Optional
 
 from pydantic import BaseModel, field_validator
 
-from ncatbot.types.common.segment.base import MessageSegment, parse_segment
+from ...common.segment.base import MessageSegment, parse_segment
 
 __all__ = [
     "ForwardNode",

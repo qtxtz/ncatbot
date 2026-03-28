@@ -8,8 +8,14 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional, TYPE_CHECKING
 
-from ncatbot.adapter.base import BaseAdapter
+from ..base import BaseAdapter
 from ncatbot.utils import get_log
+from .api import BiliBotAPI
+from .auth import qrcode_login
+from .config import BilibiliConfig
+from .credential_store import has_valid_credential, save_credential_to_config
+from .parser import BiliEventParser
+from .source.manager import SourceManager
 
 if TYPE_CHECKING:
     from ncatbot.api import IAPIClient
@@ -42,8 +48,6 @@ class BilibiliAdapter(BaseAdapter):
             bot_uin=bot_uin,
             websocket_timeout=websocket_timeout,
         )
-        from .config import BilibiliConfig
-
         self._config = BilibiliConfig.model_validate(self._raw_config)
         self._credential: Any = None
         self._source_manager: Any = None
@@ -53,8 +57,6 @@ class BilibiliAdapter(BaseAdapter):
 
     async def setup(self) -> None:
         from bilibili_api import Credential
-        from .auth import qrcode_login
-        from .credential_store import has_valid_credential, save_credential_to_config
 
         if has_valid_credential(self._config):
             self._credential = Credential(
@@ -83,10 +85,6 @@ class BilibiliAdapter(BaseAdapter):
         LOG.info("Bilibili 凭据已就绪")
 
     async def connect(self) -> None:
-        from .source.manager import SourceManager
-        from .api import BiliBotAPI
-        from .parser import BiliEventParser
-
         self._parser = BiliEventParser(self_id=self._bot_uin)
 
         self._source_manager = SourceManager(

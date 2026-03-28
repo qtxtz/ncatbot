@@ -14,6 +14,7 @@ import httpx
 from aiohttp import web
 
 from ncatbot.utils import get_log
+from ..parser import GitHubEventParser
 
 LOG = get_log("GitHubSource")
 
@@ -109,8 +110,6 @@ class SourceManager:
 
     async def _handle_webhook(self, request: web.Request) -> web.Response:
         """处理 GitHub webhook POST 请求"""
-        from ncatbot.adapter.github.parser import GitHubEventParser
-
         body = await request.read()
 
         # 签名验证

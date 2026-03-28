@@ -11,15 +11,11 @@ NapCat 诊断工具 — 综合状态对比
 import asyncio
 import hashlib
 import json
-import sys
-import urllib.error
+import urllib.parse
 import urllib.request
-
-try:
-    import websockets
-except ImportError:
-    print("[ERROR] websockets 未安装")
-    sys.exit(1)
+from ncatbot.utils import ncatbot_config
+from ncatbot.utils import NapCatConfig
+import websockets
 
 SALT = "napcat"
 
@@ -40,8 +36,6 @@ def post(url, payload=None, headers=None, timeout=5.0):
 
 
 async def check_ws(uri: str, token: str = "") -> dict:
-    import urllib.parse
-
     ws_uri = (
         f"{uri}?access_token={urllib.parse.quote(token, safe='')}" if token else uri
     )
@@ -98,9 +92,6 @@ def check_webui(base_uri: str, token: str) -> dict:
 async def diagnose():
     # 加载配置
     try:
-        from ncatbot.utils import ncatbot_config
-        from ncatbot.utils.config.models import NapCatConfig
-
         # 从 adapters 列表中提取 napcat 适配器配置
         nc = None
         for entry in ncatbot_config.config.adapters:

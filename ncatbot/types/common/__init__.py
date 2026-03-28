@@ -9,7 +9,7 @@ from .attachment import (
     VideoAttachment,
 )
 from .attachment_list import AttachmentList
-from .base import BaseEventData
+from .base import BaseEventData, register_platform_secondary_keys, get_secondary_key
 from .sender import BaseSender
 from .segment import (
     SEGMENT_MAP,
@@ -35,6 +35,8 @@ __all__ = [
     "AudioAttachment",
     "FileAttachment",
     "BaseEventData",
+    "register_platform_secondary_keys",
+    "get_secondary_key",
     "BaseSender",
     # segments
     "SEGMENT_MAP",

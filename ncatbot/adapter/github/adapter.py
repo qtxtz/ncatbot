@@ -8,8 +8,12 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional, TYPE_CHECKING
 
-from ncatbot.adapter.base import BaseAdapter
+from ..base import BaseAdapter
 from ncatbot.utils import get_log
+from .api import GitHubBotAPI
+from .config import GitHubConfig
+from .parser import GitHubEventParser
+from .source.manager import SourceManager
 
 if TYPE_CHECKING:
     from ncatbot.api import IAPIClient
@@ -36,8 +40,6 @@ class GitHubAdapter(BaseAdapter):
             bot_uin=bot_uin,
             websocket_timeout=websocket_timeout,
         )
-        from .config import GitHubConfig
-
         self._config = GitHubConfig.model_validate(self._raw_config)
         self._source_manager: Any = None
         self._api: Any = None
@@ -46,8 +48,6 @@ class GitHubAdapter(BaseAdapter):
 
     async def setup(self) -> None:
         """验证 token 有效性"""
-        from .api import GitHubBotAPI
-
         if not self._config.token:
             LOG.warning("未配置 GitHub token，API 调用将受到严格速率限制")
             return
@@ -63,10 +63,6 @@ class GitHubAdapter(BaseAdapter):
             await api.close()
 
     async def connect(self) -> None:
-        from .source.manager import SourceManager
-        from .api import GitHubBotAPI
-        from .parser import GitHubEventParser
-
         self._parser = GitHubEventParser(self_id=self._bot_uin)
         self._api = GitHubBotAPI(self._config.token)
 

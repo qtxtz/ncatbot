@@ -24,6 +24,7 @@ from .registry import (
     # ContextVar
     set_current_plugin,
     get_current_plugin,
+    _current_plugin_ctx,
     # Hook
     Hook,
     HookStage,
@@ -60,6 +61,7 @@ from .registry import (
     registrar,
     flush_pending,
     clear_pending,
+    _pending_handlers,
 )
 
 __all__ = [
@@ -85,6 +87,7 @@ __all__ = [
     # Registry — ContextVar
     "set_current_plugin",
     "get_current_plugin",
+    "_current_plugin_ctx",
     # Registry — Hook
     "Hook",
     "HookStage",
@@ -121,4 +124,5 @@ __all__ = [
     "registrar",
     "flush_pending",
     "clear_pending",
+    "_pending_handlers",
 ]

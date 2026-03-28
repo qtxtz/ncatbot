@@ -7,7 +7,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
 from ncatbot.api.bilibili import IBiliAPIClient
-from ncatbot.types.bilibili.models import LiveRoomInfo
+from ncatbot.types.bilibili import LiveRoomInfo
 
 from .api_base import MockAPIBase
 

@@ -4,20 +4,18 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Optional, Union
 
-from ncatbot.types.common.sender import BaseSender
-from ncatbot.types.common.segment.array import MessageArray
-from ncatbot.types.common.segment.media import Image, Video
-from ncatbot.types.qq.enums import MessageType
-from ncatbot.types.qq.message import (
+from ncatbot.types import BaseSender, MessageArray, Image, Video
+from ncatbot.types.qq import (
+    MessageType,
     GroupMessageEventData,
     MessageEventData,
     PrivateMessageEventData,
+    GroupSender,
+    Anonymous,
 )
-from ncatbot.types.qq.sender import GroupSender
-from ncatbot.types.qq.misc import Anonymous
 
-from ncatbot.event.common.base import BaseEvent
-from ncatbot.event.common.mixins import (
+from ..common.base import BaseEvent
+from ..common.mixins import (
     Bannable,
     Deletable,
     GroupScoped,

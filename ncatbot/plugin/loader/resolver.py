@@ -7,6 +7,9 @@
 from collections import defaultdict, deque
 from typing import Dict, List, Set
 
+from packaging.specifiers import SpecifierSet
+from packaging.version import parse as parse_version
+
 from ncatbot.utils import get_log
 
 from ..manifest import PluginManifest
@@ -127,9 +130,6 @@ class DependencyResolver:
         Raises:
             PluginVersionError: 版本约束不满足
         """
-        from packaging.specifiers import SpecifierSet
-        from packaging.version import parse as parse_version
-
         for name, manifest in manifests.items():
             for dep_name, constraint in manifest.dependencies.items():
                 dep = manifests.get(dep_name)

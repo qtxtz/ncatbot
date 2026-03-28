@@ -19,6 +19,7 @@ from typing import Any, Dict, Optional, Set
 from ...ncatbot_plugin import NcatBotPlugin
 from ncatbot.core import registrar
 from ncatbot.event import HasSender
+from ncatbot.types.qq import HeartbeatTimeoutMetaEventData
 from ncatbot.utils import get_config_manager, get_log
 
 LOG = get_log("SystemManager")
@@ -29,7 +30,7 @@ _OFF = "内置管理命令已关闭。"
 
 
 def _builtin_reserved_names() -> Set[str]:
-    from ncatbot.plugin.builtin import BUILTIN_PLUGINS
+    from .. import BUILTIN_PLUGINS
 
     return {p.name for p in BUILTIN_PLUGINS}
 
@@ -276,8 +277,6 @@ class SystemManagerPlugin(NcatBotPlugin):
 
     async def _emit_heartbeat_timeout(self, elapsed: float, timeout: int) -> None:
         """发出心跳超时事件。"""
-        from ncatbot.types.qq import HeartbeatTimeoutMetaEventData
-
         event_data = HeartbeatTimeoutMetaEventData(
             time=int(time_mod.time()),
             self_id="0",

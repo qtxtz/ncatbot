@@ -17,7 +17,7 @@ Hook 驱动 + HandlerDispatcher 分发 + Registrar 装饰器 + ContextVar 隔离
 """
 
 # ContextVar
-from .context import set_current_plugin, get_current_plugin
+from .context import set_current_plugin, get_current_plugin, _current_plugin_ctx
 
 # Hook 系统
 from .hook import Hook, HookStage, HookAction, HookContext, add_hooks, get_hooks
@@ -52,7 +52,13 @@ from .command_group_hook import CommandGroup, CommandGroupHook
 from .dispatcher import HandlerDispatcher, HandlerEntry
 
 # Registrar
-from .registrar import Registrar, registrar, flush_pending, clear_pending
+from .registrar import (
+    Registrar,
+    registrar,
+    flush_pending,
+    clear_pending,
+    _pending_handlers,
+)
 
 # 平台子注册器
 from .platform import PlatformRegistrar, QQRegistrar, BilibiliRegistrar, GitHubRegistrar
@@ -61,6 +67,7 @@ __all__ = [
     # ContextVar
     "set_current_plugin",
     "get_current_plugin",
+    "_current_plugin_ctx",
     # Hook
     "Hook",
     "HookStage",
@@ -97,6 +104,7 @@ __all__ = [
     "registrar",
     "flush_pending",
     "clear_pending",
+    "_pending_handlers",
     # 平台子注册器
     "PlatformRegistrar",
     "QQRegistrar",

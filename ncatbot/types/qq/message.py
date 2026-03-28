@@ -6,8 +6,8 @@ from typing import Any, Optional
 
 from pydantic import Field, field_validator
 
-from ncatbot.types.common.base import BaseEventData
-from ncatbot.types.common.segment.array import MessageArray
+from ..common.base import BaseEventData
+from ..common.segment.array import MessageArray
 from .enums import PostType, MessageType
 from .misc import Anonymous
 from .sender import QQSender, GroupSender

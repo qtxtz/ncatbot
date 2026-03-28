@@ -6,7 +6,7 @@ from typing import ClassVar
 
 from pydantic import field_validator
 
-from ncatbot.types.common.segment.base import MessageSegment
+from ...common.segment.base import MessageSegment
 
 __all__ = [
     "Face",

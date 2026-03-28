@@ -6,10 +6,11 @@
 
 from __future__ import annotations
 
+import json
 import time
 from typing import Any, Callable, Dict, Optional
 
-from ncatbot.types.bilibili.events import (
+from ncatbot.types.bilibili import (
     BiliCommentEventData,
     BiliConnectionEventData,
     BiliDynamicEventData,
@@ -34,8 +35,9 @@ from ncatbot.types.bilibili.events import (
     ViewEventData,
     WatchedChangeEventData,
 )
-from ncatbot.types.bilibili.enums import BiliLiveEventType, BiliSessionEventType
-from ncatbot.types.bilibili.models import (
+from ncatbot.types.bilibili import BiliLiveEventType, BiliSessionEventType
+from ncatbot.types.bilibili import BiliDynamicEventType
+from ncatbot.types.bilibili import (
     LiveRoomInfo,
     DynamicStatInfo,
     DynamicVideoInfo,
@@ -43,9 +45,9 @@ from ncatbot.types.bilibili.models import (
     DynamicArticleInfo,
     DynamicLiveRcmdInfo,
 )
-from ncatbot.types.bilibili.sender import BiliSender
-from ncatbot.types.common.base import BaseEventData
-from ncatbot.types.common.segment.array import MessageArray
+from ncatbot.types.bilibili import BiliSender
+from ncatbot.types import BaseEventData
+from ncatbot.types import MessageArray
 from ncatbot.utils import get_log
 
 LOG = get_log("BiliEventParser")
@@ -190,9 +192,6 @@ class BiliEventParser:
     # ==================== 动态解析 ====================
 
     def _parse_dynamic(self, raw: dict) -> Optional[BaseEventData]:
-        import json as _json
-        from ncatbot.types.bilibili.enums import BiliDynamicEventType
-
         item = raw.get("dynamic") or {}
         dynamic_status = raw.get("status", "new")  # "new" | "deleted"
         now = int(time.time())
@@ -289,7 +288,7 @@ class BiliEventParser:
             live_rcmd_obj = major.get("live_rcmd") or {}
             live_rcmd_content = live_rcmd_obj.get("content", "{}")
             try:
-                live_data = _json.loads(live_rcmd_content)
+                live_data = json.loads(live_rcmd_content)
             except Exception:
                 live_data = {}
             live_play_info = live_data.get("live_play_info") or {}
@@ -559,8 +558,6 @@ def _parse_danmu_aggregation(data: dict, common: dict) -> DanmuAggregationEventD
 
 def _parse_dm_interaction(data: dict, common: dict) -> DmInteractionEventData:
     d = data.get("data", data)
-    import json
-
     inner = d.get("data", "{}")
     if isinstance(inner, str):
         try:

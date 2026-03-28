@@ -68,8 +68,10 @@ class TestLoadPlugin:
             patch.object(
                 loader._importer, "find_plugin_class", return_value=_StubPlugin
             ),
-            patch("ncatbot.core.flush_pending", return_value=2) as mock_flush,
-            patch("ncatbot.core.clear_pending"),
+            patch(
+                "ncatbot.plugin.loader.core.flush_pending", return_value=2
+            ) as mock_flush,
+            patch("ncatbot.plugin.loader.core.clear_pending"),
         ):
             mock_load.return_value = MagicMock()
 
@@ -91,8 +93,8 @@ class TestLoadPlugin:
             patch.object(
                 loader._importer, "find_plugin_class", return_value=_FailPlugin
             ),
-            patch("ncatbot.core.flush_pending"),
-            patch("ncatbot.core.clear_pending") as mock_clear,
+            patch("ncatbot.plugin.loader.core.flush_pending"),
+            patch("ncatbot.plugin.loader.core.clear_pending") as mock_clear,
         ):
             mock_load.return_value = MagicMock()
 
