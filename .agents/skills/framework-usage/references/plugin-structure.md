@@ -45,7 +45,7 @@ description = "插件说明"
 
 | 基类 | 适用场景 | 继承链 |
 |------|---------|--------|
-| `NcatBotPlugin` | **推荐**，含全部 Mixin | BasePlugin + 5 Mixin |
+| `NcatBotPlugin` | **推荐**，含全部 Mixin | BasePlugin + 6 Mixin |
 | `BasePlugin` | 极简插件 | 仅生命周期 |
 
 ## 生命周期

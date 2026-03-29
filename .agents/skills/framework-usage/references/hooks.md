@@ -232,3 +232,23 @@ async def handler(self, event):
     # 不是自己发的 → 群消息 → 包含"天气" → 未在冷却中
     ...
 ```
+
+## 全局 Hook — DispatchFilterHook
+
+> 参考文档：`docs/docs/notes/reference/6. 服务层/3. 分发过滤服务.md`
+
+`DispatchFilterHook` 是一种**全局 Hook**，通过 `HandlerDispatcher(global_hooks=[...])` 注册，在所有 handler 的 handler 级 hooks 之前执行。
+
+- **priority**: 200
+- **stage**: `BEFORE_CALL`
+- **依赖**: `DispatchFilterService`
+
+插件开发者**不需要**手动使用 `DispatchFilterHook`，通过 `DispatchFilterMixin` 管理规则即可自动生效。
+
+```mermaid
+flowchart LR
+    EVENT[事件到达] --> GH[全局 Hook: DispatchFilterHook]
+    GH -->|blocked| SKIP[跳过 Handler]
+    GH -->|pass| HH[Handler 级 Hooks]
+    HH --> EXEC[Handler 执行]
+```

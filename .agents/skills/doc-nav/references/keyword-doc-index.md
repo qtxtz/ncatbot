@@ -28,6 +28,9 @@
 | 配置、Config、ConfigManager | `reference/8. 工具模块/1. 配置.md` |
 | Dispatcher、分发 | `reference/4. 核心模块/1. 内部实现.md` |
 | Registry、注册 | `reference/4. 核心模块/1. 内部实现.md` |
+| 分发过滤、DispatchFilter、禁用插件、禁用命令 | `reference/6. 服务层/3. 分发过滤服务.md` |
+| DispatchFilterMixin、block_in_group、block_for_user | `reference/5. 插件系统/2. Mixins.md` |
+| !filter、!plugins、!indexed、!commands | `guide/3. 插件开发/12. 内置管理命令.md` |
 | 生命周期、启动、关闭 | `guide/11. 架构与概念/1. 架构总览.md`（§5 生命周期） |
 | AI、chat、embeddings、图像生成 | `reference/1. Bot API/5. AI/1. API.md` |
 | Misc、下载、代理、http_get | `reference/1. Bot API/6. Misc/1. API.md` |

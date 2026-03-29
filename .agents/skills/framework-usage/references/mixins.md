@@ -2,7 +2,7 @@
 
 > 参考文档：`docs/docs/notes/guide/3. 插件开发/7. 配置与数据.md`、`docs/docs/notes/guide/3. 插件开发/8. RBAC 定时任务与事件.md`、`docs/docs/notes/reference/5. 插件系统/2. Mixins.md`
 
-`NcatBotPlugin` 已包含全部 5 个 Mixin，按需使用。
+`NcatBotPlugin` 已包含全部 6 个 Mixin，按需使用。
 
 ## ConfigMixin — 配置持久化
 
@@ -145,3 +145,37 @@ async def _monitor(self):
 - 配置与数据：`docs/docs/examples/common/02_config_and_data/`
 - RBAC 权限：`docs/docs/examples/common/04_rbac/`
 - 定时任务：`docs/docs/examples/common/05_scheduled_tasks/`
+- 分发过滤：`docs/docs/examples/qq/10_dispatch_filter/`
+
+## DispatchFilterMixin — 分发过滤
+
+> 依赖 DispatchFilterService，数据存储在 `data/dispatch_filter.json`
+> 参考文档：`docs/docs/notes/reference/5. 插件系统/2. Mixins.md`、`docs/docs/notes/reference/6. 服务层/3. 分发过滤服务.md`
+
+无 RBAC 限制，任何插件均可自由调用。管理范围为全局（不限于本插件）。
+
+| 方法 | 签名 | 说明 |
+|------|------|------|
+| `block_in_group` | `(group_id: str, plugin_name: str, commands=None) -> Optional[FilterRule]` | 在群中禁用插件或命令 |
+| `unblock_in_group` | `(group_id: str, plugin_name: str, commands=None) -> int` | 解除群禁用 |
+| `block_for_user` | `(user_id: str, plugin_name: str, commands=None) -> Optional[FilterRule]` | 对用户禁用 |
+| `unblock_for_user` | `(user_id: str, plugin_name: str, commands=None) -> int` | 解除用户禁用 |
+| `list_filters` | `(scope_type=None, scope_id=None, plugin_name=None) -> List[FilterRule]` | 查询规则 |
+| `clear_filters` | `(plugin_name=None) -> int` | 批量清除 |
+| `dispatch_filter` (property) | `Optional[DispatchFilterService]` | 服务实例 |
+
+```python
+# 在群中禁用某插件
+self.block_in_group("12345", "weather_plugin")
+
+# 对用户禁用某命令
+self.block_for_user("67890", "my_plugin", commands=["echo"])
+
+# 解除禁用
+self.unblock_in_group("12345", "weather_plugin")
+
+# 查询所有规则
+rules = self.list_filters()
+```
+
+**注意**：`self.dispatch_filter` 可能为 None（服务未启动时），便捷方法此时返回 None 或 0。`plugin_name` 为 `"*"` 时匹配全部插件。

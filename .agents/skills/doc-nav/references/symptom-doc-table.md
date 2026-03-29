@@ -13,6 +13,7 @@
 | 插件卸载/热重载异常 | plugin/loader | `guide/3. 插件开发/3. 生命周期.md` |
 | Hook/Filter 不生效 | core/registry/hook | `guide/3. 插件开发/9. Hooks.md` |
 | 权限/RBAC 不工作 | service/builtin/rbac | `guide/7. RBAC 权限/1. RBAC 模型.md` |
+| 分发过滤不生效 / 插件未被禁用 | service/builtin/dispatch_filter, core/registry/dispatch_filter_hook | `reference/6. 服务层/3. 分发过滤服务.md`。检查 DispatchFilterService 是否已加载、规则是否匹配（scope_type/scope_id/plugin_name）、DispatchFilterHook 是否注册为全局 Hook |
 | 定时任务不执行 | plugin/mixin/time_task_mixin, service/builtin/schedule | `reference/6. 服务层/2. 配置任务服务.md`。检查插件是否有与 task name 同名的方法，或是否显式传入了 callback |
 | 配置读取错误 | utils/config | `guide/6. 配置管理/1. 配置安全.md` |
 | 消息构造/消息段问题 | types/common/segment | `guide/4. 消息发送/1. 通用/1. 消息段.md` |
