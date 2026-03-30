@@ -1,14 +1,14 @@
 ## ✨ 新功能
-- **lark**: 新增飞书适配器实现 (e8b0c04c)
-- **dispatch-filter**: 新增分发过滤服务 — DispatchFilterService 按 group/user 维度管理过滤规则；DispatchFilterHook 全局拦截匹配事件分发；DispatchFilterMixin 插件便捷 API；SystemManager 新增管理命令 (79cdda1f)
+- **plugin**: 热重载支持运行时新增插件自动索引 (1bd81b67)
 
-## ♻️ 重构
-- **napcat**: 重构 Linux NapCat 启动检测逻辑 — 多策略检测 (napcat CLI / screen / pgrep)、rootless 安装路径支持、启动方式分层回退 (49f48467)
+## 🐛 修复
+- **core**: 修复 `Optional[T]` 参数绑定静默失败 — `_is_type()` 增加 Union 泛型解包 (8030e3e2)
 
 ## ✅ 测试
-- **lark**: 新增飞书适配器单元测试 (5c60738b)
-- **dispatch-filter**: 新增 18 个测试 (14 unit + 4 integration) (79cdda1f)
+- 补充命令绑定和插件加载测试 (7a830d08)
 
 ## 📝 文档
-- 更新分发过滤服务相关文档与 skills (e157949e)
-- 补充飞书适配器相关 skills (5367ed97)
+- 更新 Skills 知识资产 (80a920ee)
+
+## 🔧 维护
+- 更新 uv.lock (dc190db3)
