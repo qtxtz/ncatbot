@@ -33,13 +33,20 @@ def init(target_dir: str):
         "bot_uin": bot_uin,
         "root": root,
         "debug": False,
-        "napcat": {
-            "ws_uri": "ws://localhost:3001",
-            "ws_token": "napcat_ws",
-            "webui_uri": "http://localhost:6099",
-            "webui_token": "napcat_webui",
-            "enable_webui": True,
-        },
+        "adapters": [
+            {
+                "type": "napcat",
+                "platform": "qq",
+                "enabled": True,
+                "config": {
+                    "ws_uri": "ws://localhost:3001",
+                    "ws_token": "napcat_ws",
+                    "webui_uri": "http://localhost:6099",
+                    "webui_token": "napcat_webui",
+                    "enable_webui": True,
+                },
+            },
+        ],
         "plugin": {
             "plugins_dir": "plugins",
             "load_plugin": True,
