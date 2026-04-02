@@ -65,7 +65,10 @@ class TestEventParserRegistry:
         assert (PostType.NOTICE, NoticeType.FRIEND_ADD) in EventParser._registry
         assert (PostType.NOTICE, NoticeType.GROUP_RECALL) in EventParser._registry
         assert (PostType.NOTICE, NoticeType.FRIEND_RECALL) in EventParser._registry
-        assert (PostType.NOTICE, NoticeType.GROUP_MSG_EMOJI_LIKE) in EventParser._registry
+        assert (
+            PostType.NOTICE,
+            NoticeType.GROUP_MSG_EMOJI_LIKE,
+        ) in EventParser._registry
 
     def test_notify_events_registered(self):
         assert (PostType.NOTICE, NoticeType.NOTIFY) in EventParser._registry

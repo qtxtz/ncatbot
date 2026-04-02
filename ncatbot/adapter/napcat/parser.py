@@ -109,7 +109,9 @@ def _register_builtin() -> None:
     r(PostType.NOTICE, NoticeType.FRIEND_ADD)(FriendAddNoticeEventData)
     r(PostType.NOTICE, NoticeType.GROUP_RECALL)(GroupRecallNoticeEventData)
     r(PostType.NOTICE, NoticeType.FRIEND_RECALL)(FriendRecallNoticeEventData)
-    r(PostType.NOTICE, NoticeType.GROUP_MSG_EMOJI_LIKE)(GroupMsgEmojiLikeNoticeEventData)
+    r(PostType.NOTICE, NoticeType.GROUP_MSG_EMOJI_LIKE)(
+        GroupMsgEmojiLikeNoticeEventData
+    )
 
     # Notice - Notify (single entry; sub_type filtering via hooks)
     r(PostType.NOTICE, NoticeType.NOTIFY)(NotifyEventData)
