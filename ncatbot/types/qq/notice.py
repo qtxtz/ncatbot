@@ -2,12 +2,20 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional
+from typing import List, Literal, Optional
 
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from ..common.base import BaseEventData
-from .enums import PostType, NoticeType, NotifySubType
+from .enums import (
+    PostType,
+    NoticeType,
+    NoticeNotifySubType,
+    GroupAdminSubType,
+    GroupDecreaseSubType,
+    GroupIncreaseSubType,
+    GroupBanSubType,
+)
 from .misc import FileInfo
 
 __all__ = [
@@ -20,6 +28,8 @@ __all__ = [
     "FriendAddNoticeEventData",
     "GroupRecallNoticeEventData",
     "FriendRecallNoticeEventData",
+    "EmojiLike",
+    "GroupMsgEmojiLikeNoticeEventData",
     "NotifyEventData",
     "PokeNotifyEventData",
     "LuckyKingNotifyEventData",
@@ -29,9 +39,9 @@ __all__ = [
 
 class NoticeEventData(BaseEventData):
     platform: str = "qq"
-    post_type: PostType = Field(default=PostType.NOTICE)
+    post_type: PostType = Field(default=PostType.NOTICE)  # type: ignore[assignment]
     notice_type: NoticeType
-    sub_type: Optional[NotifySubType] = None
+    sub_type: Optional[str] = None
     group_id: Optional[str] = None
     user_id: Optional[str] = None
 
@@ -43,24 +53,24 @@ class GroupUploadNoticeEventData(NoticeEventData):
 
 class GroupAdminNoticeEventData(NoticeEventData):
     notice_type: NoticeType = Field(default=NoticeType.GROUP_ADMIN)
-    sub_type: str = Field(default="set")
+    sub_type: GroupAdminSubType = Field(default=GroupAdminSubType.SET)  # type: ignore[assignment]
 
 
 class GroupDecreaseNoticeEventData(NoticeEventData):
     notice_type: NoticeType = Field(default=NoticeType.GROUP_DECREASE)
-    sub_type: str = Field(default="leave")
+    sub_type: GroupDecreaseSubType = Field(default=GroupDecreaseSubType.LEAVE)  # type: ignore[assignment]
     operator_id: str
 
 
 class GroupIncreaseNoticeEventData(NoticeEventData):
     notice_type: NoticeType = Field(default=NoticeType.GROUP_INCREASE)
-    sub_type: str = Field(default="approve")
+    sub_type: GroupIncreaseSubType = Field(default=GroupIncreaseSubType.APPROVE)  # type: ignore[assignment]
     operator_id: str
 
 
 class GroupBanNoticeEventData(NoticeEventData):
     notice_type: NoticeType = Field(default=NoticeType.GROUP_BAN)
-    sub_type: str = Field(default="ban")
+    sub_type: GroupBanSubType = Field(default=GroupBanSubType.BAN)  # type: ignore[assignment]
     operator_id: str
     duration: int
 
@@ -80,34 +90,40 @@ class FriendRecallNoticeEventData(NoticeEventData):
     message_id: str
 
 
+# --- 群消息表情回应 ---
+
+
+class EmojiLike(BaseModel):
+    emoji_id: str
+    count: int
+
+
+class GroupMsgEmojiLikeNoticeEventData(NoticeEventData):
+    notice_type: NoticeType = Field(default=NoticeType.GROUP_MSG_EMOJI_LIKE)
+    message_id: str
+    likes: List[EmojiLike]
+    message_seq: Optional[int] = None
+    is_add: Optional[bool] = None
+
+
 # --- Notify 子类 ---
 
 
 class NotifyEventData(NoticeEventData):
     notice_type: NoticeType = Field(default=NoticeType.NOTIFY)
-    sub_type: str
-
-    def resolve_type(self) -> str:
-        """Notify 事件使用 sub_type 作为二级类型。"""
-        sub = self.sub_type
-        if hasattr(sub, "value"):
-            sub = sub.value
-        sub = str(sub) if sub else ""
-        if sub:
-            return f"notice.{sub.lower()}"
-        return "notice.notify"
+    sub_type: NoticeNotifySubType  # type: ignore[assignment]
 
 
 class PokeNotifyEventData(NotifyEventData):
-    sub_type: str = Field(default=NotifySubType.POKE)
+    sub_type: NoticeNotifySubType = Field(default=NoticeNotifySubType.POKE)
     target_id: str
 
 
 class LuckyKingNotifyEventData(NotifyEventData):
-    sub_type: str = Field(default=NotifySubType.LUCKY_KING)
+    sub_type: NoticeNotifySubType = Field(default=NoticeNotifySubType.LUCKY_KING)
     target_id: str
 
 
 class HonorNotifyEventData(NotifyEventData):
-    sub_type: str = Field(default=NotifySubType.HONOR)
+    sub_type: NoticeNotifySubType = Field(default=NoticeNotifySubType.HONOR)
     honor_type: Literal["talkative", "performer", "emotion"]

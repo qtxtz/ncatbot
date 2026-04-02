@@ -19,8 +19,9 @@ from ncatbot.types.qq import (
     GroupIncreaseNoticeEventData,
     GroupDecreaseNoticeEventData,
     GroupBanNoticeEventData,
-    PokeNotifyEventData,
+    GroupMsgEmojiLikeNoticeEventData,
 )
+from ncatbot.types.qq.notice import NotifyEventData
 
 _msg_id_counter = count(1)
 _SELF_ID = "10001"
@@ -246,6 +247,35 @@ def group_ban(
     return GroupBanNoticeEventData.model_validate(data)
 
 
+def group_msg_emoji_like(
+    user_id: str = "99999",
+    group_id: str = "100200",
+    message_id: Optional[str] = None,
+    likes: Optional[List[Dict[str, Any]]] = None,
+    is_add: bool = True,
+    message_seq: Optional[int] = None,
+    *,
+    self_id: str = _SELF_ID,
+    **extra: Any,
+) -> GroupMsgEmojiLikeNoticeEventData:
+    """构造群消息表情回应通知"""
+    data = {
+        "time": _now(),
+        "self_id": self_id,
+        "platform": "qq",
+        "post_type": "notice",
+        "notice_type": "group_msg_emoji_like",
+        "group_id": group_id,
+        "user_id": user_id,
+        "message_id": message_id or _next_msg_id(),
+        "likes": likes or [{"emoji_id": "128077", "count": 1}],
+        "is_add": is_add,
+        "message_seq": message_seq,
+        **extra,
+    }
+    return GroupMsgEmojiLikeNoticeEventData.model_validate(data)
+
+
 def poke(
     user_id: str = "99999",
     target_id: str = "10001",
@@ -253,7 +283,7 @@ def poke(
     *,
     self_id: str = _SELF_ID,
     **extra: Any,
-) -> PokeNotifyEventData:
+) -> NotifyEventData:
     """构造戳一戳通知"""
     data = {
         "time": _now(),
@@ -267,4 +297,4 @@ def poke(
         "target_id": target_id,
         **extra,
     }
-    return PokeNotifyEventData.model_validate(data)
+    return NotifyEventData.model_validate(data)

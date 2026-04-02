@@ -500,7 +500,11 @@ def test_registrar_qq_on_poke():
     async def handler(event):
         pass
 
-    assert handler.__handler_meta__["event_type"] == "notice.poke"
+    assert handler.__handler_meta__["event_type"] == "notice.notify"
+    hooks = getattr(handler, "__hooks__", [])
+    from ncatbot.core.registry.builtin_hooks import SubTypeFilter
+
+    assert any(isinstance(h, SubTypeFilter) and h.sub_type == "poke" for h in hooks)
 
 
 # ======================= K-21: message.text 而非 raw_message =======================

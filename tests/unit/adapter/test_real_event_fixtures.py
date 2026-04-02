@@ -33,8 +33,9 @@ from ncatbot.types.qq import (
     GroupBanNoticeEventData,
     GroupRecallNoticeEventData,
     GroupDecreaseNoticeEventData,
-    PokeNotifyEventData,
 )
+from ncatbot.types.qq.notice import NotifyEventData
+from ncatbot.types.qq import NoticeNotifySubType
 
 FIXTURE_PATH = (
     Path(__file__).resolve().parent.parent.parent / "fixtures" / "real_events.json"
@@ -185,8 +186,8 @@ class TestRealGroupNotices:
         raw = _find(all_events, "notice", "notify", sub_type="poke")
         result = EventParser.parse(raw)
 
-        assert isinstance(result, PokeNotifyEventData)
-        assert result.target_id
+        assert isinstance(result, NotifyEventData)
+        assert result.sub_type == NoticeNotifySubType.POKE
         assert result.user_id
 
 

@@ -6,7 +6,11 @@ __all__ = [
     "PostType",
     "MessageType",
     "NoticeType",
-    "NotifySubType",
+    "NoticeNotifySubType",
+    "GroupAdminSubType",
+    "GroupDecreaseSubType",
+    "GroupIncreaseSubType",
+    "GroupBanSubType",
     "RequestType",
     "MetaEventType",
     "EventType",
@@ -35,10 +39,32 @@ class NoticeType(str, Enum):
     FRIEND_ADD = "friend_add"
     GROUP_RECALL = "group_recall"
     FRIEND_RECALL = "friend_recall"
+    GROUP_MSG_EMOJI_LIKE = "group_msg_emoji_like"
     NOTIFY = "notify"
 
 
-class NotifySubType(str, Enum):
+class GroupAdminSubType(str, Enum):
+    SET = "set"
+    UNSET = "unset"
+
+
+class GroupDecreaseSubType(str, Enum):
+    LEAVE = "leave"
+    KICK = "kick"
+    KICK_ME = "kick_me"
+
+
+class GroupIncreaseSubType(str, Enum):
+    APPROVE = "approve"
+    INVITE = "invite"
+
+
+class GroupBanSubType(str, Enum):
+    BAN = "ban"
+    LIFT_BAN = "lift_ban"
+
+
+class NoticeNotifySubType(str, Enum):
     POKE = "poke"
     LUCKY_KING = "lucky_king"
     HONOR = "honor"

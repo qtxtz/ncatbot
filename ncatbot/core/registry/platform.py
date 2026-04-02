@@ -22,7 +22,7 @@ from typing import Any, Callable, TYPE_CHECKING
 if TYPE_CHECKING:
     from .registrar import Registrar
 
-from .builtin_hooks import MessageTypeFilter
+from .builtin_hooks import MessageTypeFilter, SubTypeFilter
 from .command_hook import CommandHook
 
 __all__ = [
@@ -171,9 +171,20 @@ class QQRegistrar(PlatformRegistrar):
         """注册好友已添加通知 handler"""
         return self.on("notice.friend_add", priority=priority, **metadata)
 
+    def on_group_msg_emoji_like(self, priority: int = 0, **metadata: Any) -> Callable:
+        """注册群消息表情回应事件 handler"""
+        return self.on("notice.group_msg_emoji_like", priority=priority, **metadata)
+
     def on_poke(self, priority: int = 0, **metadata: Any) -> Callable:
         """注册戳一戳事件 handler"""
-        return self.on("notice.poke", priority=priority, **metadata)
+
+        def decorator(func: Callable) -> Callable:
+            if not hasattr(func, "__hooks__"):
+                func.__hooks__ = []
+            func.__hooks__.append(SubTypeFilter(sub_type="poke"))
+            return self.on("notice.notify", priority=priority, **metadata)(func)
+
+        return decorator
 
     # ---- 请求事件精确类型 ----
 

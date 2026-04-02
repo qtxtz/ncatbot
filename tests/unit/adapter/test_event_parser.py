@@ -19,20 +19,21 @@ from ncatbot.adapter.napcat.parser import EventParser, NapCatEventParser
 from ncatbot.types.qq import (
     FriendRequestEventData,
     GroupMessageEventData,
+    GroupMsgEmojiLikeNoticeEventData,
     HeartbeatMetaEventData,
     LifecycleMetaEventData,
     PostType,
     MessageType,
     MetaEventType,
     NoticeType,
-    NotifySubType,
+    NoticeNotifySubType,
     RequestType,
     PrivateMessageEventData,
     GroupBanNoticeEventData,
     GroupIncreaseNoticeEventData,
     GroupRecallNoticeEventData,
-    PokeNotifyEventData,
 )
+from ncatbot.types.qq.notice import NotifyEventData
 
 
 # ===========================================================================
@@ -64,15 +65,14 @@ class TestEventParserRegistry:
         assert (PostType.NOTICE, NoticeType.FRIEND_ADD) in EventParser._registry
         assert (PostType.NOTICE, NoticeType.GROUP_RECALL) in EventParser._registry
         assert (PostType.NOTICE, NoticeType.FRIEND_RECALL) in EventParser._registry
+        assert (PostType.NOTICE, NoticeType.GROUP_MSG_EMOJI_LIKE) in EventParser._registry
 
     def test_notify_events_registered(self):
-        assert (PostType.NOTICE, NotifySubType.POKE) in EventParser._registry
-        assert (PostType.NOTICE, NotifySubType.LUCKY_KING) in EventParser._registry
-        assert (PostType.NOTICE, NotifySubType.HONOR) in EventParser._registry
+        assert (PostType.NOTICE, NoticeType.NOTIFY) in EventParser._registry
 
     def test_total_registered_count(self):
-        # 2 message + 2 request + 2 meta + 8 notice + 3 notify = 17
-        assert len(EventParser._registry) == 17
+        # 2 message + 2 request + 2 meta + 10 notice (9 + 1 notify) = 16
+        assert len(EventParser._registry) == 16
 
 
 # ===========================================================================
@@ -100,10 +100,10 @@ class TestGetKey:
         data = {"post_type": "notice", "notice_type": "group_recall"}
         assert EventParser._get_key(data) == (PostType.NOTICE, "group_recall")
 
-    def test_notify_uses_sub_type(self):
-        """P-07: notify 子类通过 sub_type 推导"""
+    def test_notify_uses_notice_type(self):
+        """P-07: notify 通过 notice_type 推导，与其他 notice 一致"""
         data = {"post_type": "notice", "notice_type": "notify", "sub_type": "poke"}
-        assert EventParser._get_key(data) == (PostType.NOTICE, "poke")
+        assert EventParser._get_key(data) == (PostType.NOTICE, "notify")
 
     def test_request_key(self):
         data = {"post_type": "request", "request_type": "friend"}
@@ -206,8 +206,8 @@ class TestEventParserParse:
             "group_id": "589962002",
         }
         result = EventParser.parse(data)
-        assert isinstance(result, PokeNotifyEventData)
-        assert result.target_id == "2324488671"
+        assert isinstance(result, NotifyEventData)
+        assert result.sub_type == NoticeNotifySubType.POKE
 
     def test_parse_friend_request(self):
         data = {
@@ -269,6 +269,28 @@ class TestEventParserParse:
         result = EventParser.parse(data)
         assert isinstance(result, GroupIncreaseNoticeEventData)
         assert result.sub_type == "approve"
+
+    def test_parse_group_msg_emoji_like_notice(self):
+        data = {
+            "time": 1767072900,
+            "self_id": "1115557735",
+            "post_type": "notice",
+            "notice_type": "group_msg_emoji_like",
+            "group_id": "701784439",
+            "user_id": "3333355556",
+            "message_id": "2009890764",
+            "likes": [{"emoji_id": "128077", "count": 2}],
+            "is_add": True,
+            "message_seq": 12345,
+        }
+        result = EventParser.parse(data)
+        assert isinstance(result, GroupMsgEmojiLikeNoticeEventData)
+        assert result.message_id == "2009890764"
+        assert len(result.likes) == 1
+        assert result.likes[0].emoji_id == "128077"
+        assert result.likes[0].count == 2
+        assert result.is_add is True
+        assert result.message_seq == 12345
 
     def test_parse_int_id_coerced_to_str(self):
         """int 类型的 ID 字段应自动转为 str"""

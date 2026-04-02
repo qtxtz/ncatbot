@@ -18,7 +18,6 @@ from ncatbot.types.qq import (
     MetaEventType,
     MessageType,
     NoticeType,
-    NotifySubType,
     PostType,
     PrivateMessageEventData,
     RequestType,
@@ -30,10 +29,9 @@ from ncatbot.types.qq import (
     GroupDecreaseNoticeEventData,
     GroupIncreaseNoticeEventData,
     GroupRecallNoticeEventData,
+    GroupMsgEmojiLikeNoticeEventData,
     GroupUploadNoticeEventData,
-    HonorNotifyEventData,
-    LuckyKingNotifyEventData,
-    PokeNotifyEventData,
+    NotifyEventData,
 )
 from ncatbot.utils import get_log
 
@@ -64,10 +62,7 @@ class EventParser:
             return (PostType.MESSAGE, data.get("message_type", ""))
 
         if post_type == PostType.NOTICE:
-            notice_type = data.get("notice_type", "")
-            if notice_type == NoticeType.NOTIFY:
-                return (PostType.NOTICE, data.get("sub_type", ""))
-            return (PostType.NOTICE, notice_type)
+            return (PostType.NOTICE, data.get("notice_type", ""))
 
         if post_type == PostType.REQUEST:
             return (PostType.REQUEST, data.get("request_type", ""))
@@ -114,11 +109,10 @@ def _register_builtin() -> None:
     r(PostType.NOTICE, NoticeType.FRIEND_ADD)(FriendAddNoticeEventData)
     r(PostType.NOTICE, NoticeType.GROUP_RECALL)(GroupRecallNoticeEventData)
     r(PostType.NOTICE, NoticeType.FRIEND_RECALL)(FriendRecallNoticeEventData)
+    r(PostType.NOTICE, NoticeType.GROUP_MSG_EMOJI_LIKE)(GroupMsgEmojiLikeNoticeEventData)
 
-    # Notice - Notify
-    r(PostType.NOTICE, NotifySubType.POKE)(PokeNotifyEventData)
-    r(PostType.NOTICE, NotifySubType.LUCKY_KING)(LuckyKingNotifyEventData)
-    r(PostType.NOTICE, NotifySubType.HONOR)(HonorNotifyEventData)
+    # Notice - Notify (single entry; sub_type filtering via hooks)
+    r(PostType.NOTICE, NoticeType.NOTIFY)(NotifyEventData)
 
 
 _register_builtin()

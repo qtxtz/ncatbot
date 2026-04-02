@@ -10,13 +10,14 @@ from ncatbot.types.qq import (
     GroupMessageEventData,
     PrivateMessageEventData,
     GroupIncreaseNoticeEventData,
+    GroupMsgEmojiLikeNoticeEventData,
     FriendRequestEventData,
     GroupRequestEventData,
 )
 
 from ..common.base import BaseEvent
 from .message import MessageEvent, GroupMessageEvent, PrivateMessageEvent
-from .notice import NoticeEvent, GroupIncreaseEvent
+from .notice import NoticeEvent, GroupIncreaseEvent, GroupMsgEmojiLikeEvent
 from .request import FriendRequestEvent, GroupRequestEvent, RequestEvent
 from .meta import MetaEvent
 
@@ -34,6 +35,7 @@ _QQ_ENTITY_MAP: Dict[Type[BaseEventData], Type[BaseEvent]] = {
     FriendRequestEventData: FriendRequestEvent,
     GroupRequestEventData: GroupRequestEvent,
     GroupIncreaseNoticeEventData: GroupIncreaseEvent,
+    GroupMsgEmojiLikeNoticeEventData: GroupMsgEmojiLikeEvent,
 }
 
 # post_type → 降级实体基类

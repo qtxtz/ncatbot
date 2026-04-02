@@ -12,7 +12,7 @@ from ncatbot.adapter.mock.api import MockBotAPI
 from ncatbot.event.common.factory import create_entity
 from ncatbot.event.common.base import BaseEvent
 from ncatbot.event.qq.message import GroupMessageEvent, PrivateMessageEvent
-from ncatbot.event.qq.notice import GroupIncreaseEvent
+from ncatbot.event.qq.notice import GroupIncreaseEvent, GroupMsgEmojiLikeEvent
 from ncatbot.event.qq.request import FriendRequestEvent, GroupRequestEvent
 from ncatbot.testing.factories import qq as factory
 
@@ -53,6 +53,16 @@ def test_group_increase_creates_event():
     data = factory.group_increase(user_id="777", group_id="888")
     entity = create_entity(data, MockBotAPI())
     assert isinstance(entity, GroupIncreaseEvent)
+
+
+def test_group_msg_emoji_like_creates_event():
+    """E-01 补充: GroupMsgEmojiLikeNoticeEventData → GroupMsgEmojiLikeEvent"""
+    data = factory.group_msg_emoji_like(user_id="999", group_id="888")
+    entity = create_entity(data, MockBotAPI())
+    assert isinstance(entity, GroupMsgEmojiLikeEvent)
+    assert entity.message_id == data.message_id
+    assert len(entity.likes) == 1
+    assert entity.is_add is True
 
 
 # ---- E-03: 降级映射 ----
