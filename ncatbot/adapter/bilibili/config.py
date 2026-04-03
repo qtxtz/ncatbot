@@ -43,6 +43,9 @@ class BilibiliConfig(BaseModel):
     dynamic_poll_interval: float = 600.0
     dynamic_page_poll_interval: float = 180.0
 
+    # 自动刷新凭据
+    auto_refresh_credential: bool = False
+
     # 连接
     max_retry: int = 5
     retry_after: float = 1.0
