@@ -15,6 +15,11 @@ AI 适配器单元测试
   AI-13: At 段转可读文本 + nickname_map
   AI-14: 不支持段跳过并警告
   AI-15: 单个 MessageSegment 输入
+  AI-16: transcription() 调用 litellm.atranscription
+  AI-17: transcription() 未指定模型抛出 ValueError
+  AI-18: transcription() 模型不存在时回退到默认 asr_model
+  AI-19: transcription_text() 返回文本字符串
+  AI-20: transcription() 透传 language/prompt/response_format/temperature
 """
 
 import asyncio
@@ -440,3 +445,128 @@ async def test_chat_single_image_segment():
     content = mock_fn.call_args.kwargs["messages"][0]["content"]
     assert isinstance(content, list)
     assert content[0]["type"] == "image_url"
+
+
+# ---- AI-16 ----
+
+
+@pytest.mark.asyncio
+async def test_transcription_calls_atranscription():
+    """AI-16: transcription() 正确调用 litellm.atranscription"""
+    cfg = AIConfig(asr_model="whisper-1")
+    api = AIBotAPI(cfg)
+
+    mock_response = MagicMock()
+    mock_response.text = "你好世界"
+
+    with patch("litellm.atranscription", new_callable=AsyncMock) as mock_fn:
+        mock_fn.return_value = mock_response
+        result = await api.transcription("audio.mp3")
+
+    assert result is mock_response
+    call_kwargs = mock_fn.call_args
+    assert call_kwargs.kwargs["model"] == "whisper-1"
+    assert call_kwargs.kwargs["file"] == "audio.mp3"
+
+
+# ---- AI-17 ----
+
+
+@pytest.mark.asyncio
+async def test_transcription_no_model_raises():
+    """AI-17: 未指定模型时 transcription() 抛出 ValueError"""
+    cfg = AIConfig()  # 无 asr_model
+    api = AIBotAPI(cfg)
+
+    with pytest.raises(ValueError, match="未指定模型"):
+        await api.transcription("audio.mp3")
+
+
+# ---- AI-18 ----
+
+
+@pytest.mark.asyncio
+async def test_transcription_model_fallback():
+    """AI-18: 指定模型不存在时回退到默认 asr_model"""
+    cfg = AIConfig(asr_model="whisper-1")
+    api = AIBotAPI(cfg)
+
+    mock_response = MagicMock()
+    call_count = 0
+
+    async def mock_atranscription(**kwargs):
+        nonlocal call_count
+        call_count += 1
+        if kwargs.get("model") == "nonexistent-asr":
+            raise Exception("model_not_found: nonexistent-asr")
+        return mock_response
+
+    with patch("litellm.atranscription", side_effect=mock_atranscription):
+        result = await api.transcription("audio.mp3", model="nonexistent-asr")
+
+    assert call_count == 2
+    assert result is mock_response
+
+
+# ---- AI-19 ----
+
+
+@pytest.mark.asyncio
+async def test_transcription_text_returns_str():
+    """AI-19: transcription_text() 直接返回文本字符串"""
+    cfg = AIConfig(asr_model="whisper-1")
+    api = AIBotAPI(cfg)
+
+    mock_response = MagicMock()
+    mock_response.text = "识别出的文本内容"
+
+    with patch("litellm.atranscription", new_callable=AsyncMock) as mock_fn:
+        mock_fn.return_value = mock_response
+        result = await api.transcription_text("audio.mp3")
+
+    assert isinstance(result, str)
+    assert result == "识别出的文本内容"
+
+
+@pytest.mark.asyncio
+async def test_transcription_text_returns_empty_on_none():
+    """AI-19: transcription_text() text 为 None 时返回空字符串"""
+    cfg = AIConfig(asr_model="whisper-1")
+    api = AIBotAPI(cfg)
+
+    mock_response = MagicMock()
+    mock_response.text = None
+
+    with patch("litellm.atranscription", new_callable=AsyncMock) as mock_fn:
+        mock_fn.return_value = mock_response
+        result = await api.transcription_text("audio.mp3")
+
+    assert result == ""
+
+
+# ---- AI-20 ----
+
+
+@pytest.mark.asyncio
+async def test_transcription_kwargs_passthrough():
+    """AI-20: transcription() 透传 language/prompt/response_format/temperature"""
+    cfg = AIConfig(asr_model="whisper-1")
+    api = AIBotAPI(cfg)
+
+    mock_response = MagicMock()
+
+    with patch("litellm.atranscription", new_callable=AsyncMock) as mock_fn:
+        mock_fn.return_value = mock_response
+        await api.transcription(
+            "audio.mp3",
+            language="zh",
+            prompt="这是一段中文语音",
+            response_format="json",
+            temperature=0.2,
+        )
+
+    call_kwargs = mock_fn.call_args.kwargs
+    assert call_kwargs["language"] == "zh"
+    assert call_kwargs["prompt"] == "这是一段中文语音"
+    assert call_kwargs["response_format"] == "json"
+    assert call_kwargs["temperature"] == 0.2

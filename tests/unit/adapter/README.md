@@ -65,3 +65,46 @@ python -m pytest tests/unit/adapter/ -v
 | BL-20 | 删除动态 | dynamic_event_type 为 DELETED_DYNAMIC |
 | BL-21 | 转发动态 (DYNAMIC_TYPE_FORWARD) | text 和 forward_dynamic_id 正确 |
 | BL-22 | DataPair 时间戳缓存 | 首次/后续 update 与深拷贝隔离 |
+
+### BiliQueryAPI (`test_bilibili_query_api.py`)
+
+测试 Bilibili 查询操作 Mixin：视频 ID 解析、音频流获取、字幕获取。
+
+| 规范 ID | 说明 | 验证点 |
+|---------|------|--------|
+| BQ-01 | parse_bili_id 匹配 BV 号 | 标准 BV、URL 中 BV、大小写 |
+| BQ-02 | parse_bili_id 匹配 av 号 | 标准 av、混合文本中 av |
+| BQ-03 | parse_bili_id 匹配 b23 短链 | mock 重定向后提取 BV |
+| BQ-04 | parse_bili_id 无匹配 | 返回 None |
+| BQ-05 | parse_bili_id 完整 URL | 从长 URL 提取 BV |
+| BQ-06 | get_video_audio_url DASH 模式 | 返回独立 AudioStreamDownloadURL |
+| BQ-07 | get_video_audio_url html5 回退 | DASH 失败后回退 html5 合并流 |
+| BQ-08 | get_video_audio_url 完全失败 | DASH + html5 均失败返回 None |
+| BQ-09 | get_video_subtitle 正常 | 拼接字幕 body.content |
+| BQ-10 | get_video_subtitle 无字幕 | 返回 None |
+| BQ-11 | get_video_subtitle 语言选择 | 按 language 参数选取字幕 |
+
+### AIAdapter (`test_ai_adapter.py`)
+
+测试 AI 适配器：chat、image_generation、transcription（ASR）。
+
+| 规范 ID | 说明 | 验证点 |
+|---------|------|--------|
+| AI-03 | chat() str 包装 | 自动包装为 messages 列表 |
+| AI-04 | chat() list 透传 | 直接透传 list[dict] |
+| AI-05 | 未指定模型 | chat/embeddings/image_generation 抛 ValueError |
+| AI-06 | 模型回退 | 模型不存在时回退到默认模型 |
+| AI-07 | 生命周期 | connect/disconnect/listen |
+| AI-08 | 未 connect | get_api() 抛 RuntimeError |
+| AI-09 | chat_text() | 返回 str，None → "" |
+| AI-10 | generate_image() | url → Image, b64 → base64://Image |
+| AI-11 | MessageArray 纯文本 | 拼接为普通字符串 |
+| AI-12 | MessageArray 图片 | 转为多模态 content |
+| AI-13 | At 段 | 默认 @id，nickname_map → @昵称 |
+| AI-14 | 不支持段 | 跳过并警告 |
+| AI-15 | 单个 MessageSegment | 直接传入 Image |
+| AI-16 | transcription() | 调用 atranscription，传递 model/file |
+| AI-17 | transcription 无模型 | 未指定 asr_model 抛 ValueError |
+| AI-18 | transcription 模型回退 | 不存在模型回退到 asr_model |
+| AI-19 | transcription_text() | 返回 str，None → "" |
+| AI-20 | transcription kwargs | 透传 language/prompt/response_format/temperature |
