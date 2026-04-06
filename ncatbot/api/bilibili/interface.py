@@ -70,7 +70,10 @@ class IBiliAPIClient(IAPIClient):
 
     @abstractmethod
     async def send_private_image(self, user_id: int, image_url: str) -> Any:
-        """发送私信图片"""
+        """发送私信图片
+        Args:
+            image_url: 可以是网络 URL 或本地路径
+        """
 
     @abstractmethod
     async def get_session_history(self, user_id: int, count: int = 20) -> list:

@@ -16,14 +16,20 @@ class SessionAPIMixin:
             content=content,
         )
 
-    async def send_private_image(self, user_id: int, image_url: str) -> Any:
+    async def send_private_image(self, user_id: int, image: str) -> Any:
         from bilibili_api import session as bili_session
+        from bilibili_api import Picture
+
+        if image.startswith(("http://", "https://")):
+            pic = await Picture.load_url(image)
+        else:
+            pic = Picture.from_file(image)
 
         return await bili_session.send_msg(
             self._credential,
             receiver_id=user_id,
             msg_type=bili_session.EventType.PICTURE,
-            content=image_url,
+            content=pic,
         )
 
     async def get_session_history(self, user_id: int, count: int = 20) -> list:
