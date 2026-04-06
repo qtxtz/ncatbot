@@ -34,6 +34,7 @@ from ncatbot.event.qq import GroupMessageEvent, PrivateMessageEvent
 | `@registrar.qq.on_group_recall()` | 群消息撤回 |
 | `@registrar.qq.on_group_admin()` | 群管理员变动 |
 | `@registrar.qq.on_group_ban()` | 群禁言 |
+| `@registrar.qq.on_group_msg_emoji_like()` | 群消息表情回应 |
 | `@registrar.qq.on_poke()` | 戳一戳 |
 | `@registrar.qq.on_friend_request()` | 好友请求 |
 | `@registrar.qq.on_group_request()` | 群请求 |
@@ -172,6 +173,74 @@ pred = from_event(event) * ~same_user(bot_id)
 # 混用 lambda
 pred = from_event(event) * P.of(lambda e: int(e.data.raw_message) > 0)
 ```
+
+## Session 便利方法
+
+EventMixin 提供 4 个 session 便利方法消除多步对话的样板代码。
+
+### wait_session_event（基础）
+
+自动 `from_event` 绑定 session，支持取消词检测。抛异常。
+
+```python
+from ncatbot.core import SessionCancelled
+
+try:
+    reply = await self.wait_session_event(event, timeout=30, cancel_words=["取消"])
+except asyncio.TimeoutError:
+    await event.reply("超时")
+except SessionCancelled as e:
+    await event.reply(f"已取消（{e.word}）")
+```
+
+### wait_session_reply（返回 SessionResult）
+
+```python
+result = await self.wait_session_reply(event, timeout=30, cancel_words=["取消"])
+if result.ok:
+    name = result.text  # raw_message.strip()
+```
+
+### session_prompt（一站式）
+
+发问题 → 等回复 → 超时/取消自动回复。
+
+```python
+result = await self.session_prompt(
+    "请输入名字：", event,
+    timeout=30, cancel_words=["取消"],
+    timeout_reply="⏰ 超时", cancel_reply="❌ 已取消",
+)
+if result.ok:
+    name = result.text
+```
+
+### session_choose（选择题）
+
+```python
+result = await self.session_choose(
+    "确认？回复「确认」或「取消」", event,
+    choices={"确认": "confirm", "取消": "cancel"},
+    timeout=15, max_retries=2,
+    invalid_reply="请回复「确认」或「取消」",
+)
+if result.ok and result.key == "confirm":
+    ...
+```
+
+### SessionResult 属性
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| `.ok` | `bool` | 正常回复为 True |
+| `.text` | `str \| None` | 回复文本 |
+| `.event` | `Event \| None` | 原始事件 |
+| `.cancelled` | `bool` | 取消词触发 |
+| `.timed_out` | `bool` | 超时 |
+| `.cancel_word` | `str \| None` | 匹配的取消词 |
+| `.key` | `str \| None` | session_choose 的选项 key |
+
+**导入路径**：`from ncatbot.core import SessionCancelled, SessionResult`
 
 ## 事件类型字符串完整列表
 

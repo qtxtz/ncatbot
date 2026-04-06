@@ -120,6 +120,10 @@ async def daily_report(self):
 |------|------|------|
 | `events` | `(event_type=None) -> EventStream` | 创建事件流 |
 | `wait_event` | `async (predicate=None, timeout=None) -> Event` | 等待单个事件 |
+| `wait_session_event` | `async (event, *, timeout, extra_predicate, cancel_words) -> Event` | 同 session 等待，抛异常 |
+| `wait_session_reply` | `async (event, *, timeout, cancel_words) -> SessionResult` | 同 session 等文本回复 |
+| `session_prompt` | `async (prompt_text, event, *, timeout, cancel_words, timeout_reply, cancel_reply) -> SessionResult` | 发问题+等回复+自动回复 |
+| `session_choose` | `async (prompt_text, event, *, choices, timeout, timeout_reply, invalid_reply, max_retries) -> SessionResult` | 选择题+重试 |
 
 ```python
 import asyncio
@@ -136,6 +140,28 @@ async def _monitor(self):
         async for event in stream:
             if "广告" in event.data.message.text:
                 await self.api.qq.messaging.delete_msg(event.data.message_id)
+```
+
+**Session 便利方法示例**：
+
+```python
+# 一站式问答
+result = await self.session_prompt(
+    "请输入名字：", event,
+    timeout=30, cancel_words=["取消"],
+    timeout_reply="⏰ 超时", cancel_reply="❌ 已取消",
+)
+if result.ok:
+    name = result.text
+
+# 选择题
+result = await self.session_choose(
+    "确认？", event,
+    choices={"确认": "confirm", "取消": "cancel"},
+    timeout=15, max_retries=2,
+)
+if result.ok and result.key == "confirm":
+    ...
 ```
 
 **注意**：`events()` 流在插件卸载时自动关闭。后台 task 需在 `on_close()` 取消。
