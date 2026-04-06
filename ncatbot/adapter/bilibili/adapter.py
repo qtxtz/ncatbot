@@ -6,6 +6,8 @@
 
 from __future__ import annotations
 
+import asyncio
+from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, TYPE_CHECKING
 
 from ..base import BaseAdapter
@@ -54,6 +56,7 @@ class BilibiliAdapter(BaseAdapter):
         self._api: Any = None
         self._parser: Any = None
         self._connected = False
+        self._refresh_task: Optional[asyncio.Task] = None
 
     async def setup(self) -> None:
         from bilibili_api import Credential
@@ -127,10 +130,19 @@ class BilibiliAdapter(BaseAdapter):
             len(self._config.dynamic_page_watches),
         )
 
+        if self._config.auto_refresh_credential:
+            self._refresh_task = asyncio.create_task(
+                self._auto_refresh_credential_loop()
+            )
+            LOG.info("已启用凭据自动刷新（每天 05:00 检查）")
+
     async def listen(self) -> None:
         await self._source_manager.run_forever()
 
     async def disconnect(self) -> None:
+        if self._refresh_task is not None:
+            self._refresh_task.cancel()
+            self._refresh_task = None
         if self._source_manager is not None:
             await self._source_manager.stop_all()
         self._connected = False
@@ -148,3 +160,32 @@ class BilibiliAdapter(BaseAdapter):
         parsed: Optional["BaseEventData"] = self._parser.parse(source_type, raw_data)
         if parsed is not None and self._event_callback is not None:
             await self._event_callback(parsed)
+
+    @staticmethod
+    def _seconds_until_next_target(hour: int = 5, minute: int = 0) -> float:
+        """计算距离下一个目标时刻（本地时间）的秒数。"""
+        now = datetime.now()
+        target = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        if target <= now:
+            target += timedelta(days=1)
+        return (target - now).total_seconds()
+
+    async def _auto_refresh_credential_loop(self) -> None:
+        """每天凌晨 5:00 检查并刷新 Bilibili 凭据。"""
+        while True:
+            wait = self._seconds_until_next_target(hour=5, minute=0)
+            LOG.debug("凭据自动刷新：将在 %.0f 秒后执行下次检查", wait)
+            await asyncio.sleep(wait)
+            try:
+                need_refresh = await self._credential.check_refresh()
+                if need_refresh:
+                    LOG.info("Bilibili 凭据需要刷新，正在执行...")
+                    await self._credential.refresh()
+                    save_credential_to_config(self._credential)
+                    LOG.info("Bilibili 凭据刷新完成，已写回 config.yaml")
+                else:
+                    LOG.debug("Bilibili 凭据暂不需要刷新")
+            except asyncio.CancelledError:
+                raise
+            except Exception:
+                LOG.exception("自动刷新 Bilibili 凭据时出错")

@@ -35,6 +35,7 @@ class SessionSource(BaseSource):
         from bilibili_api.session import Session, EventType
 
         self._session = Session(credential=self._credential)
+        self._session.logger = LOG
 
         # 注册所有消息类型
         for et in EventType:

@@ -34,5 +34,6 @@ class AIConfig(BaseModel):
     completion_model: str = ""
     embedding_model: str = ""
     image_model: str = ""
+    asr_model: str = ""
     timeout: float = 120.0
     max_tokens: Optional[int] = None

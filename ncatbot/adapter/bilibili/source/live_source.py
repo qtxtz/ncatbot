@@ -57,6 +57,7 @@ class LiveSource(BaseSource):
             max_retry=self._max_retry,
             retry_after=self._retry_after,
         )
+        self._danmaku.logger = LOG
 
         @self._danmaku.on("ALL")
         async def _on_all(event: dict) -> None:

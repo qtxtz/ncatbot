@@ -3,7 +3,7 @@ AIAdapter — 基于 litellm 的 AI 平台适配器
 
 不需要显式启动外部服务，仅提供 API 调用能力。
 通过 ``api.ai.chat()`` / ``api.ai.embeddings()`` / ``api.ai.image_generation()``
-调用任意 LLM 提供商。
+/ ``api.ai.transcription()`` 调用任意 LLM 提供商。
 """
 
 from __future__ import annotations
@@ -115,6 +115,7 @@ class AIAdapter(BaseAdapter):
             "completion_model": self._ai_config.completion_model,
             "embedding_model": self._ai_config.embedding_model,
             "image_model": self._ai_config.image_model,
+            "asr_model": self._ai_config.asr_model,
         }
         for label, model_name in models.items():
             if not model_name:

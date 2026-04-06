@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from ncatbot.api.base import IAPIClient
 from ncatbot.types import (
@@ -351,3 +351,89 @@ class AIBotAPI(IAPIClient):
         if image.url:
             return Image(file=image.url, url=image.url)
         return Image(file=f"base64://{image.b64_json}")
+
+    # ---- ASR (语音转文字) ----
+
+    async def transcription(
+        self,
+        file: Any,
+        *,
+        model: Optional[str] = None,
+        language: Optional[str] = None,
+        prompt: Optional[str] = None,
+        response_format: Optional[
+            Literal["json", "text", "srt", "verbose_json", "vtt"]
+        ] = None,
+        temperature: Optional[float] = None,
+        **kwargs: Any,
+    ) -> Any:
+        """语音转文字（ASR）
+
+        Parameters
+        ----------
+        file:
+            音频文件，支持文件路径 (``str`` / ``PathLike``)、
+            字节 (``bytes``)、文件对象 (``IO[bytes]``) 等。
+        model:
+            模型名（覆盖 ``asr_model``）。
+        language:
+            音频语言（ISO-639-1 格式，如 ``"zh"``、``"en"``）。
+        prompt:
+            可选提示文本，用于引导模型识别。
+        response_format:
+            响应格式。
+        temperature:
+            采样温度。
+
+        Returns
+        -------
+        litellm.TranscriptionResponse
+            包含 ``text`` 字段。
+        """
+        from litellm import atranscription
+
+        resolved_model = model or self._config.asr_model
+        if not resolved_model:
+            raise ValueError("未指定模型：请通过参数 model= 或配置 asr_model 设置")
+
+        call_kwargs: Dict[str, Any] = {**self._common_kwargs, **kwargs}
+        if language is not None:
+            call_kwargs["language"] = language
+        if prompt is not None:
+            call_kwargs["prompt"] = prompt
+        if response_format is not None:
+            call_kwargs["response_format"] = response_format
+        if temperature is not None:
+            call_kwargs["temperature"] = temperature
+
+        return await self._call_with_fallback(
+            atranscription,
+            resolved_model,
+            self._config.asr_model,
+            file=file,
+            **call_kwargs,
+        )
+
+    async def transcription_text(
+        self,
+        file: Any,
+        *,
+        model: Optional[str] = None,
+        language: Optional[str] = None,
+        prompt: Optional[str] = None,
+        temperature: Optional[float] = None,
+        **kwargs: Any,
+    ) -> str:
+        """语音转文字 — 直接返回文本
+
+        参数与 ``transcription()`` 相同，返回识别出的纯文本。
+        """
+        resp = await self.transcription(
+            file,
+            model=model,
+            language=language,
+            prompt=prompt,
+            temperature=temperature,
+            **kwargs,
+        )
+        return resp.text or ""

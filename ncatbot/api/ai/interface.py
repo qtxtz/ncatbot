@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
 from ..base import IAPIClient
 
@@ -139,4 +139,60 @@ class IAIAPIClient(IAPIClient):
         """图像生成 — 直接返回 Image 消息段
 
         与 ``image_generation()`` 参数相同，返回 ``ncatbot.types.Image``。
+        """
+
+    # ---- ASR (语音转文字) ----
+
+    @abstractmethod
+    async def transcription(
+        self,
+        file: Any,
+        *,
+        model: Optional[str] = None,
+        language: Optional[str] = None,
+        prompt: Optional[str] = None,
+        response_format: Optional[
+            Literal["json", "text", "srt", "verbose_json", "vtt"]
+        ] = None,
+        temperature: Optional[float] = None,
+        **kwargs: Any,
+    ) -> Any:
+        """语音转文字（ASR）
+
+        Parameters
+        ----------
+        file:
+            音频文件，支持文件路径 (``str`` / ``PathLike``)、
+            字节 (``bytes``)、文件对象 (``IO[bytes]``) 等。
+        model:
+            覆盖 ``asr_model``。
+        language:
+            音频语言（ISO-639-1 格式，如 ``"zh"``、``"en"``）。
+        prompt:
+            可选提示文本，用于引导模型识别风格或补充上下文。
+        response_format:
+            响应格式：``"json"`` / ``"text"`` / ``"srt"`` / ``"verbose_json"`` / ``"vtt"``。
+        temperature:
+            采样温度。
+
+        Returns
+        -------
+        litellm.TranscriptionResponse
+            包含 ``text`` 字段。
+        """
+
+    @abstractmethod
+    async def transcription_text(
+        self,
+        file: Any,
+        *,
+        model: Optional[str] = None,
+        language: Optional[str] = None,
+        prompt: Optional[str] = None,
+        temperature: Optional[float] = None,
+        **kwargs: Any,
+    ) -> str:
+        """语音转文字 — 直接返回文本
+
+        与 ``transcription()`` 参数相同，返回识别出的纯文本。
         """
