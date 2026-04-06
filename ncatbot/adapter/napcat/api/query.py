@@ -83,7 +83,7 @@ class QueryAPIMixin:
 
     async def get_msg(self, message_id: Union[str, int]) -> MessageData:
         data = await self._call_data("get_msg", {"message_id": int(message_id)}) or {}
-        message_array = MessageArray.from_list(data['message'])
+        message_array = MessageArray.from_list(data["message"])
         message = MessageData(**data)
         message.message = message_array
         return message
