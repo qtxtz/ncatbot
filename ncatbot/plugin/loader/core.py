@@ -202,7 +202,7 @@ class PluginLoader:
         except Exception as e:
             # 加载失败时清理残留的 pending handlers
             clear_pending(name)
-            LOG.error("加载插件 %s 失败: %s", name, e)
+            LOG.error("加载插件 %s 失败: %s", name, e, exc_info=True)
             return None
 
     async def unload_plugin(self, name: str) -> bool:

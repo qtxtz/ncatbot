@@ -151,17 +151,36 @@ class ModuleImporter:
             ImportError: 未找到插件类
         """
         if class_name:
-            obj = getattr(module, class_name, None)
-            if (
-                obj is None
-                or not isinstance(obj, type)
-                or not issubclass(obj, BasePlugin)
-            ):
-                raise ImportError(
-                    f"模块 {module.__name__} 中未找到 BasePlugin 子类: {class_name}"
-                )
+            return self._find_by_name(module, class_name)
+        return self._find_by_scan(module)
+
+    def _find_by_name(self, module: ModuleType, class_name: str) -> Type[BasePlugin]:
+        """根据 manifest.entry_class 指定的类名查找。"""
+        obj = getattr(module, class_name, None)
+        if obj is not None and isinstance(obj, type) and issubclass(obj, BasePlugin):
             return obj
 
+        # 查找失败，生成诊断信息
+        candidates = self._collect_candidates(module)
+        detail = self._format_diag(module, candidates)
+
+        if obj is None:
+            reason = f"类 {class_name} 不在模块命名空间中"
+        elif not isinstance(obj, type):
+            reason = f"{class_name} 存在但不是类（实际类型: {type(obj).__name__}）"
+        else:
+            reason = (
+                f"{class_name} 存在但不是 BasePlugin 子类"
+                f"（MRO: {[c.__name__ for c in obj.__mro__]}）"
+            )
+        raise ImportError(
+            f"模块 {module.__name__} 中未找到 BasePlugin 子类: {class_name}\n"
+            f"  原因: {reason}\n{detail}"
+        )
+
+    def _find_by_scan(self, module: ModuleType) -> Type[BasePlugin]:
+        """自动发现：在模块中扫描 BasePlugin 子类。"""
+        # 严格匹配：仅匹配在此模块中定义的类
         for obj in vars(module).values():
             if (
                 isinstance(obj, type)
@@ -171,7 +190,62 @@ class ModuleImporter:
             ):
                 return obj
 
-        raise ImportError(f"模块 {module.__name__} 中未找到 BasePlugin 子类")
+        # 严格匹配失败，尝试宽松匹配（排除框架内部类）
+        candidates = self._collect_candidates(module)
+        relaxed = [
+            (name, cls)
+            for name, cls, mod in candidates
+            if not mod.startswith("ncatbot.")
+        ]
+
+        if len(relaxed) == 1:
+            name, cls = relaxed[0]
+            LOG.warning(
+                "模块 %s 中未找到严格匹配的 BasePlugin 子类，"
+                "但宽松匹配发现 %s（__module__=%s != %s），已采用。"
+                '建议在 manifest.toml 中显式指定 entry_class = "%s"',
+                module.__name__,
+                name,
+                cls.__module__,
+                module.__name__,
+                name,
+            )
+            return cls
+
+        # 完全失败，生成诊断信息
+        detail = self._format_diag(module, candidates)
+        raise ImportError(f"模块 {module.__name__} 中未找到 BasePlugin 子类\n{detail}")
+
+    @staticmethod
+    def _collect_candidates(
+        module: ModuleType,
+    ) -> list[tuple[str, type, str]]:
+        """收集模块中所有 BasePlugin 子类（排除 BasePlugin 自身）。"""
+        return [
+            (name, obj, obj.__module__)
+            for name, obj in vars(module).items()
+            if isinstance(obj, type)
+            and issubclass(obj, BasePlugin)
+            and obj is not BasePlugin
+        ]
+
+    @staticmethod
+    def _format_diag(
+        module: ModuleType,
+        candidates: list[tuple[str, type, str]],
+    ) -> str:
+        """格式化诊断信息。"""
+        if not candidates:
+            all_names = [k for k, v in vars(module).items() if isinstance(v, type)]
+            return (
+                f"  诊断: 模块中无任何 BasePlugin 子类（共 {len(all_names)} 个类: "
+                f"{all_names}）"
+            )
+        lines = [f"  诊断: 发现 {len(candidates)} 个 BasePlugin 子类:"]
+        for name, cls, mod in candidates:
+            match = "✓" if mod == module.__name__ else "✗"
+            lines.append(f"    {match} {name} (__module__={mod})")
+        return "\n".join(lines)
 
     # ------------------------------------------------------------------
     # 内部方法
