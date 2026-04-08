@@ -4,13 +4,14 @@ NapCat 适配器主类
 纯编排类，组合 setup / connection / api / parser 子组件。
 """
 
+import logging
 from typing import Any, Dict, Optional
 
 from ..base import BaseAdapter
 from ncatbot.api import IAPIClient
 from ncatbot.utils import get_config_manager, get_log
 from ncatbot.utils import NapCatConfig
-from ncatbot.utils import resolve_event_log_level
+from ncatbot.utils import resolve_event_log_level, format_event_summary
 
 from .api.bot_api import NapCatBotAPI
 from .connection.protocol import OB11Protocol
@@ -95,14 +96,24 @@ class NapCatAdapter(BaseAdapter):
 
         # 根据配置决定事件日志级别
         event_type = data_model.resolve_type()
-        overrides = get_config_manager().config.logging.event_log_levels
-        log_level = resolve_event_log_level(event_type, overrides)
+        logging_config = get_config_manager().config.logging
+        log_level = resolve_event_log_level(event_type, logging_config.event_log_levels)
 
         if log_level is not None:
-            s = data_model.model_dump_json()
-            if len(s) > 2000:
-                s = s[:2000] + "..."
-            LOG._log(log_level, f"收到事件 {data_model.post_type.value}: {s}", (), {})
+            if logging_config.event_log_format == "summary":
+                summary = format_event_summary(raw_data)
+                LOG._log(log_level, summary, (), {})
+                # DEBUG 级别额外输出完整 JSON
+                s = data_model.model_dump_json()
+                if len(s) > 2000:
+                    s = s[:2000] + "..."
+                LOG._log(logging.DEBUG, f"收到事件 {data_model.post_type.value}: {s}", (), {})
+            else:
+                # raw 模式：旧行为
+                s = data_model.model_dump_json()
+                if len(s) > 2000:
+                    s = s[:2000] + "..."
+                LOG._log(log_level, f"收到事件 {data_model.post_type.value}: {s}", (), {})
 
         if self._event_callback:
             await self._event_callback(data_model)

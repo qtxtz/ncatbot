@@ -185,3 +185,100 @@ class TestFormatUnknown:
         }
         result = format_event_summary(data)
         assert result == "[群消息] G(123) Bot(456): hi"
+
+
+import logging
+from unittest.mock import patch, MagicMock
+
+
+class TestOnEventLogFormat:
+    """ELS-14 ~ ELS-17: NapCatAdapter._on_event 日志格式集成"""
+
+    def _make_adapter(self):
+        """创建一个最小化的 NapCatAdapter 用于测试 _on_event"""
+        from ncatbot.adapter.napcat.adapter import NapCatAdapter
+        from ncatbot.adapter.napcat.parser import NapCatEventParser
+
+        adapter = NapCatAdapter.__new__(NapCatAdapter)
+        adapter._event_callback = None
+        adapter._parser = NapCatEventParser()
+        return adapter
+
+    def _make_raw_data(self):
+        return {
+            "post_type": "message",
+            "message_type": "group",
+            "sub_type": "normal",
+            "group_id": "123",
+            "group_name": "TestGroup",
+            "user_id": "456",
+            "sender": {"user_id": "456", "nickname": "Nick"},
+            "raw_message": "hello",
+            "message": [{"type": "text", "data": {"text": "hello"}}],
+            "message_id": "789",
+            "time": 1000000000,
+            "self_id": "111",
+            "font": 14,
+        }
+
+    @pytest.mark.asyncio
+    async def test_summary_format_logs_summary(self):
+        """ELS-14: event_log_format=summary 时以 resolved level 输出摘要"""
+        adapter = self._make_adapter()
+        mock_cfg = MagicMock()
+        mock_cfg.config.logging.event_log_levels = {}
+        mock_cfg.config.logging.event_log_format = "summary"
+
+        with patch("ncatbot.adapter.napcat.adapter.get_config_manager", return_value=mock_cfg):
+            with patch("ncatbot.adapter.napcat.adapter.LOG") as mock_log:
+                await adapter._on_event(self._make_raw_data())
+                calls = mock_log._log.call_args_list
+                assert len(calls) >= 1
+                summary_msg = calls[0][0][1]
+                assert "[群消息]" in summary_msg
+                assert "TestGroup(123)" in summary_msg
+
+    @pytest.mark.asyncio
+    async def test_summary_format_emits_debug_raw(self):
+        """ELS-15: event_log_format=summary 时 DEBUG 级别额外输出完整 JSON"""
+        adapter = self._make_adapter()
+        mock_cfg = MagicMock()
+        mock_cfg.config.logging.event_log_levels = {}
+        mock_cfg.config.logging.event_log_format = "summary"
+
+        with patch("ncatbot.adapter.napcat.adapter.get_config_manager", return_value=mock_cfg):
+            with patch("ncatbot.adapter.napcat.adapter.LOG") as mock_log:
+                await adapter._on_event(self._make_raw_data())
+                calls = mock_log._log.call_args_list
+                assert len(calls) == 2
+                debug_level = calls[1][0][0]
+                assert debug_level == logging.DEBUG
+
+    @pytest.mark.asyncio
+    async def test_raw_format_logs_json(self):
+        """ELS-16: event_log_format=raw 时输出完整 JSON（旧行为）"""
+        adapter = self._make_adapter()
+        mock_cfg = MagicMock()
+        mock_cfg.config.logging.event_log_levels = {}
+        mock_cfg.config.logging.event_log_format = "raw"
+
+        with patch("ncatbot.adapter.napcat.adapter.get_config_manager", return_value=mock_cfg):
+            with patch("ncatbot.adapter.napcat.adapter.LOG") as mock_log:
+                await adapter._on_event(self._make_raw_data())
+                calls = mock_log._log.call_args_list
+                assert len(calls) == 1
+                msg = calls[0][0][1]
+                assert "收到事件 message:" in msg
+
+    @pytest.mark.asyncio
+    async def test_none_level_suppresses_all(self):
+        """ELS-17: event_log_levels=NONE 时 summary 和 raw 都不输出"""
+        adapter = self._make_adapter()
+        mock_cfg = MagicMock()
+        mock_cfg.config.logging.event_log_levels = {"message": "NONE"}
+        mock_cfg.config.logging.event_log_format = "summary"
+
+        with patch("ncatbot.adapter.napcat.adapter.get_config_manager", return_value=mock_cfg):
+            with patch("ncatbot.adapter.napcat.adapter.LOG") as mock_log:
+                await adapter._on_event(self._make_raw_data())
+                mock_log._log.assert_not_called()
