@@ -107,13 +107,17 @@ class NapCatAdapter(BaseAdapter):
                 s = data_model.model_dump_json()
                 if len(s) > 2000:
                     s = s[:2000] + "..."
-                LOG._log(logging.DEBUG, f"收到事件 {data_model.post_type.value}: {s}", (), {})
+                LOG._log(
+                    logging.DEBUG, f"收到事件 {data_model.post_type.value}: {s}", (), {}
+                )
             else:
                 # raw 模式：旧行为
                 s = data_model.model_dump_json()
                 if len(s) > 2000:
                     s = s[:2000] + "..."
-                LOG._log(log_level, f"收到事件 {data_model.post_type.value}: {s}", (), {})
+                LOG._log(
+                    log_level, f"收到事件 {data_model.post_type.value}: {s}", (), {}
+                )
 
         if self._event_callback:
             await self._event_callback(data_model)

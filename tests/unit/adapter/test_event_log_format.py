@@ -228,7 +228,9 @@ class TestOnEventLogFormat:
         mock_cfg.config.logging.event_log_levels = {}
         mock_cfg.config.logging.event_log_format = "summary"
 
-        with patch("ncatbot.adapter.napcat.adapter.get_config_manager", return_value=mock_cfg):
+        with patch(
+            "ncatbot.adapter.napcat.adapter.get_config_manager", return_value=mock_cfg
+        ):
             with patch("ncatbot.adapter.napcat.adapter.LOG") as mock_log:
                 await adapter._on_event(self._make_raw_data())
                 calls = mock_log._log.call_args_list
@@ -245,7 +247,9 @@ class TestOnEventLogFormat:
         mock_cfg.config.logging.event_log_levels = {}
         mock_cfg.config.logging.event_log_format = "summary"
 
-        with patch("ncatbot.adapter.napcat.adapter.get_config_manager", return_value=mock_cfg):
+        with patch(
+            "ncatbot.adapter.napcat.adapter.get_config_manager", return_value=mock_cfg
+        ):
             with patch("ncatbot.adapter.napcat.adapter.LOG") as mock_log:
                 await adapter._on_event(self._make_raw_data())
                 calls = mock_log._log.call_args_list
@@ -261,7 +265,9 @@ class TestOnEventLogFormat:
         mock_cfg.config.logging.event_log_levels = {}
         mock_cfg.config.logging.event_log_format = "raw"
 
-        with patch("ncatbot.adapter.napcat.adapter.get_config_manager", return_value=mock_cfg):
+        with patch(
+            "ncatbot.adapter.napcat.adapter.get_config_manager", return_value=mock_cfg
+        ):
             with patch("ncatbot.adapter.napcat.adapter.LOG") as mock_log:
                 await adapter._on_event(self._make_raw_data())
                 calls = mock_log._log.call_args_list
@@ -277,7 +283,9 @@ class TestOnEventLogFormat:
         mock_cfg.config.logging.event_log_levels = {"message": "NONE"}
         mock_cfg.config.logging.event_log_format = "summary"
 
-        with patch("ncatbot.adapter.napcat.adapter.get_config_manager", return_value=mock_cfg):
+        with patch(
+            "ncatbot.adapter.napcat.adapter.get_config_manager", return_value=mock_cfg
+        ):
             with patch("ncatbot.adapter.napcat.adapter.LOG") as mock_log:
                 await adapter._on_event(self._make_raw_data())
                 mock_log._log.assert_not_called()

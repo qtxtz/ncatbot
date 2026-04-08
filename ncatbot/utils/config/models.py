@@ -197,9 +197,7 @@ class LoggingConfig(BaseConfig):
     def _validate_event_log_format(cls, v: str) -> str:
         lower = v.lower()
         if lower not in ("summary", "raw"):
-            raise ValueError(
-                f"无效的 event_log_format '{v}'。可选值: raw, summary"
-            )
+            raise ValueError(f"无效的 event_log_format '{v}'。可选值: raw, summary")
         return lower
 
 
