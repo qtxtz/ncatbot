@@ -7,6 +7,7 @@ NapCat 适配器主类
 import logging
 from typing import Any, Dict, Optional
 
+
 from ..base import BaseAdapter
 from ncatbot.api import IAPIClient
 from ncatbot.utils import get_config_manager, get_log
@@ -77,6 +78,68 @@ class NapCatAdapter(BaseAdapter):
     def stop_managed_runtime(self) -> None:
         """停止由 NapCat 平台层管理的本地运行时。"""
         self._launcher.stop()
+
+    @classmethod
+    def cli_configure(cls) -> Dict[str, Any]:
+        import click
+
+        click.echo(click.style("\n— NapCat 适配器配置 —", fg="cyan", bold=True))
+
+        # 询问是否自动下载安装 NapCat
+        auto_install = click.confirm("是否现在自动下载并安装 NapCat?", default=False)
+        if auto_install:
+            cls._cli_install_napcat()
+            # 自动安装模式：启动时由 configure_all() 自动配置，使用默认值
+            click.echo(
+                click.style(
+                    "  将使用默认连接参数，适配器启动时自动配置",
+                    dim=True,
+                )
+            )
+            return {
+                "ws_uri": "ws://localhost:3001",
+                "ws_token": "napcat_ws",
+                "webui_uri": "http://localhost:6099",
+                "webui_token": "napcat_webui",
+                "enable_webui": True,
+            }
+
+        ws_uri = click.prompt("WebSocket 地址", default="ws://localhost:3001")
+        ws_token = click.prompt("WebSocket Token", default="napcat_ws")
+        webui_uri = click.prompt("WebUI 地址", default="http://localhost:6099")
+        webui_token = click.prompt("WebUI Token", default="napcat_webui")
+        enable_webui = click.confirm("启用 WebUI?", default=True)
+        return {
+            "ws_uri": ws_uri,
+            "ws_token": ws_token,
+            "webui_uri": webui_uri,
+            "webui_token": webui_token,
+            "enable_webui": enable_webui,
+        }
+
+    @staticmethod
+    def _cli_install_napcat() -> None:
+        """CLI 环境下安装 NapCat。"""
+        import click
+
+        try:
+            from .setup.platform import PlatformOps, UnsupportedPlatformError
+            from .setup.installer import NapCatInstaller
+
+            try:
+                platform_ops = PlatformOps.create()
+            except UnsupportedPlatformError:
+                click.echo(click.style("当前操作系统不支持自动安装 NapCat", fg="red"))
+                return
+
+            installer = NapCatInstaller(platform_ops)
+            ok = installer.install(skip_confirm=True)
+            if ok:
+                click.echo(click.style("NapCat 安装成功!", fg="green"))
+            else:
+                click.echo(click.style("NapCat 安装失败，请稍后手动安装", fg="red"))
+        except Exception as e:
+            click.echo(click.style(f"安装过程出错: {e}", fg="red"))
 
     async def listen(self) -> None:
         await self._ws.listen(self._protocol.on_message)

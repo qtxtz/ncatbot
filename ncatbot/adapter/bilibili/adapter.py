@@ -38,6 +38,77 @@ class BilibiliAdapter(BaseAdapter):
     platform = "bilibili"
     pip_dependencies = {"bilibili-api-python": ">=17.0.0"}
 
+    @classmethod
+    def cli_configure(cls) -> Dict[str, Any]:
+        import click
+
+        click.echo(click.style("\n— Bilibili 适配器配置 —", fg="cyan", bold=True))
+
+        cfg: Dict[str, Any] = {}
+
+        # 询问是否扫码登录获取 cookie
+        if click.confirm("是否现在扫码登录获取 Bilibili 凭据?", default=False):
+            credential = cls._cli_qrcode_login()
+            if credential:
+                cfg.update(credential)
+        else:
+            click.echo(
+                click.style(
+                    "  Cookie 可从浏览器开发者工具获取，留空则启动时扫码登录",
+                    dim=True,
+                )
+            )
+            for field in (
+                "sessdata",
+                "bili_jct",
+                "buvid3",
+                "dedeuserid",
+                "ac_time_value",
+            ):
+                val = click.prompt(field, default="", show_default=False)
+                if val:
+                    cfg[field] = val
+
+        live_rooms_str = click.prompt(
+            "监听的直播间 ID（逗号分隔，留空跳过）", default="", show_default=False
+        )
+        cfg["live_rooms"] = [
+            int(r.strip()) for r in live_rooms_str.split(",") if r.strip().isdigit()
+        ]
+        cfg["enable_session"] = click.confirm("监听私信?", default=False)
+
+        return cfg
+
+    @staticmethod
+    def _cli_qrcode_login() -> Optional[Dict[str, Any]]:
+        """CLI 环境下通过扫码登录获取凭据。"""
+        import asyncio
+        import click
+
+        try:
+            from ncatbot.utils import check_requirements, install_packages
+
+            _, missing = check_requirements({"bilibili-api-python": ">=17.0.0"})
+            if missing:
+                click.echo("正在安装 bilibili-api-python ...")
+                if not install_packages(missing):
+                    click.echo(click.style("依赖安装失败", fg="red"))
+                    return None
+
+            credential = asyncio.run(qrcode_login())
+            click.echo(click.style("Bilibili 登录成功!", fg="green"))
+            return {
+                "sessdata": credential.sessdata or "",
+                "bili_jct": credential.bili_jct or "",
+                "buvid3": credential.buvid3 or "",
+                "dedeuserid": credential.dedeuserid or "",
+                "ac_time_value": credential.ac_time_value or "",
+            }
+        except Exception as e:
+            click.echo(click.style(f"扫码登录失败: {e}", fg="red"))
+            click.echo("你可以稍后启动时再扫码，或手动填写 Cookie")
+            return None
+
     def __init__(
         self,
         config: Optional[Dict[str, Any]] = None,

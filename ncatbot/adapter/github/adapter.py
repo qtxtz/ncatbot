@@ -28,6 +28,45 @@ class GitHubAdapter(BaseAdapter):
     supported_protocols = ["github_webhook", "github_polling"]
     platform = "github"
 
+    @classmethod
+    def cli_configure(cls) -> Dict[str, Any]:
+        import click
+
+        click.echo(click.style("\n— GitHub 适配器配置 —", fg="cyan", bold=True))
+        token = click.prompt(
+            "Personal Access Token（留空匿名）", default="", show_default=False
+        )
+        repos_str = click.prompt(
+            "监听仓库（owner/repo 格式，逗号分隔）", default="", show_default=False
+        )
+        repos = [r.strip() for r in repos_str.split(",") if r.strip()]
+
+        mode = click.prompt(
+            "事件接收模式",
+            type=click.Choice(["webhook", "polling"]),
+            default="webhook",
+        )
+
+        cfg: Dict[str, Any] = {"repos": repos, "mode": mode}
+        if token:
+            cfg["token"] = token
+
+        if mode == "webhook":
+            cfg["webhook_port"] = click.prompt(
+                "Webhook 监听端口", type=int, default=8080
+            )
+            webhook_secret = click.prompt(
+                "Webhook Secret（留空不验签）", default="", show_default=False
+            )
+            if webhook_secret:
+                cfg["webhook_secret"] = webhook_secret
+        else:
+            cfg["poll_interval"] = click.prompt(
+                "轮询间隔（秒）", type=float, default=60.0
+            )
+
+        return cfg
+
     def __init__(
         self,
         config: Optional[Dict[str, Any]] = None,

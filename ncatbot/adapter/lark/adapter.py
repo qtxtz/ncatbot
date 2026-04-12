@@ -34,6 +34,16 @@ class LarkAdapter(BaseAdapter):
     platform = "lark"
     pip_dependencies = {"lark-oapi": ">=1.5.3"}
 
+    @classmethod
+    def cli_configure(cls) -> Dict[str, Any]:
+        import click
+
+        click.echo(click.style("\n— 飞书 / Lark 适配器配置 —", fg="cyan", bold=True))
+        app_id = click.prompt("App ID（必填）", type=str)
+        app_secret = click.prompt("App Secret（必填）", type=str)
+        cfg: Dict[str, Any] = {"app_id": app_id, "app_secret": app_secret}
+        return cfg
+
     def __init__(
         self,
         config: Optional[Dict[str, Any]] = None,

@@ -47,6 +47,32 @@ class AIAdapter(BaseAdapter):
     platform = "ai"
     pip_dependencies: Dict[str, str] = {"litellm": ">=1.40.0"}
 
+    @classmethod
+    def cli_configure(cls) -> Dict[str, Any]:
+        import click
+
+        click.echo(click.style("\n— AI 适配器配置 —", fg="cyan", bold=True))
+        click.echo(
+            click.style(
+                "  支持 OpenAI / DeepSeek / Qwen / Kimi 等，留空使用环境变量",
+                dim=True,
+            )
+        )
+        api_key = click.prompt("API Key", default="", show_default=False)
+        base_url = click.prompt("API Base URL", default="", show_default=False)
+        completion_model = click.prompt(
+            "Completion Model", default="", show_default=False
+        )
+
+        cfg: Dict[str, Any] = {}
+        if api_key:
+            cfg["api_key"] = api_key
+        if base_url:
+            cfg["base_url"] = base_url
+        if completion_model:
+            cfg["completion_model"] = completion_model
+        return cfg
+
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._ai_config = AIConfig(**self._raw_config)
