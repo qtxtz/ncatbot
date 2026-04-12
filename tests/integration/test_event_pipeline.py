@@ -5,6 +5,7 @@
   I-01: Dispatcher → HandlerDispatcher → handler 全链路
   I-02: 多类型事件混发，handler 只收到匹配的
   I-03: Hook 过滤 + handler 执行全链路
+  I-22: event.reply() 经 QQAPIClient sugar 层到 MockBotAPI 全链路
 """
 
 import asyncio
@@ -137,8 +138,8 @@ async def test_handler_api_call():
     await ed.callback(factory.group_message("ping", group_id="1"))
     await asyncio.sleep(0.05)
 
-    assert api.called("send_group_msg")
-    call = api.last_call("send_group_msg")
+    assert api.called("post_group_array_msg")
+    call = api.last_call("post_group_array_msg")
     assert call.params["group_id"] == "1"
     from ncatbot.testing.assertions import extract_text
 
@@ -146,3 +147,27 @@ async def test_handler_api_call():
 
     await hd.stop()
     await ed.close()
+
+
+# ---- I-22: event.reply() 经 sugar 层全链路 ----
+
+
+async def test_reply_through_sugar_layer(harness):
+    """I-22: event.reply() 经 QQAPIClient sugar 层 → send_group_msg 到 MockBotAPI"""
+
+    async def reply_handler(event):
+        await event.reply(text="hi", at_sender=False)
+
+    harness.bot.handler_dispatcher.register_handler("message.group", reply_handler)
+
+    await harness.inject(
+        factory.group_message("hello", group_id="200", user_id="10001")
+    )
+    await harness.settle(0.1)
+
+    harness.assert_api("send_group_msg").called()
+    call = harness.assert_api("send_group_msg").last
+    assert call.params["group_id"] == "200"
+    from ncatbot.testing.assertions import extract_text
+
+    assert "hi" in extract_text(call)

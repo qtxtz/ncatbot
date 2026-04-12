@@ -15,7 +15,8 @@
 | 规范 ID | 说明 | 验证点 |
 |---------|------|--------|
 | I-01 | 全链路事件管线 | `Dispatcher` → `HandlerDispatcher` → handler 收到 `GroupMessageEvent` |
-| I-01 补充 | handler 与 API | handler 内 `event.reply()` → `MockBotAPI` 记录 `send_group_msg` 等调用 |
+| I-01 补充 | handler 与 API | handler 内 `event.reply()` → `MockBotAPI` 记录 `post_group_array_msg` 调用 |
+| I-22 | reply 经 sugar 层全链路 | `event.reply()` 经 `QQAPIClient` sugar 层 → `send_group_msg` 到 `MockBotAPI` |
 | I-02 | 混合事件过滤 | 多类型事件混发；`message.group` handler 仅群消息；`message` handler 收到群+私聊 |
 | I-03 | Hook 过滤 + 执行 | `MessageTypeFilter("group")` + `add_hooks` 在全链路中过滤私聊，仅群消息进入 handler |
 
