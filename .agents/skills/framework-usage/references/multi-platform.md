@@ -12,9 +12,9 @@
 | 飞书 (Lark) | App ID + App Secret | config.yaml 配置 `app_id` / `app_secret` |
 | Mock | 无需认证 | `docs/docs/notes/guide/2. 适配器/4. Mock 适配器.md` |
 
-> QQ (NapCat) 首次启动时由 NcatBot 自动安装，无需手动配置。启动后通过 WebUI 扫码登录。
+> QQ (NapCat) 首次启动时由 NcatBot 自动安装，无需手动配置。启动后通过 WebUI 扫码登录。CLI `ncatbot init` 选择自动安装时跳过 WS/WebUI 地址输入。
 
-> Bilibili 适配器支持扫码登录：config.yaml 中 `sessdata` 留空即可在启动时自动弹出二维码，扫码后凭据自动写回配置文件。
+> Bilibili 适配器支持扫码登录：config.yaml 中 `sessdata` 留空即可在启动时自动弹出二维码，扫码后凭据自动写回配置文件。CLI 初始化时选择扫码可跳过 sessdata 等手动输入。
 
 ## 多适配器启动
 

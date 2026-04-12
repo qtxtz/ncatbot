@@ -29,6 +29,11 @@ pip install ncatbot5
 ncatbot init    # 交互式创建 config.yaml + plugins/ + 模板插件
 ```
 
+`ncatbot init` 支持多适配器 checkbox 选择，各适配器的 `cli_configure()` 钩子含智能跳过逻辑：
+
+- **NapCat**：选择自动安装时跳过 WS/WebUI 地址输入（启动时自动配置）
+- **Bilibili**：选择扫码登录时跳过 sessdata 等凭据手动输入（扫码自动获取）
+
 ### 方式 2：手动创建
 
 创建项目目录，包含 `config.yaml` 和 `plugins/` 目录即可。
