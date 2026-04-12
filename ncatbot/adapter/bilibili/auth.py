@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import re
 import tempfile
 from typing import TYPE_CHECKING
 
@@ -18,13 +19,85 @@ if TYPE_CHECKING:
 
 LOG = get_log("BilibiliAuth")
 
+# 匹配 ANSI CSI 序列（如 \x1b[0;37;47m）
+_ANSI_RE = re.compile(r"\x1b\[([^m]*)m")
+
+
+def _ansi_to_matrix(terminal_str: str) -> list[list[bool]]:
+    """将 ANSI 彩色终端输出解析为布尔矩阵。
+
+    bilibili_api 的 ``get_qrcode_terminal()`` 返回 ANSI 颜色序列：
+    - 背景色 40 (黑) = 暗像素 → True
+    - 背景色 47 (白) = 亮像素 → False
+
+    每个像素输出为 2 个空格 + 一组 ANSI 转义前缀。
+    """
+    matrix: list[list[bool]] = []
+    for line in terminal_str.splitlines():
+        if not line.strip():
+            continue
+        row: list[bool] = []
+        bg_dark = False
+        pos = 0
+        while pos < len(line):
+            m = _ANSI_RE.match(line, pos)
+            if m:
+                # 解析 CSI 参数（如 "0;37;40"），查找背景色
+                codes = m.group(1).split(";")
+                for code in codes:
+                    c = int(code) if code.isdigit() else 0
+                    if c == 40:
+                        bg_dark = True
+                    elif 41 <= c <= 47 or c == 49 or c == 0:
+                        bg_dark = c == 40  # reset 或其他背景色 → 非暗
+                pos = m.end()
+            elif line[pos] == " ":
+                row.append(bg_dark)
+                pos += 1
+            else:
+                pos += 1
+        # 每 2 个空格代表 1 个像素 → 去重合并
+        pixel_row = row[::2] if row else row
+        if pixel_row:
+            matrix.append(pixel_row)
+    return matrix
+
 
 def _compress_qr(terminal_str: str) -> str:
-    """将二维码终端输出压缩为原来的 1/2（长宽各减半）。
+    """将二维码终端输出压缩为紧凑的 Unicode 半块字符。
 
-    利用 Unicode 半块字符将每 2×2 像素合并为 1 个字符：
-    ▀ = 上暗下亮, ▄ = 上亮下暗, █ = 全暗, ' ' = 全亮
+    先将 ANSI 彩色输出解析为布尔矩阵，再用 Unicode 半块字符
+    将每 2 行合并为 1 行：
+    █ = 上暗+下暗, ▀ = 上暗+下亮, ▄ = 上亮+下暗, ' ' = 上亮+下亮
     """
+    matrix = _ansi_to_matrix(terminal_str)
+    if not matrix:
+        # 非 ANSI 输出（如纯 ASCII），回退为简单处理
+        return _compress_qr_plain(terminal_str)
+
+    result: list[str] = []
+    for i in range(0, len(matrix), 2):
+        top = matrix[i]
+        bot = matrix[i + 1] if i + 1 < len(matrix) else []
+        compressed: list[str] = []
+        width = max(len(top), len(bot))
+        for j in range(width):
+            td = top[j] if j < len(top) else False
+            bd = bot[j] if j < len(bot) else False
+            if td and bd:
+                compressed.append("█")
+            elif td:
+                compressed.append("▀")
+            elif bd:
+                compressed.append("▄")
+            else:
+                compressed.append(" ")
+        result.append("".join(compressed))
+    return "\n".join(result)
+
+
+def _compress_qr_plain(terminal_str: str) -> str:
+    """纯文本 QR 输出的压缩（无 ANSI 转义）。"""
     lines = terminal_str.splitlines()
     while lines and not lines[-1].strip():
         lines.pop()
