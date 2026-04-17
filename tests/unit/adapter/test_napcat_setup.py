@@ -65,10 +65,14 @@ def config_manager(tmp_napcat_dir, mock_napcat_config):
 class TestConfigureAll:
     @patch(
         "ncatbot.adapter.napcat.setup.config.NapCatConfigManager"
+        "._enforce_ws_token_security"
+    )
+    @patch(
+        "ncatbot.adapter.napcat.setup.config.NapCatConfigManager"
         "._enforce_webui_token_security"
     )
     def test_creates_config_dir_when_missing(
-        self, _mock_sec, config_manager, tmp_napcat_dir
+        self, _mock_webui_sec, _mock_ws_sec, config_manager, tmp_napcat_dir
     ):
         """S-01: config 目录不存在时 configure_all 自动创建"""
         config_dir = tmp_napcat_dir / "config"
@@ -81,10 +85,14 @@ class TestConfigureAll:
 
     @patch(
         "ncatbot.adapter.napcat.setup.config.NapCatConfigManager"
+        "._enforce_ws_token_security"
+    )
+    @patch(
+        "ncatbot.adapter.napcat.setup.config.NapCatConfigManager"
         "._enforce_webui_token_security"
     )
     def test_succeeds_when_config_dir_exists(
-        self, _mock_sec, config_manager, tmp_napcat_dir
+        self, _mock_webui_sec, _mock_ws_sec, config_manager, tmp_napcat_dir
     ):
         """S-01: config 目录已存在时不报错"""
         config_dir = tmp_napcat_dir / "config"
