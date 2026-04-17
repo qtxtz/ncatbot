@@ -4,7 +4,7 @@
 
 `BaseAdapter.cli_configure()` 是各适配器为 CLI 命令提供的交互式配置入口：
 
-- **调用方**：`ncatbot init`（`ncatbot/cli/commands/init.py`）和 `ncatbot adapter enable`
+- **调用方**：`ncatbot adapter`（`ncatbot/cli/commands/adapter.py`）和 `ncatbot init`（通过 `adapter_interactive()`）
 - **返回值**：`Dict[str, Any]`，序列化到 `config.yaml` 的 `adapters[].config`
 - **默认实现**：返回空字典
 
@@ -24,7 +24,7 @@
 
 ### NapCat
 
-```
+```text
 询问自动安装?
   ├─ Yes → 执行安装 → 直接返回默认值（ws/webui），由 configure_all() 启动时自动配置
   └─ No  → 逐项交互输入 ws_uri / ws_token / webui_uri / webui_token / enable_webui
@@ -34,7 +34,7 @@
 
 ### Bilibili
 
-```
+```text
 询问扫码登录?
   ├─ Yes → 弹出二维码 → 扫码获取凭据 → 跳过 sessdata 等手动输入
   └─ No  → 逐项输入 sessdata / bili_jct / buvid3 / dedeuserid / ac_time_value
@@ -47,13 +47,15 @@
 
 当前无跳过逻辑（所有字段均需用户输入或使用默认值）。
 
-## init 命令中的适配器选择
+## adapter 命令与 init 命令中的适配器管理
 
-`ncatbot init` 使用 checkbox 多选（`ncatbot/cli/commands/init.py`）：
+`ncatbot adapter` 和 `ncatbot init` 均使用 `adapter_interactive()`（`ncatbot/cli/commands/adapter.py`）：
 
-1. `_get_adapter_choices()` 从 `adapter_registry.discover()` 读取可用适配器（排除 mock）
-2. `_select_adapters()` 展示 checkbox，用户选择后依次调用 `cli_configure()`
-3. 所有适配器配置结果写入 `config.yaml` 的 `adapters` 列表
+1. `_build_items()` 从 `adapter_registry.discover()` 和已有 `config.yaml` 合并构建列表（排除 mock）
+2. 进入副屏（alternate screen）交互界面：↑/↓ 导航、空格切换启用/禁用、Enter 调用 `cli_configure()`、q 保存退出
+3. 退出后收集结果写入 `config.yaml` 的 `adapters` 列表
+
+`ncatbot init` 调用时传入 `default_first=True`，无已有配置时默认启用第一个适配器。
 
 ## 新增适配器的 cli_configure 实现规则
 
