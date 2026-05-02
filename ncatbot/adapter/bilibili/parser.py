@@ -485,7 +485,16 @@ def _parse_live_status(data: dict, common: dict, status: str) -> LiveStatusEvent
     live_event_type = (
         BiliLiveEventType.LIVE if status == "live" else BiliLiveEventType.PREPARING
     )
-    return LiveStatusEventData(**common, live_event_type=live_event_type, status=status)
+    live_time = 0
+    inner = data.get("data", data) if isinstance(data, dict) else data
+    if isinstance(inner, dict):
+        live_time = inner.get("live_time", 0) or 0
+    return LiveStatusEventData(
+        **common,
+        live_event_type=live_event_type,
+        status=status,
+        live_time=live_time,
+    )
 
 
 def _parse_room_change(data: dict, common: dict) -> RoomChangeEventData:

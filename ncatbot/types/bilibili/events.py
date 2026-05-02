@@ -147,6 +147,7 @@ class LiveStatusEventData(BiliLiveEventData):
     """开播/下播"""
 
     status: str = ""
+    live_time: int = 0
     room_info: Optional[LiveRoomInfo] = None
 
 

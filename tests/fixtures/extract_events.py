@@ -350,7 +350,7 @@ def _build_bilibili_fixtures() -> List[Dict]:
                 "type": "LIVE",
                 "room_real_id": "22628755",
                 "room_display_id": "22628755",
-                "data": {},
+                "data": {"live_time": 1712345678},
             },
         }
     )

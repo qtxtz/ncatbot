@@ -178,12 +178,27 @@ class TestLiveStatus:
         result = parser.parse(fix["source_type"], fix["raw_data"])
         assert isinstance(result, LiveStatusEventData)
         assert result.status == "live"
+        assert result.live_time == 1712345678
 
     def test_bl08_preparing(self, parser, fixtures):
         fix = _get(fixtures, "live", "PREPARING")
         result = parser.parse(fix["source_type"], fix["raw_data"])
         assert isinstance(result, LiveStatusEventData)
         assert result.status == "preparing"
+        assert result.live_time == 0
+
+    def test_bl08_live_time_from_nested_data(self, parser):
+        raw = {
+            "type": "LIVE",
+            "room_real_id": "22628755",
+            "room_display_id": "22628755",
+            "data": {"data": {"live_time": 1712345678}},
+        }
+
+        result = parser.parse("live", raw)
+
+        assert isinstance(result, LiveStatusEventData)
+        assert result.live_time == 1712345678
 
 
 class TestRoomEvents:
