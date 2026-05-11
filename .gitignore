@@ -56,6 +56,7 @@ logs/
 /data
 /plugins
 /napcat
+/snowluma
 config.yaml
 
 # === Development ===
