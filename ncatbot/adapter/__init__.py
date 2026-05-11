@@ -12,6 +12,7 @@ from .bilibili import BilibiliAdapter
 from .github import GitHubAdapter
 from .ai import AIAdapter
 from .lark import LarkAdapter
+from .snowluma import SnowLumaAdapter
 from .registry import AdapterRegistry, adapter_registry
 
 # 注册内置适配器
@@ -21,6 +22,7 @@ adapter_registry.register("bilibili", BilibiliAdapter)
 adapter_registry.register("github", GitHubAdapter)
 adapter_registry.register("ai", AIAdapter)
 adapter_registry.register("lark", LarkAdapter)
+adapter_registry.register("snowluma", SnowLumaAdapter)
 
 __all__ = [
     "BaseAdapter",
@@ -35,6 +37,7 @@ __all__ = [
     "GitHubAdapter",
     "AIAdapter",
     "LarkAdapter",
+    "SnowLumaAdapter",
     "AdapterRegistry",
     "adapter_registry",
 ]

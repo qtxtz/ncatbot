@@ -8,6 +8,7 @@ from .commands.run import run, dev
 from .commands.config import config
 from .commands.plugin import plugin
 from .commands.napcat import napcat
+from .commands.snowluma import snowluma
 from .commands.init import init
 from .commands.adapter import adapter
 from .commands.ref import ref
@@ -43,6 +44,7 @@ cli.add_command(dev)
 cli.add_command(config)
 cli.add_command(plugin)
 cli.add_command(napcat)
+cli.add_command(snowluma)
 cli.add_command(init)
 cli.add_command(adapter)
 cli.add_command(ref)
