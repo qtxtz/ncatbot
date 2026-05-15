@@ -47,8 +47,7 @@ def _download_file(url: str, dest: str) -> None:
             unit_scale=True,
             desc=f"Downloading {os.path.basename(dest)}",
             bar_format=(
-                "{l_bar}{bar}| {n_fmt}/{total_fmt} "
-                "[{elapsed}<{remaining}, {rate_fmt}]"
+                "{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]"
             ),
             colour="green",
             dynamic_ncols=True,

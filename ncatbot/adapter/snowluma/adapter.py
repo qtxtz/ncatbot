@@ -130,9 +130,7 @@ class SnowLumaAdapter(BaseAdapter):
         """``ncatbot init`` / ``ncatbot adapter`` 的交互式配置钩子。"""
         import click
 
-        click.echo(
-            click.style("\n— SnowLuma 适配器配置 —", fg="cyan", bold=True)
-        )
+        click.echo(click.style("\n— SnowLuma 适配器配置 —", fg="cyan", bold=True))
         click.echo(
             click.style(
                 "  SnowLuma 是基于 Node.js 的独立 OneBot v11 协议端，"
@@ -160,7 +158,9 @@ class SnowLumaAdapter(BaseAdapter):
             }
 
         ws_uri = click.prompt("OneBot WebSocket 地址", default="ws://localhost:3001")
-        ws_token = click.prompt("WebSocket Token (可留空)", default="", show_default=False)
+        ws_token = click.prompt(
+            "WebSocket Token (可留空)", default="", show_default=False
+        )
         webui_uri = click.prompt("WebUI 地址", default="http://localhost:5099")
         skip_setup = click.confirm(
             "skip_setup (已手动管理 SnowLuma 时选 Y)?", default=False
@@ -185,9 +185,7 @@ class SnowLumaAdapter(BaseAdapter):
                 platform_ops = PlatformOps.create()
             except UnsupportedPlatformError:
                 click.echo(
-                    click.style(
-                        "当前操作系统暂不支持 SnowLuma 自动安装", fg="red"
-                    )
+                    click.style("当前操作系统暂不支持 SnowLuma 自动安装", fg="red")
                 )
                 return
 
@@ -196,9 +194,7 @@ class SnowLumaAdapter(BaseAdapter):
             if ok:
                 click.echo(click.style("SnowLuma 安装成功!", fg="green"))
             else:
-                click.echo(
-                    click.style("SnowLuma 安装失败，请稍后手动安装", fg="red")
-                )
+                click.echo(click.style("SnowLuma 安装失败，请稍后手动安装", fg="red"))
         except Exception as e:
             click.echo(click.style(f"安装过程出错: {e}", fg="red"))
 

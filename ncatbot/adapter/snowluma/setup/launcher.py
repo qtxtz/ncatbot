@@ -211,9 +211,7 @@ class SnowLumaLauncher:
                             "OneBot v11 端点的 access_token 一致",
                             False,
                         )
-                    raise NcatBotError(
-                        f"SnowLuma WebSocket 连接被拒: {message}", False
-                    )
+                    raise NcatBotError(f"SnowLuma WebSocket 连接被拒: {message}", False)
                 return True
         except NcatBotError:
             raise
@@ -275,9 +273,7 @@ class SnowLumaLauncher:
         LOG.warning("    %s", webui_uri)
         LOG.warning("步骤:")
         LOG.warning("  1. 设置/确认登录密码")
-        LOG.warning(
-            "  2. 在 OneBot v11 控制台启用 WebSocket 服务 (端口与 ws_uri 一致)"
-        )
+        LOG.warning("  2. 在 OneBot v11 控制台启用 WebSocket 服务 (端口与 ws_uri 一致)")
         LOG.warning("  3. 扫码登录目标 QQ 账号")
         LOG.warning(
             "  4. 全部完成后，NcatBot 会自动检测 WebSocket 服务并连接 (%ds 超时)",

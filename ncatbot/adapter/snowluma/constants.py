@@ -13,9 +13,7 @@ WINDOWS_SNOWLUMA_DIR = "snowluma"
 SNOWLUMA_REPO = "SnowLuma/SnowLuma"
 
 #: 最新 release 重定向 URL（用 HEAD 请求 + follow_redirects 拿版本号）
-SNOWLUMA_LATEST_RELEASE_URL = (
-    f"https://github.com/{SNOWLUMA_REPO}/releases/latest"
-)
+SNOWLUMA_LATEST_RELEASE_URL = f"https://github.com/{SNOWLUMA_REPO}/releases/latest"
 
 #: GitHub Tags API（备选，受 API 限额影响）
 SNOWLUMA_TAGS_API_URL = f"https://api.github.com/repos/{SNOWLUMA_REPO}/tags"

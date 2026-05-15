@@ -161,7 +161,11 @@ def ws(uri: str | None, token: str | None):
     final_uri = uri or (cfg.ws_uri if cfg else "ws://localhost:3001")
     final_token = token if token is not None else (cfg.ws_token if cfg else "")
 
-    click.echo(info(f"测试 WebSocket 连接: {final_uri} (token={'***' if final_token else '<空>'})"))
+    click.echo(
+        info(
+            f"测试 WebSocket 连接: {final_uri} (token={'***' if final_token else '<空>'})"
+        )
+    )
 
     asyncio.run(_check_ws(final_uri, final_token))
 
@@ -190,16 +194,18 @@ async def _check_ws(uri: str, token: str) -> None:
                         )
                     )
                 else:
-                    self_id = data.get("self_id") or data.get("data", {}).get(
-                        "self_id"
-                    )
+                    self_id = data.get("self_id") or data.get("data", {}).get("self_id")
                     if self_id:
                         click.echo(success(f"  当前登录 QQ: {self_id}"))
                     else:
-                        click.echo(info(f"  收到首帧 (post_type={data.get('post_type')})"))
+                        click.echo(
+                            info(f"  收到首帧 (post_type={data.get('post_type')})")
+                        )
             except asyncio.TimeoutError:
                 click.echo(
-                    info("  WS 连接成功但 2s 内无事件下发 (SnowLuma 未登录或心跳间隔较长)")
+                    info(
+                        "  WS 连接成功但 2s 内无事件下发 (SnowLuma 未登录或心跳间隔较长)"
+                    )
                 )
     except Exception as e:
         click.echo(click.style(f"✘ WebSocket 连接失败: {e}", fg="red"), err=True)

@@ -206,9 +206,7 @@ class LinuxOps(PlatformOps):
         )
 
     def stop_snowluma(self) -> None:
-        raise UnsupportedPlatformError(
-            "Linux 平台的 SnowLuma 自动启动尚未实现。"
-        )
+        raise UnsupportedPlatformError("Linux 平台的 SnowLuma 自动启动尚未实现。")
 
 
 __all__ = [
