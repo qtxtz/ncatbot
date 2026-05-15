@@ -29,3 +29,4 @@
 | CX-12 | `ref --trae` 重命名 | `--trae` 解压后 `.agents` 重命名为 `.trae` |
 | CX-13 | `napcat stop` (Linux) | 调用 `PlatformOps.stop_napcat()` |
 | CX-14 | `napcat stop` (非 Linux) | 拒绝执行并返回非 0 |
+| CX-15 | CLI 行编辑初始化 | CLI 入口初始化 readline 并修补 Click 整行 prompt，保证 `click.prompt` 可处理左右键且不发生提示词错位 |

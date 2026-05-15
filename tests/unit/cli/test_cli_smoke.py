@@ -1,12 +1,13 @@
 """CLI 冒烟：--help 与真实参数绑定（mock 副作用）。
 
-规范: CX-01 ~ CX-10（见 tests/unit/cli/README.md）
+规范: CX-01 ~ CX-15（见 tests/unit/cli/README.md）
 """
 
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import click
 import pytest
 from click.testing import CliRunner
 
@@ -23,6 +24,19 @@ def run_help(args: list[str]):
 def test_cli_root_help():
     """CX-01: 根命令 --help 可正常退出"""
     run_help(["--help"])
+
+
+def test_cli_enables_line_editing_before_dispatch():
+    """CX-15: CLI 入口先初始化行编辑，保证 click.prompt 可处理左右键"""
+    runner = CliRunner()
+    with (
+        patch("ncatbot.cli.main.enable_terminal_line_editing") as mock_enable,
+        patch("ncatbot.utils.is_interactive", return_value=False),
+    ):
+        r = runner.invoke(cli, [], catch_exceptions=False)
+
+    assert r.exit_code == 0
+    mock_enable.assert_called_once()
 
 
 def test_cli_subcommands_help():
@@ -207,6 +221,74 @@ def test_napcat_stop_rejects_non_linux():
 
     assert r.exit_code == 1
     assert "仅支持 Linux" in r.output
+
+
+def test_enable_terminal_line_editing_imports_readline_on_posix():
+    """CX-15: POSIX 交互终端下启用 readline，为 Click prompt 提供行编辑"""
+    from ncatbot.cli.utils import line_editing
+
+    mock_stdin = MagicMock()
+    mock_stdout = MagicMock()
+    mock_stdin.isatty.return_value = True
+    mock_stdout.isatty.return_value = True
+
+    with (
+        patch.object(line_editing.sys, "platform", "linux"),
+        patch.object(line_editing.sys, "stdin", mock_stdin),
+        patch.object(line_editing.sys, "stdout", mock_stdout),
+        patch.object(line_editing.importlib, "import_module") as mock_import,
+    ):
+        line_editing.enable_terminal_line_editing()
+
+    mock_import.assert_called_once_with("readline")
+
+
+def test_enable_terminal_line_editing_passes_full_prompt_to_click_input():
+    """CX-15: patched Click prompt 必须把完整提示词传给 visible_prompt_func"""
+    from ncatbot.cli.utils import line_editing
+
+    original_click_prompt = click.prompt
+    original_click_confirm = click.confirm
+    original_termui_prompt = click.termui.prompt
+    original_termui_confirm = click.termui.confirm
+    original_core_prompt = click.core.prompt
+    original_core_confirm = click.core.confirm
+    original_patched = line_editing._CLICK_PROMPTS_PATCHED
+
+    mock_stdin = MagicMock()
+    mock_stdout = MagicMock()
+    mock_stdin.isatty.return_value = True
+    mock_stdout.isatty.return_value = True
+    seen_prompts: list[str] = []
+
+    try:
+        line_editing._CLICK_PROMPTS_PATCHED = False
+
+        with (
+            patch.object(line_editing.sys, "platform", "linux"),
+            patch.object(line_editing.sys, "stdin", mock_stdin),
+            patch.object(line_editing.sys, "stdout", mock_stdout),
+            patch.object(line_editing.importlib, "import_module"),
+        ):
+            line_editing.enable_terminal_line_editing()
+
+        def fake_visible(prompt_text: str) -> str:
+            seen_prompts.append(prompt_text)
+            return ""
+
+        with patch.object(click.termui, "visible_prompt_func", fake_visible):
+            value = click.prompt("OneBot WebSocket 地址", default="ws://localhost:3001")
+
+        assert value == "ws://localhost:3001"
+        assert seen_prompts == ["OneBot WebSocket 地址 [ws://localhost:3001]: "]
+    finally:
+        click.prompt = original_click_prompt
+        click.confirm = original_click_confirm
+        click.termui.prompt = original_termui_prompt
+        click.termui.confirm = original_termui_confirm
+        click.core.prompt = original_core_prompt
+        click.core.confirm = original_core_confirm
+        line_editing._CLICK_PROMPTS_PATCHED = original_patched
 
 
 def test_ref_downloads_and_extracts(tmp_path):

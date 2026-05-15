@@ -13,6 +13,7 @@ from .commands.init import init
 from .commands.adapter import adapter
 from .commands.ref import ref
 from .commands.test_ui import test_ui
+from .utils.line_editing import enable_terminal_line_editing
 
 
 def _get_version() -> str:
@@ -27,6 +28,8 @@ def _get_version() -> str:
 @click.pass_context
 def cli(ctx: click.Context):
     """NcatBot — QQ 机器人框架 CLI"""
+    enable_terminal_line_editing()
+
     if ctx.invoked_subcommand is None:
         from ncatbot.utils import is_interactive
 
